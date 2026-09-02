@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         CurrencyManager.init(this)
+        com.shopkeeper.mobileshop.sync.GitHubSyncManager.init(this)
 
         setSupportActionBar(binding.toolbar)
 

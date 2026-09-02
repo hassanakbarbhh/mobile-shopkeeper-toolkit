@@ -13,6 +13,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.shopkeeper.mobileshop.R
 import com.shopkeeper.mobileshop.databinding.DialogChangePasswordBinding
 import com.shopkeeper.mobileshop.databinding.FragmentSettingsBinding
+import com.shopkeeper.mobileshop.sync.GitHubSyncManager
+import com.shopkeeper.mobileshop.sync.SyncState
 import com.shopkeeper.mobileshop.ui.role.RoleSelectActivity
 import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.CurrencyManager
@@ -49,6 +51,42 @@ class SettingsFragment : Fragment() {
             val addr = binding.etShopAddress.text.toString().trim()
             ShopProfile.save(requireContext(), name, phone, addr)
             Toast.makeText(requireContext(), "Shop profile saved!", Toast.LENGTH_SHORT).show()
+        }
+
+        // GitHub Sync Controls
+        binding.btnTestSyncSuccess.setOnClickListener {
+            GitHubSyncManager.setTestState(
+                com.shopkeeper.mobileshop.sync.SyncState.Synced(
+                    lastSyncTimestamp = System.currentTimeMillis(),
+                    commitSha = "7e4b9a1",
+                    syncedItemsCount = 28
+                )
+            )
+            Toast.makeText(requireContext(), "Sync State set to: Synced", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnTestSyncPending.setOnClickListener {
+            GitHubSyncManager.setTestState(
+                com.shopkeeper.mobileshop.sync.SyncState.Pending(
+                    message = "Syncing local Room entities to GitHub repository...",
+                    pendingCount = 6
+                )
+            )
+            Toast.makeText(requireContext(), "Sync State set to: Pending", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnTestSyncError.setOnClickListener {
+            GitHubSyncManager.setTestState(
+                com.shopkeeper.mobileshop.sync.SyncState.Error(
+                    errorMessage = "GitHub API 403 / Network Timeout: Remote branch protection rejected commit without authentication token",
+                    canRetry = true
+                )
+            )
+            Toast.makeText(requireContext(), "Sync State set to: Error", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnConfigureRepo.setOnClickListener {
+            showConfigureRepoDialog()
         }
 
         binding.btnChangePassword.setOnClickListener { showChangePasswordDialog() }
@@ -110,6 +148,29 @@ class SettingsFragment : Fragment() {
                     CurrencyManager.setCurrency(requireContext(), "CUSTOM", symbol)
                     updateCurrencyDisplay()
                     Toast.makeText(requireContext(), "Custom currency symbol set to $symbol", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showConfigureRepoDialog() {
+        val currentRepo = GitHubSyncManager.getRepoName(requireContext())
+        val input = EditText(requireContext()).apply {
+            setText(currentRepo)
+            hint = "username/repository-name"
+            setPadding(50, 40, 50, 40)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Configure GitHub Repository")
+            .setMessage("Set the target remote GitHub repository to synchronize local Room database state:")
+            .setView(input)
+            .setPositiveButton("Save & Sync") { _, _ ->
+                val repo = input.text.toString().trim()
+                if (repo.isNotEmpty()) {
+                    GitHubSyncManager.setRepoName(requireContext(), repo)
+                    GitHubSyncManager.triggerSync(requireContext())
+                    Toast.makeText(requireContext(), "Target repository updated to $repo", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)

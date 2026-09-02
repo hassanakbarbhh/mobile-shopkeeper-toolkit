@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardSyncRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1.5dp"
+    app:strokeColor="@color/divider"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Status Icon Container -->
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginEnd="12dp">
+
+                <View
+                    android:id="@+id/vStatusBg"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/bg_badge_green"/>
+
+                <ImageView
+                    android:id="@+id/ivStatusIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_sync_done"
+                    android:contentDescription="Sync Status"/>
+
+                <ProgressBar
+                    android:id="@+id/pbSyncProgress"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/amber_800"
+                    android:visibility="gone"/>
+            </FrameLayout>
+
+            <!-- Status Text Info -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvStatusTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Room &lt;=&gt; GitHub: Synced"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@color/green_900"/>
+
+                    <TextView
+                        android:id="@+id/tvStatusBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_badge_green"
+                        android:text="SYNCED"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/green_800"
+                        android:paddingHorizontal="6dp"
+                        android:paddingVertical="2dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvRepoLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remote: main @ GitHub"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    android:layout_marginTop="2dp"/>
+
+                <TextView
+                    android:id="@+id/tvStatusSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Local Room database in sync with remote repository"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="3dp"/>
+            </LinearLayout>
+
+            <!-- Sync Action Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSyncAction"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="14dp"
+                android:text="Sync"
+                android:textSize="12sp"
+                app:cornerRadius="10dp"/>
+        </LinearLayout>
+
+        <!-- Detailed Sync Error Container (Shown only on Error) -->
+        <LinearLayout
+            android:id="@+id/llErrorDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_badge_red"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvErrorMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Network error: Could not reach GitHub API."
+                android:textColor="@color/red_800"
+                android:textSize="12sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
