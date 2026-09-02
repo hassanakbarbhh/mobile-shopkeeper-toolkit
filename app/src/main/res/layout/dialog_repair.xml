@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+        <EditText android:id="@+id/etCustomerName" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Customer name *"/>
+        <EditText android:id="@+id/etCustomerPhone" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Phone *" android:inputType="phone"
+            android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etDeviceBrand" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Device brand *" android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etDeviceModel" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Device model" android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etImei" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="IMEI (optional)" android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etIssue" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Issue description *"
+            android:minLines="2" android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etEstCost" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Estimated cost"
+            android:inputType="numberDecimal" android:layout_marginTop="8dp"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSaveRepair"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" android:text="Register Repair"
+            android:backgroundTint="@color/green_800"/>
+    </LinearLayout>
+</ScrollView>

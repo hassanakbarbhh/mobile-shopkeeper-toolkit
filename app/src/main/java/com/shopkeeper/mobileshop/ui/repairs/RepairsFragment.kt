@@ -1,0 +1,132 @@
+package com.shopkeeper.mobileshop.ui.repairs
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.shopkeeper.mobileshop.R
+import com.shopkeeper.mobileshop.data.db.AppDatabase
+import com.shopkeeper.mobileshop.data.db.entity.Repair
+import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
+import com.shopkeeper.mobileshop.data.repository.ShopRepository
+import com.shopkeeper.mobileshop.databinding.DialogRepairBinding
+import com.shopkeeper.mobileshop.databinding.FragmentRepairsBinding
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+class RepairsFragment : Fragment() {
+
+    private var _binding: FragmentRepairsBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var repository: ShopRepository
+    private lateinit var adapter: RepairAdapter
+    private var allRepairs: List<Repair> = emptyList()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentRepairsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val db = AppDatabase.getDatabase(requireContext())
+        repository = ShopRepository(db)
+
+        adapter = RepairAdapter { repair -> showRepairActions(repair) }
+        binding.rvRepairs.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvRepairs.adapter = adapter
+
+        binding.fabAddRepair.setOnClickListener { showAddRepairDialog() }
+
+        binding.chipGroupStatus.setOnCheckedStateChangeListener { _, _ ->
+            filterRepairs()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repository.allRepairs.collectLatest { list ->
+                allRepairs = list
+                filterRepairs()
+            }
+        }
+    }
+
+    private fun filterRepairs() {
+        val filtered = when (binding.chipGroupStatus.checkedChipId) {
+            R.id.chipReceived -> allRepairs.filter { it.status == RepairStatus.RECEIVED }
+            R.id.chipInRepair -> allRepairs.filter { it.status == RepairStatus.IN_REPAIR || it.status == RepairStatus.DIAGNOSING }
+            R.id.chipCompleted -> allRepairs.filter { it.status == RepairStatus.COMPLETED }
+            R.id.chipDelivered -> allRepairs.filter { it.status == RepairStatus.DELIVERED }
+            else -> allRepairs
+        }
+        adapter.submitList(filtered)
+    }
+
+    private fun showAddRepairDialog() {
+        val dBinding = DialogRepairBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Register Device Repair")
+            .setView(dBinding.root)
+            .create()
+
+        dBinding.btnSaveRepair.setOnClickListener {
+            val custName = dBinding.etCustomerName.text.toString().trim()
+            val phone = dBinding.etCustomerPhone.text.toString().trim()
+            val brand = dBinding.etDeviceBrand.text.toString().trim()
+            val model = dBinding.etDeviceModel.text.toString().trim()
+            val imei = dBinding.etImei.text.toString().trim()
+            val issue = dBinding.etIssue.text.toString().trim()
+            val cost = dBinding.etEstCost.text.toString().toDoubleOrNull() ?: 0.0
+
+            if (custName.isEmpty() || brand.isEmpty() || issue.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill mandatory fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val r = Repair(
+                customerName = custName,
+                customerPhone = phone,
+                deviceBrand = brand,
+                deviceModel = model,
+                imei = imei,
+                issueDescription = issue,
+                estimatedCost = cost,
+                status = RepairStatus.RECEIVED
+            )
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                repository.insertRepair(r)
+                dialog.dismiss()
+                Toast.makeText(requireContext(), "Repair ticket created!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun showRepairActions(repair: Repair) {
+        val statuses = RepairStatus.values().map { it.name.replace('_', ' ') }.toTypedArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("${repair.deviceBrand} ${repair.deviceModel} — Status")
+            .setItems(statuses) { _, which ->
+                val newStatus = RepairStatus.values()[which]
+                viewLifecycleOwner.lifecycleScope.launch {
+                    repository.updateRepair(repair.copy(status = newStatus))
+                    Toast.makeText(requireContext(), "Status updated to ${newStatus.name}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

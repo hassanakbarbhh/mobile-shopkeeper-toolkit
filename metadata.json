@@ -1,0 +1,6 @@
+{
+  "name": "Mobile Shopkeeper Toolkit",
+  "description": "Comprehensive mobile shop management toolkit for inventory, sales POS, invoices, repair tracking, supplier purchases, IMEI history, dues, and financial reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

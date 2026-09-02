@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="20dp">
+    <EditText android:id="@+id/etSupName" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:hint="Supplier name *"/>
+    <EditText android:id="@+id/etSupPhone" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:hint="Phone *" android:inputType="phone"
+        android:layout_marginTop="6dp"/>
+    <EditText android:id="@+id/etSupCompany" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:hint="Company / market" android:layout_marginTop="6dp"/>
+    <com.google.android.material.button.MaterialButton android:id="@+id/btnSaveSupplier"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" android:text="Save Supplier"
+        android:backgroundTint="@color/green_800"/>
+</LinearLayout>

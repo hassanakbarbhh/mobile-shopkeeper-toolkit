@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_dashboard">
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.shopkeeper.mobileshop.ui.dashboard.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard"/>
+
+    <fragment
+        android:id="@+id/navigation_inventory"
+        android:name="com.shopkeeper.mobileshop.ui.inventory.InventoryFragment"
+        android:label="Inventory &amp; Stock"
+        tools:layout="@layout/fragment_inventory"/>
+
+    <fragment
+        android:id="@+id/navigation_sales"
+        android:name="com.shopkeeper.mobileshop.ui.sales.SalesListFragment"
+        android:label="Sales / Invoices"
+        tools:layout="@layout/fragment_sales_list"/>
+
+    <fragment
+        android:id="@+id/navigation_new_sale"
+        android:name="com.shopkeeper.mobileshop.ui.sales.NewSaleFragment"
+        android:label="New Sale POS"
+        tools:layout="@layout/fragment_new_sale"/>
+
+    <fragment
+        android:id="@+id/navigation_customers"
+        android:name="com.shopkeeper.mobileshop.ui.customers.CustomersFragment"
+        android:label="Customers"
+        tools:layout="@layout/fragment_customers"/>
+
+    <fragment
+        android:id="@+id/navigation_repairs"
+        android:name="com.shopkeeper.mobileshop.ui.repairs.RepairsFragment"
+        android:label="Repairs Tracking"
+        tools:layout="@layout/fragment_repairs"/>
+
+    <fragment
+        android:id="@+id/navigation_purchases"
+        android:name="com.shopkeeper.mobileshop.ui.purchases.PurchasesFragment"
+        android:label="Purchases &amp; Suppliers"
+        tools:layout="@layout/fragment_purchases"/>
+
+    <fragment
+        android:id="@+id/navigation_imei"
+        android:name="com.shopkeeper.mobileshop.ui.imei.ImeiTrackerFragment"
+        android:label="IMEI History Tracker"
+        tools:layout="@layout/fragment_imei_tracker"/>
+
+    <fragment
+        android:id="@+id/navigation_dues"
+        android:name="com.shopkeeper.mobileshop.ui.dues.DuesFragment"
+        android:label="Udhaar / Customer Dues"
+        tools:layout="@layout/fragment_dues"/>
+
+    <fragment
+        android:id="@+id/navigation_expenses"
+        android:name="com.shopkeeper.mobileshop.ui.expenses.ExpensesFragment"
+        android:label="Daily Expenses"
+        tools:layout="@layout/fragment_expenses"/>
+
+    <fragment
+        android:id="@+id/navigation_reports"
+        android:name="com.shopkeeper.mobileshop.ui.reports.ReportsFragment"
+        android:label="Reports &amp; Analytics"
+        tools:layout="@layout/fragment_reports"/>
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.shopkeeper.mobileshop.ui.settings.SettingsFragment"
+        android:label="Settings &amp; Profile"
+        tools:layout="@layout/fragment_settings"/>
+
+    <fragment
+        android:id="@+id/navigation_about"
+        android:name="com.shopkeeper.mobileshop.ui.about.AboutFragment"
+        android:label="About Hassan"
+        tools:layout="@layout/fragment_about"/>
+
+</navigation>

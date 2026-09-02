@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">Mobile Shopkeeper Toolkit</string>
+    <string name="app_tagline">Your complete shop companion</string>
+    <string name="made_by">Crafted with ❤ by Hassan</string>
+    <string name="version">Version 1.0.0</string>
+
+    <string name="splash_loading">Preparing your shop…</string>
+
+    <string name="lock_title">Welcome Back</string>
+    <string name="lock_subtitle">This toolkit is protected.\nEnter your password to continue.</string>
+    <string name="lock_hint">Enter password</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_fingerprint">Unlock with fingerprint</string>
+    <string name="lock_wrong">Wrong password. %1$d attempts left.</string>
+    <string name="lock_empty">Please enter your password</string>
+    <string name="lock_locked_out">Too many attempts. Try again in %1$d s</string>
+
+    <string name="role_title">How will you use the app today?</string>
+    <string name="role_shop">Start as Shop Owner</string>
+    <string name="role_shop_desc">Sales, stock, purchases, customers &amp; reports</string>
+    <string name="role_repair">Start as Repair Technician</string>
+    <string name="role_repair_desc">Repair jobs, parts, status &amp; deliveries</string>
+    <string name="role_remember">Remember my choice</string>
+    <string name="role_continue">Continue</string>
+
+    <string name="about_tagline">Mobile business since 2011 • App developer since 2014</string>
+    <string name="about_love">This toolkit is a token of love — crafted with ❤ by Hassan</string>
+
+    <string name="url_whatsapp">https://wa.me/923001234567</string>
+    <string name="url_facebook">https://facebook.com/hassan</string>
+    <string name="url_instagram">https://instagram.com/hassan</string>
+    <string name="url_youtube">https://youtube.com/@hassan</string>
+    <string name="hassan_email">hassan@example.com</string>
+</resources>

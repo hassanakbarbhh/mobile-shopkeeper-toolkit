@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="16dp">
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Add Product to Sale" android:textStyle="bold" android:textSize="18sp"
+        android:textColor="@color/green_900"/>
+
+    <EditText android:id="@+id/etDialogSearch" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:hint="Search by name / brand / IMEI…"
+        android:layout_marginTop="12dp" android:inputType="text"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDialogProducts"
+        android:layout_width="match_parent" android:layout_height="380dp"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

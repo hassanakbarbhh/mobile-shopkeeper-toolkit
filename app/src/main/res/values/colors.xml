@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green_950">#052E16</color>
+    <color name="green_900">#14532D</color>
+    <color name="green_800">#166534</color>
+    <color name="green_700">#15803D</color>
+    <color name="green_600">#16A34A</color>
+    <color name="green_500">#22C55E</color>
+    <color name="green_400">#4ADE80</color>
+    <color name="green_100">#DCFCE7</color>
+    <color name="green_50">#F0FDF4</color>
+
+    <color name="primary">#166534</color>
+    <color name="primary_dark">#14532D</color>
+    <color name="primary_light">#DCFCE7</color>
+    <color name="accent">#F59E0B</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="background_light">#F6FAF7</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#1A2E22</color>
+    <color name="text_secondary">#5F7166</color>
+    <color name="divider">#E2EAE4</color>
+
+    <color name="success">#16A34A</color>
+    <color name="warning">#F59E0B</color>
+    <color name="error">#DC2626</color>
+    <color name="info">#0EA5E9</color>
+
+    <color name="blue_800">#075985</color>
+    <color name="blue_100">#E0F2FE</color>
+    <color name="amber_800">#92400E</color>
+    <color name="amber_100">#FEF3C7</color>
+    <color name="red_800">#991B1B</color>
+    <color name="red_100">#FEE2E2</color>
+
+    <color name="chart_1">#166534</color>
+    <color name="chart_2">#22C55E</color>
+    <color name="chart_3">#F59E0B</color>
+    <color name="chart_4">#0EA5E9</color>
+    <color name="chart_5">#14532D</color>
+</resources>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MobileShopkeeper" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/green_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/green_100</item>
+        <item name="colorOnPrimaryContainer">@color/green_900</item>
+        <item name="colorSecondary">@color/green_600</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/green_100</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorError">@color/error</item>
+
+        <item name="android:statusBarColor">@color/green_900</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
+        <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+    </style>
+
+    <style name="Theme.MobileShopkeeper.NoActionBar" parent="Theme.MobileShopkeeper" />
+
+    <style name="Theme.MobileShop" parent="Theme.MobileShopkeeper" />
+
+    <style name="Theme.MobileShop.Splash" parent="Theme.MobileShop">
+        <item name="android:windowBackground">@drawable/bg_gradient_green</item>
+        <item name="android:statusBarColor">@color/green_950</item>
+    </style>
+
+    <style name="Theme.MobileShop.Lock" parent="Theme.MobileShop">
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+    <style name="Shape.MobileShop.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerSize">14dp</item>
+    </style>
+
+    <style name="Widget.MobileShop.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.MobileShop.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxStrokeColor">@color/selector_input_stroke</item>
+    </style>
+
+    <style name="SplashTitle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="QuickActionCard">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="QuickActionContent">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="QuickActionIcon">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="tint">@color/primary</item>
+    </style>
+
+    <style name="QuickActionText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:gravity">center</item>
+    </style>
+</resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_green" android:fillViewport="true">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:gravity="center_horizontal" android:padding="28dp">
+
+        <Space android:layout_width="0dp" android:layout_height="40dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/role_title" android:textColor="@color/white"
+            android:textSize="26sp" android:textStyle="bold" android:gravity="center"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/app_name" android:textColor="@color/green_400"
+            android:textSize="14sp" android:layout_marginTop="6dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardShopOwner" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="32dp"
+            app:cardCornerRadius="18dp" app:cardElevation="6dp"
+            app:strokeColor="@color/green_500" app:strokeWidth="3dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:padding="20dp">
+                <FrameLayout android:layout_width="56dp" android:layout_height="56dp"
+                    android:background="@drawable/bg_circle_green">
+                    <ImageView android:layout_width="28dp" android:layout_height="28dp"
+                        android:layout_gravity="center" android:src="@drawable/ic_storefront"/>
+                </FrameLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/role_shop" android:textStyle="bold" android:textSize="18sp"
+                        android:textColor="@color/green_900"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/role_shop_desc" android:textSize="13sp"
+                        android:textColor="@color/text_secondary"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRepairTech" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="14dp"
+            app:cardCornerRadius="18dp" app:cardElevation="6dp" app:strokeWidth="0dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:padding="20dp">
+                <FrameLayout android:layout_width="56dp" android:layout_height="56dp"
+                    android:background="@drawable/bg_circle_green">
+                    <ImageView android:layout_width="28dp" android:layout_height="28dp"
+                        android:layout_gravity="center" android:src="@drawable/ic_repair"/>
+                </FrameLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/role_repair" android:textStyle="bold" android:textSize="18sp"
+                        android:textColor="@color/green_900"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/role_repair_desc" android:textSize="13sp"
+                        android:textColor="@color/text_secondary"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <CheckBox android:id="@+id/cbRemember" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="20dp"
+            android:text="@string/role_remember" android:textColor="@color/green_100"
+            android:buttonTint="@color/green_400"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnContinue" android:layout_width="match_parent"
+            android:layout_height="56dp" android:layout_marginTop="12dp"
+            android:text="@string/role_continue" android:textSize="16sp"
+            android:backgroundTint="@color/green_600" app:cornerRadius="16dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" android:text="@string/made_by"
+            android:textColor="@color/green_100" android:textSize="12sp"/>
+    </LinearLayout>
+</ScrollView>

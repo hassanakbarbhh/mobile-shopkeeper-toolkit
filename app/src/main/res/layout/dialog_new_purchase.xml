@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+        <Spinner android:id="@+id/spSupplier" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="8dp"/>
+        <LinearLayout android:id="@+id/layoutNewSupplier" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <EditText android:id="@+id/etNewSupName" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:hint="New supplier name *"/>
+            <EditText android:id="@+id/etNewSupPhone" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:hint="Supplier phone"
+                android:inputType="phone" android:layout_marginTop="6dp"/>
+        </LinearLayout>
+        <EditText android:id="@+id/etProductName" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Product name * (e.g. iPhone 13)"
+            android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etBrand" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Brand" android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etImei" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="IMEI (for phones) — links buy → sell"
+            android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etQty" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Quantity *"
+            android:inputType="number" android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etUnitCost" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Unit cost (buy price) *"
+            android:inputType="numberDecimal" android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etSellPrice" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Selling price *"
+            android:inputType="numberDecimal" android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etPaid" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Paid now (rest = payable)"
+            android:inputType="numberDecimal" android:layout_marginTop="6dp"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSavePurchase"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:text="Save Purchase &amp; Add Stock"
+            android:backgroundTint="@color/green_800"/>
+    </LinearLayout>
+</ScrollView>

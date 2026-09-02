@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="190dp"
+    android:orientation="vertical" android:gravity="bottom"
+    android:padding="20dp" android:background="@drawable/bg_gradient_green">
+
+    <ImageView android:layout_width="56dp" android:layout_height="56dp"
+        android:src="@drawable/splash_logo" android:contentDescription="Logo"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:text="@string/app_name"
+        android:textColor="@color/white" android:textStyle="bold" android:textSize="17sp"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/made_by" android:textColor="@color/green_100" android:textSize="12sp"/>
+</LinearLayout>

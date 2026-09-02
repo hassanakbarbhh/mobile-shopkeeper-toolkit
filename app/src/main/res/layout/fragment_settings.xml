@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Shop Profile (printed on invoices)" android:textStyle="bold"
+            android:textColor="@color/green_900"/>
+        <EditText android:id="@+id/etShopName" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Shop name" android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etShopPhone" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Shop phone"
+            android:inputType="phone" android:layout_marginTop="6dp"/>
+        <EditText android:id="@+id/etShopAddress" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="Shop address" android:layout_marginTop="6dp"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSaveProfile"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" android:text="Save Profile"
+            android:backgroundTint="@color/green_800"/>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/divider" android:layout_marginVertical="18dp"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnChangePassword"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Change App Password"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSwitchRole"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="Switch Role (Owner / Repair)"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnAbout"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="About Hassan ❤"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center" android:layout_marginTop="24dp"
+            android:text="@string/version" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+    </LinearLayout>
+</ScrollView>
