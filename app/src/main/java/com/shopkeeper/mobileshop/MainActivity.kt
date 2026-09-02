@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.shopkeeper.mobileshop.databinding.ActivityMainBinding
 import com.shopkeeper.mobileshop.utils.AppMode
 import com.shopkeeper.mobileshop.utils.AppPreferences
+import com.shopkeeper.mobileshop.utils.CurrencyManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +23,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        CurrencyManager.init(this)
 
         setSupportActionBar(binding.toolbar)
 

@@ -73,6 +73,61 @@
                 android:hint="Quantity in stock *" android:inputType="number"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Custom Specs &amp; Additional Details"
+            android:textStyle="bold"
+            android:textColor="@color/green_900"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="6dp">
+            <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp"
+                android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp" style="@style/Widget.MobileShop.TextInput">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/etRam"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="RAM (e.g. 8GB)"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp"
+                android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginStart="6dp" style="@style/Widget.MobileShop.TextInput">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/etStorage"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Storage (e.g. 256GB)"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp"
+                android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp" style="@style/Widget.MobileShop.TextInput">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/etColor"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Color (e.g. Black)"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp"
+                android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginStart="6dp" style="@style/Widget.MobileShop.TextInput">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/etWarranty"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Warranty (Months)" android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="8dp"
+            style="@style/Widget.MobileShop.TextInput">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etCustomNotes"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Custom Details / Extra Notes / Specifications"
+                android:gravity="top"
+                android:minLines="2"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:layout_marginTop="16dp">
             <com.google.android.material.button.MaterialButton android:id="@+id/btnCancel"

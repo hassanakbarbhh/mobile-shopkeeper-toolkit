@@ -32,6 +32,23 @@ class ProductAdapter(
             binding.tvProductPrice.text = product.sellingPrice.money()
             binding.tvQuantity.text = "Stock: ${product.quantity}"
 
+            val detailsList = mutableListOf<String>()
+            if (product.ram.isNotBlank() || product.storage.isNotBlank()) {
+                val mem = listOf(product.ram, product.storage).filter { it.isNotBlank() }.joinToString(" / ")
+                detailsList.add(mem)
+            }
+            if (product.color.isNotBlank()) detailsList.add(product.color)
+            if (product.warrantyMonths > 0) detailsList.add("${product.warrantyMonths}m warranty")
+            if (product.notes.isNotBlank()) detailsList.add(product.notes)
+            if (product.imei.isNotBlank()) detailsList.add("IMEI: ${product.imei}")
+
+            if (detailsList.isNotEmpty()) {
+                binding.tvProductDetails.visibility = android.view.View.VISIBLE
+                binding.tvProductDetails.text = detailsList.joinToString(" • ")
+            } else {
+                binding.tvProductDetails.visibility = android.view.View.GONE
+            }
+
             if (product.quantity <= 0) {
                 binding.tvStockStatus.text = "Out of Stock"
                 binding.tvStockStatus.setTextColor(ContextCompat.getColor(binding.root.context, R.color.error))

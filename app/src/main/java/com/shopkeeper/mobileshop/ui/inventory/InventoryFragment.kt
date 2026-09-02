@@ -111,6 +111,11 @@ class InventoryFragment : Fragment() {
             dialogBinding.etPurchasePrice.setText(product.purchasePrice.toString())
             dialogBinding.etSellingPrice.setText(product.sellingPrice.toString())
             dialogBinding.etQuantity.setText(product.quantity.toString())
+            dialogBinding.etRam.setText(product.ram)
+            dialogBinding.etStorage.setText(product.storage)
+            dialogBinding.etColor.setText(product.color)
+            if (product.warrantyMonths > 0) dialogBinding.etWarranty.setText(product.warrantyMonths.toString())
+            dialogBinding.etCustomNotes.setText(product.notes)
         } else {
             dialogBinding.actvCategory.setText(ProductCategory.SMARTPHONE.name.replace('_', ' '), false)
         }
@@ -129,6 +134,11 @@ class InventoryFragment : Fragment() {
             val buyPrice = dialogBinding.etPurchasePrice.text.toString().toDoubleOrNull() ?: 0.0
             val sellPrice = dialogBinding.etSellingPrice.text.toString().toDoubleOrNull() ?: 0.0
             val qty = dialogBinding.etQuantity.text.toString().toIntOrNull() ?: 0
+            val ram = dialogBinding.etRam.text.toString().trim()
+            val storage = dialogBinding.etStorage.text.toString().trim()
+            val color = dialogBinding.etColor.text.toString().trim()
+            val warranty = dialogBinding.etWarranty.text.toString().toIntOrNull() ?: 0
+            val notes = dialogBinding.etCustomNotes.text.toString().trim()
 
             if (name.isEmpty() || brand.isEmpty()) {
                 Toast.makeText(requireContext(), "Name & Brand are required", Toast.LENGTH_SHORT).show()
@@ -141,11 +151,16 @@ class InventoryFragment : Fragment() {
             val toSave = (product ?: Product(
                 name = name, brand = brand, model = model,
                 category = category, purchasePrice = buyPrice,
-                sellingPrice = sellPrice, quantity = qty, imei = imei
+                sellingPrice = sellPrice, quantity = qty, imei = imei,
+                ram = ram, storage = storage, color = color,
+                warrantyMonths = warranty, notes = notes
             )).copy(
                 name = name, brand = brand, model = model,
                 category = category, purchasePrice = buyPrice,
-                sellingPrice = sellPrice, quantity = qty, imei = imei
+                sellingPrice = sellPrice, quantity = qty, imei = imei,
+                ram = ram, storage = storage, color = color,
+                warrantyMonths = warranty, notes = notes,
+                updatedAt = System.currentTimeMillis()
             )
 
             viewLifecycleOwner.lifecycleScope.launch {

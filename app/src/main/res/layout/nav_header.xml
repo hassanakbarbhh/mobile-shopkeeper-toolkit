@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="190dp"
     android:orientation="vertical" android:gravity="bottom"
     android:padding="20dp" android:background="@drawable/bg_gradient_green">
 
-    <ImageView android:layout_width="56dp" android:layout_height="56dp"
-        android:src="@drawable/splash_logo" android:contentDescription="Logo"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/white">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_app_logo"
+            android:contentDescription="Logo"/>
+    </androidx.cardview.widget.CardView>
 
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_marginTop="10dp" android:text="@string/app_name"
