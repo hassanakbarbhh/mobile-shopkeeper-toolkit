@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/gray_200">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Avatar Circle -->
+        <FrameLayout
+            android:id="@+id/avatarContainer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circle_green"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_seller"
+                app:tint="@color/green_700"
+                android:contentDescription="Seller Avatar" />
+        </FrameLayout>
+
+        <!-- Seller Name -->
+        <TextView
+            android:id="@+id/tvSellerName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/gray_900"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/avatarContainer"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteSeller"
+            app:layout_constraintTop_toTopOf="@id/avatarContainer"
+            tools:text="Ali Khan" />
+
+        <!-- Role Badge -->
+        <TextView
+            android:id="@+id/tvSellerRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:background="@drawable/bg_badge_blue"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:textColor="@color/blue_500"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/tvSellerName"
+            app:layout_constraintTop_toBottomOf="@id/tvSellerName"
+            tools:text="Sales Executive" />
+
+        <!-- Commission Badge -->
+        <TextView
+            android:id="@+id/tvCommission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_badge_amber"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:textColor="@color/amber_700"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/tvSellerRole"
+            app:layout_constraintTop_toTopOf="@id/tvSellerRole"
+            tools:text="2.0% Comm." />
+
+        <!-- Delete Seller Button -->
+        <ImageButton
+            android:id="@+id/btnDeleteSeller"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/red_500"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="Delete Seller" />
+
+        <!-- Phone Number -->
+        <TextView
+            android:id="@+id/tvSellerPhone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:drawableStart="@drawable/ic_call"
+            android:drawablePadding="6dp"
+            android:textColor="@color/gray_700"
+            android:textSize="13sp"
+            app:drawableTint="@color/gray_500"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnCallSeller"
+            app:layout_constraintTop_toBottomOf="@id/tvSellerRole"
+            tools:text="+92 321 7654321" />
+
+        <!-- Action Buttons (Call / WhatsApp) -->
+        <ImageButton
+            android:id="@+id/btnCallSeller"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_call"
+            app:tint="@color/green_600"
+            app:layout_constraintBottom_toBottomOf="@id/tvSellerPhone"
+            app:layout_constraintEnd_toStartOf="@id/btnWhatsAppSeller"
+            app:layout_constraintTop_toTopOf="@id/tvSellerPhone"
+            android:contentDescription="Call Seller" />
+
+        <ImageButton
+            android:id="@+id/btnWhatsAppSeller"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_whatsapp"
+            app:layout_constraintBottom_toBottomOf="@id/tvSellerPhone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvSellerPhone"
+            android:contentDescription="WhatsApp Seller" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

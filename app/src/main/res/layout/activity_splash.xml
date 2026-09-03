@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
-            android:text="Mobile Shopkeeper"
+            android:text="Mobile Inventory"
             android:textSize="30sp"/>
 
         <TextView

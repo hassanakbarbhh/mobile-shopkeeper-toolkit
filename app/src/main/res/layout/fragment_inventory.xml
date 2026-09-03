@@ -10,21 +10,46 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            app:startIconDrawable="@drawable/ic_search">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSearch"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Search products..."
-                android:inputType="text"
-                android:imeOptions="actionSearch"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:startIconDrawable="@drawable/ic_search">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search phones &amp; stock..."
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportInventory"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginStart="8dp"
+                android:text="Export"
+                android:textSize="12sp"
+                android:textColor="@color/green_700"
+                app:icon="@drawable/ic_export"
+                app:iconTint="@color/green_700"
+                app:iconSize="16dp"
+                app:strokeColor="@color/green_600"
+                app:cornerRadius="8dp"/>
+        </LinearLayout>
 
         <HorizontalScrollView
             android:layout_width="match_parent"

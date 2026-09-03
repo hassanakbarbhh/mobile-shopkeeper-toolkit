@@ -52,6 +52,21 @@ class MainActivity : AppCompatActivity() {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
+        binding.navView.setNavigationItemSelectedListener { menuItem ->
+            if (menuItem.itemId == R.id.navigation_lock_app) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                val intent = android.content.Intent(this, com.shopkeeper.mobileshop.ui.auth.LockScreenActivity::class.java)
+                startActivity(intent)
+                finish()
+                true
+            } else {
+                val handled = NavigationUI.onNavDestinationSelected(menuItem, navController)
+                if (handled) {
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
+                handled
+            }
+        }
 
         val mode = AppPreferences.getMode(this) ?: AppMode.SHOP_OWNER
         if (mode == AppMode.REPAIR_TECH) {

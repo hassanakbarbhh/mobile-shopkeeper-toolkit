@@ -1,15 +1,15 @@
 <resources>
-    <string name="app_name">Mobile Shopkeeper Toolkit</string>
-    <string name="app_tagline">Your complete shop companion</string>
+    <string name="app_name">Mobile Inventory Toolkit</string>
+    <string name="app_tagline">Your complete mobile shop &amp; inventory companion</string>
     <string name="made_by">Crafted with ❤ by Hassan</string>
     <string name="version">Version 1.0.0</string>
 
     <string name="splash_loading">Preparing your shop…</string>
 
-    <string name="lock_title">Welcome Back</string>
-    <string name="lock_subtitle">This toolkit is protected.\nEnter your password to continue.</string>
-    <string name="lock_hint">Enter password</string>
-    <string name="lock_unlock">Unlock</string>
+    <string name="lock_title">Security Login</string>
+    <string name="lock_subtitle">Mobile shop toolkit is protected.\nEnter login key to continue (Default: Hassanisgreat)</string>
+    <string name="lock_hint">Enter Key (Hassanisgreat)</string>
+    <string name="lock_unlock">Unlock Toolkit</string>
     <string name="lock_fingerprint">Unlock with fingerprint</string>
     <string name="lock_wrong">Wrong password. %1$d attempts left.</string>
     <string name="lock_empty">Please enter your password</string>

@@ -15,6 +15,8 @@ data class Sale(
     val finalAmount: Double,
     val paymentMethod: PaymentMethod,
     val paymentStatus: PaymentStatus = PaymentStatus.PAID,
+    val sellerId: Long? = null,
+    val sellerName: String = "Owner",
     val notes: String = "",
     val saleDate: Long = System.currentTimeMillis()
 ) {

@@ -78,6 +78,18 @@
         tools:layout="@layout/fragment_settings"/>
 
     <fragment
+        android:id="@+id/navigation_sellers"
+        android:name="com.shopkeeper.mobileshop.ui.sellers.SellersFragment"
+        android:label="Shop Sellers &amp; Staff"
+        tools:layout="@layout/fragment_sellers"/>
+
+    <fragment
+        android:id="@+id/navigation_online_catalog"
+        android:name="com.shopkeeper.mobileshop.ui.catalog.OnlineCatalogFragment"
+        android:label="Online Phone Models"
+        tools:layout="@layout/fragment_online_catalog"/>
+
+    <fragment
         android:id="@+id/navigation_about"
         android:name="com.shopkeeper.mobileshop.ui.about.AboutFragment"
         android:label="About Hassan"

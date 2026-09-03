@@ -8,9 +8,12 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.shopkeeper.mobileshop.R
+import com.shopkeeper.mobileshop.data.db.AppDatabase
+import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogChangePasswordBinding
 import com.shopkeeper.mobileshop.databinding.FragmentSettingsBinding
 import com.shopkeeper.mobileshop.sync.GitHubSyncManager
@@ -18,14 +21,18 @@ import com.shopkeeper.mobileshop.sync.SyncState
 import com.shopkeeper.mobileshop.ui.role.RoleSelectActivity
 import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.CurrencyManager
+import com.shopkeeper.mobileshop.utils.ExportManager
 import com.shopkeeper.mobileshop.utils.PasswordManager
 import com.shopkeeper.mobileshop.utils.ShopProfile
 import com.shopkeeper.mobileshop.utils.money
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+    private lateinit var repository: ShopRepository
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,6 +43,8 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val db = AppDatabase.getDatabase(requireContext())
+        repository = ShopRepository(db)
 
         binding.etShopName.setText(ShopProfile.name(requireContext()))
         binding.etShopPhone.setText(ShopProfile.phone(requireContext()))
@@ -51,6 +60,146 @@ class SettingsFragment : Fragment() {
             val addr = binding.etShopAddress.text.toString().trim()
             ShopProfile.save(requireContext(), name, phone, addr)
             Toast.makeText(requireContext(), "Shop profile saved!", Toast.LENGTH_SHORT).show()
+        }
+
+        // Export Center Click Listeners with CSV & PDF Options
+        binding.btnExportInventorySettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val list = repository.allProducts.first()
+                if (list.isEmpty()) {
+                    Toast.makeText(requireContext(), "No products to export", Toast.LENGTH_SHORT).show()
+                } else {
+                    ExportManager.showLedgerExportDialog(
+                        context = requireContext(),
+                        ledgerTitle = "Inventory & Stock Ledger",
+                        onExportCsv = { ExportManager.exportProductsCsv(requireContext(), list) },
+                        onExportPdf = { ExportManager.exportProductsPdf(requireContext(), list) }
+                    )
+                }
+            }
+        }
+
+        binding.btnExportSalesSettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val list = repository.allSales.first()
+                if (list.isEmpty()) {
+                    Toast.makeText(requireContext(), "No sales to export", Toast.LENGTH_SHORT).show()
+                } else {
+                    ExportManager.showLedgerExportDialog(
+                        context = requireContext(),
+                        ledgerTitle = "Sales & Invoices Ledger",
+                        onExportCsv = { ExportManager.exportSalesCsv(requireContext(), list) },
+                        onExportPdf = { ExportManager.exportSalesPdf(requireContext(), list) }
+                    )
+                }
+            }
+        }
+
+        binding.btnExportCustomersSettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val list = repository.allCustomers.first()
+                if (list.isEmpty()) {
+                    Toast.makeText(requireContext(), "No customers to export", Toast.LENGTH_SHORT).show()
+                } else {
+                    ExportManager.showLedgerExportDialog(
+                        context = requireContext(),
+                        ledgerTitle = "Customers Ledger",
+                        onExportCsv = { ExportManager.exportCustomersCsv(requireContext(), list) },
+                        onExportPdf = { ExportManager.exportCustomersPdf(requireContext(), list) }
+                    )
+                }
+            }
+        }
+
+        binding.btnExportPurchasesSettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val list = repository.allPurchases.first()
+                if (list.isEmpty()) {
+                    Toast.makeText(requireContext(), "No purchases to export", Toast.LENGTH_SHORT).show()
+                } else {
+                    ExportManager.showLedgerExportDialog(
+                        context = requireContext(),
+                        ledgerTitle = "Daily Purchases Ledger",
+                        onExportCsv = { ExportManager.exportPurchasesCsv(requireContext(), list) },
+                        onExportPdf = { ExportManager.exportPurchasesPdf(requireContext(), list) }
+                    )
+                }
+            }
+        }
+
+        binding.btnExportRepairsSettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val list = repository.allRepairs.first()
+                if (list.isEmpty()) {
+                    Toast.makeText(requireContext(), "No repairs to export", Toast.LENGTH_SHORT).show()
+                } else {
+                    ExportManager.showLedgerExportDialog(
+                        context = requireContext(),
+                        ledgerTitle = "Repair Tickets Ledger",
+                        onExportCsv = { ExportManager.exportRepairsCsv(requireContext(), list) },
+                        onExportPdf = { ExportManager.exportRepairsPdf(requireContext(), list) }
+                    )
+                }
+            }
+        }
+
+        binding.btnExportMasterLedgerSettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val prods = repository.allProducts.first()
+                val sales = repository.allSales.first()
+                val purchases = repository.allPurchases.first()
+                val customers = repository.allCustomers.first()
+                val repairs = repository.allRepairs.first()
+
+                val options = arrayOf(
+                    "📄 Open Master Shop PDF Report",
+                    "📤 Share Master Shop PDF Document"
+                )
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Consolidated Master Shop Ledger")
+                    .setItems(options) { _, which ->
+                        val pdfFile = ExportManager.exportMasterLedgerPdf(
+                            requireContext(), prods, sales, purchases, customers, repairs
+                        )
+                        if (which == 0) {
+                            ExportManager.openFile(requireContext(), pdfFile, "application/pdf")
+                        } else {
+                            ExportManager.shareFile(requireContext(), pdfFile, "application/pdf", "Complete Shop Master Ledger")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        }
+
+        binding.btnResetDefaultStock.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Reset Stock & Clean Customer Data?")
+                .setMessage("This will remove sample dummy customer/stock entries and seed all phone brands and models into inventory with No Price and 0 stock, as requested.")
+                .setPositiveButton("Reset Now") { _, _ ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        val db = AppDatabase.getDatabase(requireContext())
+                        db.customerDao().deleteAllCustomers()
+                        db.productDao().deleteAllProducts()
+                        val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map {
+                            it.toProductNoPrice()
+                        }
+                        db.productDao().insertAll(defaultPhoneProducts)
+                        Toast.makeText(requireContext(), "Stock reset! All ${defaultPhoneProducts.size} phone models added with no price.", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        binding.btnLockAppNow.setOnClickListener {
+            val intent = Intent(requireContext(), com.shopkeeper.mobileshop.ui.auth.LockScreenActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
+        }
+
+        binding.btnManageSellersSettings.setOnClickListener {
+            findNavController().navigate(R.id.navigation_sellers)
         }
 
         // GitHub Sync Controls

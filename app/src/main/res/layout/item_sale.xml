@@ -17,6 +17,9 @@
                 android:textColor="@color/green_800"/>
             <TextView android:id="@+id/tvCustomer" android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:textSize="14sp"/>
+            <TextView android:id="@+id/tvSoldBy" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textSize="12sp"
+                android:textColor="@color/green_700" android:textStyle="bold"/>
             <TextView android:id="@+id/tvDate" android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:textSize="12sp"
                 android:textColor="@color/text_secondary"/>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/gray_200">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header Row: Brand badge & Online Only Status Badge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvBrandBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_blue"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp"
+                android:textColor="@color/blue_500"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="Apple" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Online Only Badge -->
+            <TextView
+                android:id="@+id/tvOnlineStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_amber"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:text="Online Model • 0 Stock • No Price"
+                android:textColor="@color/amber_700"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Model Name -->
+        <TextView
+            android:id="@+id/tvModelName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-bold"
+            android:textColor="@color/gray_900"
+            android:textSize="17sp"
+            tools:text="iPhone 16 Pro Max" />
+
+        <!-- Key Highlights -->
+        <TextView
+            android:id="@+id/tvKeySpecs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/gray_700"
+            android:textSize="13sp"
+            tools:text="Apple A18 Pro (3nm), Camera Control button, Grade 5 Titanium frame" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/gray_100" />
+
+        <!-- Detailed Specifications Grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_online_phone"
+                android:drawablePadding="6dp"
+                android:textColor="@color/gray_600"
+                android:textSize="12sp"
+                app:drawableTint="@color/gray_500"
+                tools:text="Display: 6.9 inch Super Retina XDR OLED, 120Hz ProMotion" />
+
+            <TextView
+                android:id="@+id/tvMemory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawableStart="@drawable/ic_inventory"
+                android:drawablePadding="6dp"
+                android:textColor="@color/gray_600"
+                android:textSize="12sp"
+                app:drawableTint="@color/gray_500"
+                tools:text="Variants: 8GB RAM • 256GB / 512GB / 1TB" />
+
+            <TextView
+                android:id="@+id/tvCameraBattery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawableStart="@drawable/ic_dashboard"
+                android:drawablePadding="6dp"
+                android:textColor="@color/gray_600"
+                android:textSize="12sp"
+                app:drawableTint="@color/gray_500"
+                tools:text="Camera: 48MP Fusion + 48MP UW + 12MP 5x • 4685 mAh" />
+
+            <TextView
+                android:id="@+id/tvColors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawableStart="@drawable/ic_storefront"
+                android:drawablePadding="6dp"
+                android:textColor="@color/gray_500"
+                android:textSize="12sp"
+                app:drawableTint="@color/gray_500"
+                tools:text="Colors: Desert Titanium, Natural Titanium, Black" />
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal">
+
+            <!-- 1-Tap Add to Shop Inventory -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddToStock"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="Add to Shop Stock"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_add"
+                app:iconSize="16dp"
+                android:backgroundTint="@color/green_600"
+                app:cornerRadius="10dp" />
+
+            <!-- Share Specs / WhatsApp -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnShareSpecs"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:text="Share Specs"
+                android:textColor="@color/green_700"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_whatsapp"
+                app:iconTint="@color/green_700"
+                app:iconSize="16dp"
+                app:strokeColor="@color/green_600"
+                app:cornerRadius="10dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

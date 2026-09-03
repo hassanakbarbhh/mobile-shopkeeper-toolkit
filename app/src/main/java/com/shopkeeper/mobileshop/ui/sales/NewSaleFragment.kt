@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -29,6 +30,9 @@ class NewSaleFragment : Fragment() {
     private lateinit var repository: ShopRepository
     private lateinit var cartAdapter: CartAdapter
     private val cartItems = mutableListOf<SaleItem>()
+    private var availableSellers: List<Seller> = emptyList()
+    private var selectedSellerId: Long? = null
+    private var selectedSellerName: String = "Owner"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -44,6 +48,39 @@ class NewSaleFragment : Fragment() {
 
         setupCart()
         setupListeners()
+        setupSellerSelector()
+    }
+
+    private fun setupSellerSelector() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repository.activeSellers.collect { sellers ->
+                availableSellers = sellers
+                val sellerNames = if (sellers.isEmpty()) {
+                    listOf("Owner")
+                } else {
+                    sellers.map { it.name }
+                }
+                val sellerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sellerNames)
+                binding.actvSeller.setAdapter(sellerAdapter)
+
+                if (binding.actvSeller.text.isNullOrBlank() && sellerNames.isNotEmpty()) {
+                    binding.actvSeller.setText(sellerNames[0], false)
+                    selectedSellerName = sellerNames[0]
+                    selectedSellerId = sellers.firstOrNull()?.id
+                }
+
+                binding.actvSeller.setOnItemClickListener { _, _, position, _ ->
+                    if (position in sellers.indices) {
+                        val sel = sellers[position]
+                        selectedSellerId = sel.id
+                        selectedSellerName = sel.name
+                    } else {
+                        selectedSellerId = null
+                        selectedSellerName = "Owner"
+                    }
+                }
+            }
+        }
     }
 
     private fun setupCart() {
@@ -168,6 +205,8 @@ class NewSaleFragment : Fragment() {
 
         val status = if (method == PaymentMethod.CREDIT) PaymentStatus.PENDING else PaymentStatus.PAID
 
+        val sellerNameInput = binding.actvSeller.text?.toString()?.trim().orEmpty().ifEmpty { selectedSellerName }
+
         val sale = Sale(
             customerName = custName,
             totalAmount = subtotal,
@@ -175,7 +214,9 @@ class NewSaleFragment : Fragment() {
             taxAmount = tax,
             finalAmount = grandTotal,
             paymentMethod = method,
-            paymentStatus = status
+            paymentStatus = status,
+            sellerId = selectedSellerId,
+            sellerName = sellerNameInput
         )
 
         viewLifecycleOwner.lifecycleScope.launch {

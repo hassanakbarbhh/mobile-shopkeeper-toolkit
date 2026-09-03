@@ -52,7 +52,7 @@ jobs:
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MobileShopkeeper-APK-Debug
+          name: MobileInventoryToolkit-APK-Debug
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
 
@@ -62,7 +62,7 @@ jobs:
         with:
           files: app/build/outputs/apk/debug/*.apk
           tag_name: v1.0.0-${{ github.run_number }}
-          name: "Mobile Shopkeeper v1.0.0 (Build #${{ github.run_number }})"
+          name: "Mobile Inventory Toolkit v1.0.0 (Build #${{ github.run_number }})"
           body: "Automated Android APK build ready for physical device installation on Android."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

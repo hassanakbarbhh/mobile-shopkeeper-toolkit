@@ -18,6 +18,8 @@ class ShopRepository(private val db: AppDatabase) {
     val allCustomers: Flow<List<Customer>> = db.customerDao().getAllCustomers()
     fun searchCustomers(q: String) = db.customerDao().searchCustomers("%$q%")
     suspend fun insertCustomer(c: Customer) = db.customerDao().insert(c)
+    suspend fun updateCustomer(c: Customer) = db.customerDao().update(c)
+    suspend fun deleteCustomer(c: Customer) = db.customerDao().delete(c)
 
     val allSales: Flow<List<Sale>> = db.saleDao().getAllSales()
     val dueSales: Flow<List<Sale>> = db.saleDao().getDueSales()
@@ -30,6 +32,14 @@ class ShopRepository(private val db: AppDatabase) {
         return id
     }
     suspend fun getSaleItems(saleId: Long) = db.saleDao().getSaleItems(saleId)
+    suspend fun deleteSale(sale: Sale, restock: Boolean = true) {
+        if (restock) {
+            val items = db.saleDao().getSaleItems(sale.id)
+            items.forEach { db.productDao().increaseStock(it.productId, it.quantity) }
+        }
+        db.saleDao().deleteSaleItems(sale.id)
+        db.saleDao().delete(sale)
+    }
 
     val allRepairs: Flow<List<Repair>> = db.repairDao().getAllRepairs()
     val activeRepairs: Flow<List<Repair>> = db.repairDao().getActiveRepairs()
@@ -37,9 +47,12 @@ class ShopRepository(private val db: AppDatabase) {
     fun getRepairsByStatus(status: RepairStatus) = db.repairDao().getRepairsByStatus(status.name)
     suspend fun insertRepair(r: Repair) = db.repairDao().insert(r)
     suspend fun updateRepair(r: Repair) = db.repairDao().update(r)
+    suspend fun deleteRepair(r: Repair) = db.repairDao().delete(r)
 
     val allSuppliers: Flow<List<Supplier>> = db.supplierDao().getAll()
     suspend fun insertSupplier(s: Supplier) = db.supplierDao().insert(s)
+    suspend fun updateSupplier(s: Supplier) = db.supplierDao().update(s)
+    suspend fun deleteSupplier(s: Supplier) = db.supplierDao().delete(s)
 
     val allPurchases: Flow<List<Purchase>> = db.purchaseDao().getAll()
     suspend fun insertPurchase(p: Purchase, items: List<PurchaseItem>): Long {
@@ -47,10 +60,23 @@ class ShopRepository(private val db: AppDatabase) {
         db.purchaseDao().insertItems(items.map { it.copy(purchaseId = id) })
         return id
     }
+    suspend fun deletePurchase(p: Purchase) = db.purchaseDao().delete(p)
 
     val allExpenses: Flow<List<Expense>> = db.expenseDao().getAll()
     suspend fun insertExpense(e: Expense) = db.expenseDao().insert(e)
+    suspend fun deleteExpense(e: Expense) = db.expenseDao().delete(e)
     fun sumExpenses(start: Long, end: Long) = db.expenseDao().sumInRange(start, end)
+
+    // Seller & Staff Management for Owner
+    val allSellers: Flow<List<Seller>> = db.sellerDao().getAllSellers()
+    val activeSellers: Flow<List<Seller>> = db.sellerDao().getActiveSellers()
+    val totalSellerCount: Flow<Int> = db.sellerDao().getSellerCount()
+    suspend fun insertSeller(s: Seller) = db.sellerDao().insert(s)
+    suspend fun updateSeller(s: Seller) = db.sellerDao().update(s)
+    suspend fun deleteSeller(s: Seller) = db.sellerDao().delete(s)
+    fun getSalesBySeller(sellerId: Long) = db.saleDao().getSalesBySeller(sellerId)
+    fun getTotalSalesBySeller(sellerId: Long) = db.saleDao().getTotalSalesBySeller(sellerId)
+    fun getSalesCountBySeller(sellerId: Long) = db.saleDao().getSalesCountBySeller(sellerId)
 
     suspend fun recordPayment(payment: Payment) {
         db.paymentDao().insert(payment)

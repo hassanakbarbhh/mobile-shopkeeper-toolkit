@@ -13,9 +13,19 @@
             android:title="Inventory &amp; Stock"/>
 
         <item
+            android:id="@+id/navigation_online_catalog"
+            android:icon="@drawable/ic_online_phone"
+            android:title="Online Phone Models"/>
+
+        <item
             android:id="@+id/navigation_sales"
             android:icon="@drawable/ic_sales"
             android:title="Sales / Invoices"/>
+
+        <item
+            android:id="@+id/navigation_sellers"
+            android:icon="@drawable/ic_seller"
+            android:title="Sellers &amp; Staff"/>
 
         <item
             android:id="@+id/navigation_customers"
@@ -59,6 +69,11 @@
                 android:id="@+id/navigation_settings"
                 android:icon="@drawable/ic_settings"
                 android:title="Settings &amp; Profile"/>
+
+            <item
+                android:id="@+id/navigation_lock_app"
+                android:icon="@drawable/ic_lock"
+                android:title="Lock App (Login Key)"/>
 
             <item
                 android:id="@+id/navigation_about"

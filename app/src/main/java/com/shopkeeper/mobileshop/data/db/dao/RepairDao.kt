@@ -9,6 +9,8 @@ interface RepairDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(repair: Repair): Long
     @Update suspend fun update(repair: Repair)
     @Delete suspend fun delete(repair: Repair)
+    @Query("DELETE FROM repairs") suspend fun deleteAllRepairs()
+    @Query("DELETE FROM repairs WHERE customerName IN ('Pooja Sharma', 'Vikas Patel')") suspend fun deleteDummyRepairs()
 
     @Query("SELECT * FROM repairs ORDER BY receivedDate DESC")
     fun getAllRepairs(): Flow<List<Repair>>

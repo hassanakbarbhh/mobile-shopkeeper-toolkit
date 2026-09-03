@@ -16,6 +16,7 @@ import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogRepairBinding
 import com.shopkeeper.mobileshop.databinding.FragmentRepairsBinding
+import com.shopkeeper.mobileshop.utils.ExportManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -44,6 +45,19 @@ class RepairsFragment : Fragment() {
         binding.rvRepairs.adapter = adapter
 
         binding.fabAddRepair.setOnClickListener { showAddRepairDialog() }
+
+        binding.btnExportRepairs.setOnClickListener {
+            if (allRepairs.isEmpty()) {
+                Toast.makeText(requireContext(), "No repair records to export", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            ExportManager.showLedgerExportDialog(
+                context = requireContext(),
+                ledgerTitle = "Repair Jobs Ledger",
+                onExportCsv = { ExportManager.exportRepairsCsv(requireContext(), allRepairs) },
+                onExportPdf = { ExportManager.exportRepairsPdf(requireContext(), allRepairs) }
+            )
+        }
 
         binding.chipGroupStatus.setOnCheckedStateChangeListener { _, _ ->
             filterRepairs()
@@ -111,9 +125,56 @@ class RepairsFragment : Fragment() {
     }
 
     private fun showRepairActions(repair: Repair) {
+        val options = arrayOf(
+            "Update Status (${repair.status.name})",
+            "WhatsApp Status Update",
+            "Call Customer",
+            "Delete Repair Ticket"
+        )
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("${repair.deviceBrand} ${repair.deviceModel} • ${repair.customerName}")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> showUpdateStatusDialog(repair)
+                    1 -> {
+                        if (repair.customerPhone.isNotBlank()) {
+                            val msg = "Assalam-o-Alaikum ${repair.customerName}, your ${repair.deviceBrand} ${repair.deviceModel} repair status is currently: ${repair.status.name.replace('_', ' ')}. Est: Rs.${repair.estimatedCost}. Mobile Shop."
+                            ExportManager.shareWhatsApp(requireContext(), repair.customerPhone, msg)
+                        } else {
+                            Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    2 -> {
+                        if (repair.customerPhone.isNotBlank()) {
+                            ExportManager.openDialer(requireContext(), repair.customerPhone)
+                        } else {
+                            Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    3 -> {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Delete Repair Ticket #${repair.id}?")
+                            .setMessage("Are you sure you want to permanently delete this repair ticket for ${repair.customerName}?")
+                            .setPositiveButton("Delete") { _, _ ->
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    repository.deleteRepair(repair)
+                                    Toast.makeText(requireContext(), "Repair ticket #${repair.id} deleted", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
+                    }
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showUpdateStatusDialog(repair: Repair) {
         val statuses = RepairStatus.values().map { it.name.replace('_', ' ') }.toTypedArray()
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${repair.deviceBrand} ${repair.deviceModel} — Status")
+            .setTitle("Change Repair Status")
             .setItems(statuses) { _, which ->
                 val newStatus = RepairStatus.values()[which]
                 viewLifecycleOwner.lifecycleScope.launch {

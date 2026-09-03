@@ -23,6 +23,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Mobile Shopkeeper Toolkit"
+rootProject.name = "Mobile Inventory Toolkit"
 
 include(":app")

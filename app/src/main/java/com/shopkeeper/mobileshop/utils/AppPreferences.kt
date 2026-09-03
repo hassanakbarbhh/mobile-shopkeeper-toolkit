@@ -8,6 +8,7 @@ object AppPreferences {
     private const val PREFS = "shop_app_prefs"
     private const val KEY_MODE = "app_mode"
     private const val KEY_REMEMBER = "remember_mode"
+    private const val KEY_LOCK_ENABLED = "lock_security_enabled"
 
     fun saveMode(ctx: Context, mode: AppMode, remember: Boolean) =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
@@ -21,4 +22,12 @@ object AppPreferences {
 
     fun clearMode(ctx: Context) =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(KEY_MODE).apply()
+
+    fun isLockEnabled(ctx: Context): Boolean {
+        return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_LOCK_ENABLED, false)
+    }
+
+    fun setLockEnabled(ctx: Context, enabled: Boolean) {
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_LOCK_ENABLED, enabled).apply()
+    }
 }

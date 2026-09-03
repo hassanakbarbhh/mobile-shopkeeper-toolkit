@@ -27,6 +27,7 @@ class SaleAdapter(
         fun bind(sale: Sale) {
             binding.tvInvoice.text = "INV-#${sale.id.toString().padStart(4, '0')}"
             binding.tvCustomer.text = sale.customerName
+            binding.tvSoldBy.text = "Sold by: ${sale.sellerName}"
             binding.tvDate.text = sale.saleDate.dateTimeText()
             binding.tvPayment.text = "${sale.paymentMethod} • ${sale.paymentStatus}"
             binding.tvTotal.text = sale.finalAmount.money()

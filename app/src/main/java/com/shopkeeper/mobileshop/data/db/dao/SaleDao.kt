@@ -9,10 +9,22 @@ import kotlinx.coroutines.flow.Flow
 interface SaleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertSale(sale: Sale): Long
     @Update suspend fun update(sale: Sale)
+    @Delete suspend fun delete(sale: Sale)
+    @Query("DELETE FROM sales WHERE id = :saleId") suspend fun deleteSaleById(saleId: Long)
+    @Query("DELETE FROM sale_items WHERE saleId = :saleId") suspend fun deleteSaleItems(saleId: Long)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertSaleItems(items: List<SaleItem>)
 
     @Query("SELECT * FROM sales ORDER BY saleDate DESC")
     fun getAllSales(): Flow<List<Sale>>
+
+    @Query("SELECT * FROM sales WHERE sellerId = :sellerId ORDER BY saleDate DESC")
+    fun getSalesBySeller(sellerId: Long): Flow<List<Sale>>
+
+    @Query("SELECT SUM(finalAmount) FROM sales WHERE sellerId = :sellerId")
+    fun getTotalSalesBySeller(sellerId: Long): Flow<Double?>
+
+    @Query("SELECT COUNT(*) FROM sales WHERE sellerId = :sellerId")
+    fun getSalesCountBySeller(sellerId: Long): Flow<Int>
 
     @Query("SELECT * FROM sales WHERE id = :id")
     suspend fun getSaleById(id: Long): Sale?

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PurchaseDao {
     @Insert suspend fun insert(p: Purchase): Long
+    @Delete suspend fun delete(p: Purchase)
     @Insert suspend fun insertItems(items: List<PurchaseItem>)
 
     @Query("SELECT * FROM purchases ORDER BY purchaseDate DESC")

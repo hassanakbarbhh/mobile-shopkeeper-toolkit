@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
     entities = [
         Product::class, Customer::class, Sale::class, SaleItem::class,
         Repair::class, Payment::class, Supplier::class, Purchase::class,
-        PurchaseItem::class, Expense::class
+        PurchaseItem::class, Expense::class, Seller::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -32,6 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun supplierDao(): SupplierDao
     abstract fun purchaseDao(): PurchaseDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun sellerDao(): SellerDao
 
     companion object {
         @Volatile
@@ -44,6 +45,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "mobile_shop_database"
                 )
+                    .fallbackToDestructiveMigration()
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
@@ -51,126 +53,85 @@ abstract class AppDatabase : RoomDatabase() {
                                 INSTANCE?.let { seedInitialData(it) }
                             }
                         }
+
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                INSTANCE?.let { ensureCleanDataAndDefaultStock(it) }
+                            }
+                        }
                     })
                     .build()
                 INSTANCE = instance
+                // Also trigger cleanup/seed check right away
+                CoroutineScope(Dispatchers.IO).launch {
+                    ensureCleanDataAndDefaultStock(instance)
+                }
                 instance
             }
         }
 
+        suspend fun ensureCleanDataAndDefaultStock(db: AppDatabase) {
+            try {
+                // Delete old dummy customers so customer data starts clean
+                db.customerDao().deleteDummyCustomers()
+
+                // Delete dummy repairs and dummy expenses
+                db.repairDao().deleteDummyRepairs()
+                db.expenseDao().deleteDummyExpenses()
+
+                // Check products in stock
+                val existing = db.productDao().getAllProductsList()
+                
+                // Delete the old dummy accessory products
+                val dummyNames = setOf(
+                    "Apple 20W USB-C Power Adapter",
+                    "boAt Airdopes 141 ANC",
+                    "Tempered Glass (Universal 6.7\")",
+                    "Mi 10000mAh Power Bank 3i"
+                )
+                existing.filter { it.name in dummyNames }.forEach {
+                    db.productDao().delete(it)
+                }
+
+                // If stock is empty or missing phone models, seed all brands & models with no price
+                val currentProducts = db.productDao().getAllProductsList()
+                val hasOnlineModels = currentProducts.any { it.notes.contains("Specs:") || it.notes.contains("Online Model") || it.sellingPrice == 0.0 }
+                
+                if (currentProducts.isEmpty() || !hasOnlineModels) {
+                    val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map { 
+                        it.toProductNoPrice() 
+                    }
+                    db.productDao().insertAll(defaultPhoneProducts)
+                }
+            } catch (e: Exception) {
+                // Ignore background sync errors
+            }
+        }
+
         private suspend fun seedInitialData(db: AppDatabase) {
-            val p1 = Product(
-                name = "iPhone 15 Pro (128GB)",
-                brand = "Apple",
-                model = "A2848",
-                imei = "359876543210981",
-                category = ProductCategory.SMARTPHONE,
-                purchasePrice = 110000.0,
-                sellingPrice = 129900.0,
-                quantity = 4,
-                ram = "8GB",
-                storage = "128GB",
-                color = "Natural Titanium"
-            )
-            val p2 = Product(
-                name = "Samsung Galaxy S24 Ultra",
-                brand = "Samsung",
-                model = "SM-S928B",
-                imei = "359876543210982",
-                category = ProductCategory.SMARTPHONE,
-                purchasePrice = 112000.0,
-                sellingPrice = 129999.0,
-                quantity = 3,
-                ram = "12GB",
-                storage = "256GB",
-                color = "Titanium Gray"
-            )
-            val p3 = Product(
-                name = "Redmi Note 13 Pro+",
-                brand = "Xiaomi",
-                model = "23090RA98G",
-                imei = "869876543210983",
-                category = ProductCategory.SMARTPHONE,
-                purchasePrice = 26000.0,
-                sellingPrice = 31999.0,
-                quantity = 8,
-                ram = "8GB",
-                storage = "256GB",
-                color = "Midnight Black"
-            )
-            val p4 = Product(
-                name = "Apple 20W USB-C Power Adapter",
-                brand = "Apple",
-                model = "MHJE3HN/A",
-                category = ProductCategory.CHARGER,
-                purchasePrice = 1400.0,
-                sellingPrice = 1900.0,
-                quantity = 15
-            )
-            val p5 = Product(
-                name = "boAt Airdopes 141 ANC",
-                brand = "boAt",
-                model = "Airdopes 141",
-                category = ProductCategory.EARPHONE,
-                purchasePrice = 999.0,
-                sellingPrice = 1699.0,
-                quantity = 12
-            )
-            val p6 = Product(
-                name = "Tempered Glass (Universal 6.7\")",
-                brand = "Generic",
-                model = "TG-67",
-                category = ProductCategory.SCREEN_PROTECTOR,
-                purchasePrice = 30.0,
-                sellingPrice = 150.0,
-                quantity = 45
-            )
-            val p7 = Product(
-                name = "Mi 10000mAh Power Bank 3i",
-                brand = "Xiaomi",
-                model = "PB100LZM",
-                category = ProductCategory.POWER_BANK,
-                purchasePrice = 850.0,
-                sellingPrice = 1299.0,
-                quantity = 6
-            )
-            listOf(p1, p2, p3, p4, p5, p6, p7).forEach { db.productDao().insert(it) }
+            // Seed all phone brand names & models with no price and 0 quantity
+            val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map {
+                it.toProductNoPrice()
+            }
+            db.productDao().insertAll(defaultPhoneProducts)
 
-            val c1 = Customer(name = "Amit Kumar", phone = "+91 98765 43210", address = "Sector 14, Main Market")
-            val c2 = Customer(name = "Pooja Sharma", phone = "+91 98123 45678", address = "Civil Lines")
-            val c3 = Customer(name = "Rahul Verma", phone = "+91 99988 77665", address = "Model Town")
-            listOf(c1, c2, c3).forEach { db.customerDao().insert(it) }
-
-            val sup1 = Supplier(name = "Shree Balaji Mobile Dist", phone = "+91 98222 11111", company = "Balaji Dist, Nehru Place")
-            val sup2 = Supplier(name = "Supreme Telecom Spares", phone = "+91 98333 22222", company = "Gaffar Market, Karol Bagh")
-            listOf(sup1, sup2).forEach { db.supplierDao().insert(it) }
-
-            val r1 = Repair(
-                customerName = "Pooja Sharma",
-                customerPhone = "+91 98123 45678",
-                deviceBrand = "Samsung",
-                deviceModel = "Galaxy A52",
-                imei = "354411223344556",
-                issueDescription = "Cracked Super AMOLED display, touch responsive",
-                estimatedCost = 4200.0,
-                status = RepairStatus.IN_REPAIR
+            // Shop Owner Seller
+            val s1 = Seller(
+                name = "Hassan (Owner)",
+                phone = "+92 300 1234567",
+                role = "Shop Owner",
+                commissionPercent = 0.0,
+                isActive = true
             )
-            val r2 = Repair(
-                customerName = "Vikas Patel",
-                customerPhone = "+91 97777 66666",
-                deviceBrand = "iPhone",
-                deviceModel = "12",
-                imei = "351122334455667",
-                issueDescription = "Battery health 68%, replacement needed",
-                estimatedCost = 3500.0,
-                status = RepairStatus.RECEIVED
+            val s2 = Seller(
+                name = "Ali Khan",
+                phone = "+92 321 7654321",
+                role = "Sales Executive",
+                commissionPercent = 2.0,
+                isActive = true
             )
-            listOf(r1, r2).forEach { db.repairDao().insert(it) }
-
-            val exp1 = Expense(title = "Shop Rent - Main Hall", category = ExpenseCategory.RENT, amount = 18000.0)
-            val exp2 = Expense(title = "Electricity Bill", category = ExpenseCategory.ELECTRICITY, amount = 2450.0)
-            val exp3 = Expense(title = "Broadband Internet", category = ExpenseCategory.INTERNET, amount = 999.0)
-            listOf(exp1, exp2, exp3).forEach { db.expenseDao().insert(it) }
+            listOf(s1, s2).forEach { db.sellerDao().insert(it) }
         }
     }
 }

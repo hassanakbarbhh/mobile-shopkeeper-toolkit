@@ -19,6 +19,7 @@ import com.shopkeeper.mobileshop.data.db.entity.ProductCategory
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogProductBinding
 import com.shopkeeper.mobileshop.databinding.FragmentInventoryBinding
+import com.shopkeeper.mobileshop.utils.ExportManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -58,6 +59,19 @@ class InventoryFragment : Fragment() {
 
     private fun setupListeners() {
         binding.fabAddProduct.setOnClickListener { showAddEditDialog(null) }
+
+        binding.btnExportInventory.setOnClickListener {
+            if (fullList.isEmpty()) {
+                Toast.makeText(requireContext(), "No products in inventory to export", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            ExportManager.showLedgerExportDialog(
+                context = requireContext(),
+                ledgerTitle = "Inventory & Stock Ledger",
+                onExportCsv = { ExportManager.exportProductsCsv(requireContext(), fullList) },
+                onExportPdf = { ExportManager.exportProductsPdf(requireContext(), fullList) }
+            )
+        }
 
         binding.etSearch.doAfterTextChanged { text ->
             filterList(text?.toString().orEmpty())

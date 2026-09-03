@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +17,7 @@ import com.shopkeeper.mobileshop.data.db.AppDatabase
 import com.shopkeeper.mobileshop.data.db.entity.Sale
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.FragmentSalesListBinding
+import com.shopkeeper.mobileshop.utils.ExportManager
 import com.shopkeeper.mobileshop.utils.InvoiceGenerator
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -26,6 +28,7 @@ class SalesListFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var repository: ShopRepository
     private lateinit var adapter: SaleAdapter
+    private var currentSales: List<Sale> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -47,9 +50,24 @@ class SalesListFragment : Fragment() {
             findNavController().navigate(R.id.navigation_new_sale)
         }
 
+        binding.btnExportSales.setOnClickListener {
+            if (currentSales.isEmpty()) {
+                Toast.makeText(requireContext(), "No sales to export", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            ExportManager.showLedgerExportDialog(
+                context = requireContext(),
+                ledgerTitle = "Sales & Invoices Ledger",
+                onExportCsv = { ExportManager.exportSalesCsv(requireContext(), currentSales) },
+                onExportPdf = { ExportManager.exportSalesPdf(requireContext(), currentSales) }
+            )
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repository.allSales.collectLatest { list ->
+                currentSales = list
                 adapter.submitList(list)
+                binding.tvSalesCount.text = "${list.size} invoices recorded"
             }
         }
     }
@@ -58,13 +76,13 @@ class SalesListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val items = repository.getSaleItems(sale.id)
             val itemsText = items.joinToString("\n") {
-                "• ${it.productName} x${it.quantity} = ₹${it.totalPrice}" +
+                "• ${it.productName} x${it.quantity} = Rs.${it.totalPrice}" +
                     if (it.imei.isNotBlank()) " (IMEI: ${it.imei})" else ""
             }
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Invoice #${sale.id} • ${sale.customerName}")
-                .setMessage("Date: ${sale.saleDate}\nTotal: ₹${sale.finalAmount}\nPayment: ${sale.paymentMethod} (${sale.paymentStatus})\n\nItems:\n$itemsText")
+                .setMessage("Date: ${sale.saleDate}\nSold by: ${sale.sellerName}\nTotal: Rs.${sale.finalAmount}\nPayment: ${sale.paymentMethod} (${sale.paymentStatus})\n\nItems:\n$itemsText")
                 .setPositiveButton("Share Invoice PDF") { _, _ ->
                     val file = InvoiceGenerator.generate(requireContext(), sale, items)
                     val uri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.fileprovider", file)
@@ -74,6 +92,19 @@ class SalesListFragment : Fragment() {
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                     startActivity(Intent.createChooser(intent, "Share Invoice PDF"))
+                }
+                .setNeutralButton("Delete / Void") { _, _ ->
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Delete Invoice #${sale.id}?")
+                        .setMessage("Are you sure you want to permanently delete this sale invoice? Items will be removed from sales history.")
+                        .setPositiveButton("Delete") { _, _ ->
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                repository.deleteSale(sale)
+                                Toast.makeText(requireContext(), "Invoice #${sale.id} deleted", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                 }
                 .setNegativeButton("Close", null)
                 .show()

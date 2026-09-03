@@ -4,16 +4,37 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
         android:orientation="vertical">
-        <com.google.android.material.chip.ChipGroup android:id="@+id/chipGroupTab"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:padding="16dp" app:singleSelection="true" app:selectionRequired="true">
-            <com.google.android.material.chip.Chip android:id="@+id/chipPurchases"
-                style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="Purchases (Buy)" android:checked="true"/>
-            <com.google.android.material.chip.Chip android:id="@+id/chipSuppliers"
-                style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="Suppliers"/>
-        </com.google.android.material.chip.ChipGroup>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp">
+
+            <com.google.android.material.chip.ChipGroup android:id="@+id/chipGroupTab"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:singleSelection="true" app:selectionRequired="true">
+                <com.google.android.material.chip.Chip android:id="@+id/chipPurchases"
+                    style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="Purchases (Buy)" android:checked="true"/>
+                <com.google.android.material.chip.Chip android:id="@+id/chipSuppliers"
+                    style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="Suppliers"/>
+            </com.google.android.material.chip.ChipGroup>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportPurchases"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Export"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_export"
+                app:iconSize="16dp"/>
+        </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvPurchases"
             android:layout_width="match_parent" android:layout_height="0dp"
             android:layout_weight="1" android:paddingHorizontal="16dp" android:clipToPadding="false"/>

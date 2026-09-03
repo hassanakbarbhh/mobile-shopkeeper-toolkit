@@ -29,7 +29,7 @@ class ProductAdapter(
         fun bind(product: Product) {
             binding.tvProductName.text = product.name
             binding.tvProductBrand.text = "${product.brand} • ${product.category.name.replace('_', ' ')}"
-            binding.tvProductPrice.text = product.sellingPrice.money()
+            binding.tvProductPrice.text = if (product.sellingPrice <= 0.0) "No Price Set" else product.sellingPrice.money()
             binding.tvQuantity.text = "Stock: ${product.quantity}"
 
             val detailsList = mutableListOf<String>()
@@ -49,7 +49,11 @@ class ProductAdapter(
                 binding.tvProductDetails.visibility = android.view.View.GONE
             }
 
-            if (product.quantity <= 0) {
+            if (product.sellingPrice <= 0.0 && product.quantity <= 0) {
+                binding.tvStockStatus.text = "Default Model"
+                binding.tvStockStatus.setTextColor(ContextCompat.getColor(binding.root.context, R.color.blue_600))
+                binding.tvStockStatus.setBackgroundResource(R.drawable.bg_badge_blue)
+            } else if (product.quantity <= 0) {
                 binding.tvStockStatus.text = "Out of Stock"
                 binding.tvStockStatus.setTextColor(ContextCompat.getColor(binding.root.context, R.color.error))
                 binding.tvStockStatus.setBackgroundResource(R.drawable.bg_badge_red)

@@ -17,6 +17,7 @@ import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogNewPurchaseBinding
 import com.shopkeeper.mobileshop.databinding.DialogSupplierBinding
 import com.shopkeeper.mobileshop.databinding.FragmentPurchasesBinding
+import com.shopkeeper.mobileshop.utils.ExportManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -54,6 +55,22 @@ class PurchasesFragment : Fragment() {
             val isPurchases = binding.chipPurchases.isChecked
             binding.rvPurchases.visibility = if (isPurchases) View.VISIBLE else View.GONE
             binding.rvSuppliers.visibility = if (isPurchases) View.GONE else View.VISIBLE
+        }
+
+        binding.btnExportPurchases.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val list = repository.allPurchases.first()
+                if (list.isEmpty()) {
+                    Toast.makeText(requireContext(), "No purchase orders to export", Toast.LENGTH_SHORT).show()
+                } else {
+                    ExportManager.showLedgerExportDialog(
+                        context = requireContext(),
+                        ledgerTitle = "Daily Purchases Ledger",
+                        onExportCsv = { ExportManager.exportPurchasesCsv(requireContext(), list) },
+                        onExportPdf = { ExportManager.exportPurchasesPdf(requireContext(), list) }
+                    )
+                }
+            }
         }
 
         binding.fabAdd.setOnClickListener {

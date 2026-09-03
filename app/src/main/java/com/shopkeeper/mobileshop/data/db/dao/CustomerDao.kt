@@ -9,9 +9,14 @@ interface CustomerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(customer: Customer): Long
     @Update suspend fun update(customer: Customer)
     @Delete suspend fun delete(customer: Customer)
+    @Query("DELETE FROM customers") suspend fun deleteAllCustomers()
+    @Query("DELETE FROM customers WHERE name IN ('Amit Kumar', 'Pooja Sharma', 'Rahul Verma')") suspend fun deleteDummyCustomers()
 
     @Query("SELECT * FROM customers ORDER BY name ASC")
     fun getAllCustomers(): Flow<List<Customer>>
+
+    @Query("SELECT * FROM customers ORDER BY name ASC")
+    suspend fun getAllCustomersList(): List<Customer>
 
     @Query("SELECT * FROM customers WHERE id = :id")
     suspend fun getCustomerById(id: Long): Customer?

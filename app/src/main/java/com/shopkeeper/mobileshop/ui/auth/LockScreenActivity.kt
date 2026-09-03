@@ -25,6 +25,8 @@ class LockScreenActivity : AppCompatActivity() {
         binding = ActivityLockScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.tvLockSubtitle.text = getString(R.string.lock_subtitle)
+
         binding.btnUnlock.setOnClickListener { checkPassword() }
         binding.etPassword.setOnEditorActionListener { _, _, _ ->
             checkPassword()
@@ -47,35 +49,45 @@ class LockScreenActivity : AppCompatActivity() {
     }
 
     private fun setupBiometric() {
-        val bm = BiometricManager.from(this)
-        val canAuth = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-        if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
-            binding.btnFingerprint.visibility = View.GONE
-            return
-        }
+        try {
+            val bm = BiometricManager.from(this)
+            val canAuth = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
+                binding.btnFingerprint.visibility = View.GONE
+                return
+            }
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.app_name))
-            .setSubtitle("Unlock with fingerprint / biometrics")
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-            .build()
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle(getString(R.string.app_name))
+                .setSubtitle("Unlock with fingerprint / biometrics")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                .build()
 
-        val prompt = BiometricPrompt(this, ContextCompat.getMainExecutor(this),
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    onUnlocked()
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                        Toast.makeText(this@LockScreenActivity, errString, Toast.LENGTH_SHORT).show()
+            val prompt = BiometricPrompt(this, ContextCompat.getMainExecutor(this),
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        onUnlocked()
                     }
-                }
-            })
 
-        binding.btnFingerprint.setOnClickListener { prompt.authenticate(promptInfo) }
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        super.onAuthenticationError(errorCode, errString)
+                        if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                            Toast.makeText(this@LockScreenActivity, errString, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
+
+            binding.btnFingerprint.setOnClickListener {
+                try {
+                    prompt.authenticate(promptInfo)
+                } catch (e: Exception) {
+                    Toast.makeText(this@LockScreenActivity, "Biometric unavailable", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            binding.btnFingerprint.visibility = View.GONE
+        }
     }
 
     private fun onUnlocked() {
