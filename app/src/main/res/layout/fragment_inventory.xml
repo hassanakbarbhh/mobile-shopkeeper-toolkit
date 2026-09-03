@@ -36,11 +36,26 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnImportInventory"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginStart="6dp"
+                android:text="Import"
+                android:textSize="12sp"
+                android:textColor="@color/green_700"
+                app:icon="@drawable/ic_import"
+                app:iconTint="@color/green_700"
+                app:iconSize="16dp"
+                app:strokeColor="@color/green_600"
+                app:cornerRadius="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExportInventory"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="52dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:text="Export"
                 android:textSize="12sp"
                 android:textColor="@color/green_700"

@@ -1,11 +1,13 @@
 package com.shopkeeper.mobileshop.ui.sales
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +21,7 @@ import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogProductSearchBinding
 import com.shopkeeper.mobileshop.databinding.FragmentNewSaleBinding
 import com.shopkeeper.mobileshop.ui.inventory.ProductAdapter
+import com.shopkeeper.mobileshop.utils.InvoiceGenerator
 import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -221,8 +224,32 @@ class NewSaleFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             val saleId = repository.insertSale(sale, cartItems)
-            Toast.makeText(requireContext(), "Sale recorded! Invoice #$saleId", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
+            val createdSale = sale.copy(id = saleId)
+            val finalItems = cartItems.toList()
+            
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Sale Recorded • Invoice #$saleId")
+                .setMessage("Total: ${grandTotal.money()} • $custName\n\nWould you like to print a thermal receipt or share invoice?")
+                .setPositiveButton("🖨️ Thermal Receipt") { _, _ ->
+                    com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showSaleReceiptDialog(requireContext(), createdSale, finalItems)
+                    findNavController().popBackStack()
+                }
+                .setNeutralButton("PDF Invoice") { _, _ ->
+                    val file = InvoiceGenerator.generate(requireContext(), createdSale, finalItems)
+                    val uri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.fileprovider", file)
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "application/pdf"
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    startActivity(Intent.createChooser(intent, "Share Invoice PDF"))
+                    findNavController().popBackStack()
+                }
+                .setNegativeButton("Done") { _, _ ->
+                    findNavController().popBackStack()
+                }
+                .setCancelable(false)
+                .show()
         }
     }
 

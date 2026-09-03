@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group android:id="@+id/group_main" android:checkableBehavior="single">
         <item
             android:id="@+id/navigation_dashboard"
             android:icon="@drawable/ic_dashboard"
             android:title="Dashboard"/>
 
         <item
-            android:id="@+id/navigation_inventory"
-            android:icon="@drawable/ic_inventory"
-            android:title="Inventory &amp; Stock"/>
-
-        <item
-            android:id="@+id/navigation_online_catalog"
-            android:icon="@drawable/ic_online_phone"
-            android:title="Online Phone Models"/>
+            android:id="@+id/navigation_new_sale"
+            android:icon="@drawable/ic_add_sale"
+            android:title="New Sale (POS)"/>
 
         <item
             android:id="@+id/navigation_sales"
@@ -23,14 +18,9 @@
             android:title="Sales / Invoices"/>
 
         <item
-            android:id="@+id/navigation_sellers"
-            android:icon="@drawable/ic_seller"
-            android:title="Sellers &amp; Staff"/>
-
-        <item
-            android:id="@+id/navigation_customers"
-            android:icon="@drawable/ic_customers"
-            android:title="Customers"/>
+            android:id="@+id/navigation_inventory"
+            android:icon="@drawable/ic_inventory"
+            android:title="Inventory &amp; Stock"/>
 
         <item
             android:id="@+id/navigation_repairs"
@@ -38,9 +28,19 @@
             android:title="Repairs Tracking"/>
 
         <item
-            android:id="@+id/navigation_purchases"
-            android:icon="@drawable/ic_purchase"
-            android:title="Purchases &amp; Suppliers"/>
+            android:id="@+id/navigation_online_catalog"
+            android:icon="@drawable/ic_online_phone"
+            android:title="Online Phone Models"/>
+
+        <item
+            android:id="@+id/navigation_customers"
+            android:icon="@drawable/ic_customers"
+            android:title="Customers"/>
+
+        <item
+            android:id="@+id/navigation_dues"
+            android:icon="@drawable/ic_dues"
+            android:title="Udhaar / Customer Dues"/>
 
         <item
             android:id="@+id/navigation_imei"
@@ -48,9 +48,9 @@
             android:title="IMEI History Tracker"/>
 
         <item
-            android:id="@+id/navigation_dues"
-            android:icon="@drawable/ic_dues"
-            android:title="Udhaar / Customer Dues"/>
+            android:id="@+id/navigation_purchases"
+            android:icon="@drawable/ic_purchase"
+            android:title="Purchases &amp; Suppliers"/>
 
         <item
             android:id="@+id/navigation_expenses"
@@ -61,24 +61,29 @@
             android:id="@+id/navigation_reports"
             android:icon="@drawable/ic_reports"
             android:title="Reports &amp; Analytics"/>
+
+        <item
+            android:id="@+id/navigation_sellers"
+            android:icon="@drawable/ic_seller"
+            android:title="Sellers &amp; Staff"/>
     </group>
 
-    <item android:title="App &amp; Support">
+    <item android:title="App &amp; Security">
         <menu>
             <item
                 android:id="@+id/navigation_settings"
                 android:icon="@drawable/ic_settings"
-                android:title="Settings &amp; Profile"/>
+                android:title="Settings &amp; Keys"/>
+
+            <item
+                android:id="@+id/navigation_about"
+                android:icon="@drawable/ic_seller"
+                android:title="About Developer (Hassan Akbar)"/>
 
             <item
                 android:id="@+id/navigation_lock_app"
                 android:icon="@drawable/ic_lock"
-                android:title="Lock App (Login Key)"/>
-
-            <item
-                android:id="@+id/navigation_about"
-                android:icon="@drawable/ic_heart"
-                android:title="About Hassan ❤"/>
+                android:title="Switch Role / Lock App"/>
         </menu>
     </item>
 

@@ -12,22 +12,23 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="32dp">
+        android:padding="24dp">
 
-        <Space android:layout_width="0dp" android:layout_height="48dp"/>
+        <Space android:layout_width="0dp" android:layout_height="24dp"/>
 
         <FrameLayout
             android:id="@+id/badgeLock"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
             android:background="@drawable/bg_circle_green"
-            android:elevation="8dp">
+            android:elevation="6dp">
 
             <ImageView
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_lock"
+                app:tint="@color/white"
                 android:contentDescription="Lock"/>
         </FrameLayout>
 
@@ -35,27 +36,88 @@
             android:id="@+id/tvLockTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:text="@string/lock_title"
             android:textColor="@color/green_900"
-            android:textSize="28sp"
+            android:textSize="24sp"
             android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/tvLockSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:gravity="center"
             android:text="@string/lock_subtitle"
             android:textColor="@color/text_secondary"
-            android:textSize="14sp"/>
+            android:textSize="13sp"/>
 
+        <!-- Role Selector Chips/Buttons -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Select Login Mode:"
+            android:textColor="@color/green_800"
+            android:textSize="13sp"
+            android:textStyle="bold"/>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleRoleMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:singleSelection="true">
+
+            <Button
+                android:id="@+id/btnRoleOwner"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="👑 Owner"
+                android:textSize="11sp"/>
+
+            <Button
+                android:id="@+id/btnRoleSeller"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="💼 Seller"
+                android:textSize="11sp"/>
+
+            <Button
+                android:id="@+id/btnRoleTech"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🔧 Repair"
+                android:textSize="11sp"/>
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- Role Badge Description -->
+        <TextView
+            android:id="@+id/tvRoleHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_badge_green"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:gravity="center"
+            android:text="👑 Shop Owner: Full master access, profit reports &amp; purchases"
+            android:textColor="@color/green_900"
+            android:textSize="12sp"
+            android:textStyle="bold"/>
+
+        <!-- Password Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             style="@style/Widget.MobileShop.TextInput"
             app:endIconMode="password_toggle"
             app:startIconDrawable="@drawable/ic_lock"
@@ -66,7 +128,7 @@
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/lock_hint"
+                android:hint="Owner Key (Default: Hassanisgreat)"
                 android:inputType="textPassword"
                 android:imeOptions="actionDone"
                 android:maxLines="1"/>
@@ -76,20 +138,20 @@
             android:id="@+id/tvError"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:textColor="@color/error"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:visibility="invisible"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUnlock"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
             android:backgroundTint="@color/green_800"
-            android:text="@string/lock_unlock"
-            android:textSize="16sp"
-            app:cornerRadius="16dp"
+            android:text="Login to Toolkit"
+            android:textSize="15sp"
+            app:cornerRadius="14dp"
             app:icon="@drawable/ic_lock"
             app:iconGravity="textStart"/>
 
@@ -98,11 +160,47 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:text="@string/lock_fingerprint"
             android:textColor="@color/green_700"
             app:icon="@drawable/ic_fingerprint"
             app:iconTint="@color/green_700"/>
+
+        <!-- Credentials Info Box -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/divider"
+            app:cardBackgroundColor="#F8FAFC">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔑 Default Access Keys:"
+                    android:textColor="@color/green_900"
+                    android:textStyle="bold"
+                    android:textSize="12sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="• Owner Master: Hassanisgreat\n• Seller / Staff: seller123\n• Repair Tech: repair123"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11.5sp"
+                    android:lineSpacingExtra="2dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <Space
             android:layout_width="0dp"
@@ -112,15 +210,18 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             android:text="@string/app_name"
             android:textColor="@color/green_900"
             android:textStyle="bold"
             android:textSize="13sp"/>
 
         <TextView
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_marginTop="2dp" android:text="@string/made_by"
-            android:textColor="@color/text_secondary" android:textSize="12sp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/made_by"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"/>
     </LinearLayout>
 </ScrollView>

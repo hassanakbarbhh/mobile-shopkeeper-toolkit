@@ -60,6 +60,10 @@ class InventoryFragment : Fragment() {
     private fun setupListeners() {
         binding.fabAddProduct.setOnClickListener { showAddEditDialog(null) }
 
+        binding.btnImportInventory.setOnClickListener {
+            com.shopkeeper.mobileshop.utils.ImportManager.showImportDialog(requireContext(), repository, defaultTypeIsProducts = true) {}
+        }
+
         binding.btnExportInventory.setOnClickListener {
             if (fullList.isEmpty()) {
                 Toast.makeText(requireContext(), "No products in inventory to export", Toast.LENGTH_SHORT).show()

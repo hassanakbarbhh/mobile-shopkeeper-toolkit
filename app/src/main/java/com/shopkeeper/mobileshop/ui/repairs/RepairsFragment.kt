@@ -115,9 +115,17 @@ class RepairsFragment : Fragment() {
             )
 
             viewLifecycleOwner.lifecycleScope.launch {
-                repository.insertRepair(r)
+                val id = repository.insertRepair(r)
+                val saved = r.copy(id = id)
                 dialog.dismiss()
-                Toast.makeText(requireContext(), "Repair ticket created!", Toast.LENGTH_SHORT).show()
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Repair Ticket #$id Created")
+                    .setMessage("Device: ${r.deviceBrand} ${r.deviceModel}\nCustomer: ${r.customerName}\n\nPrint thermal claim receipt & phone tag?")
+                    .setPositiveButton("🖨️ Print Thermal Tag") { _, _ ->
+                        com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showRepairTagDialog(requireContext(), saved)
+                    }
+                    .setNegativeButton("Done", null)
+                    .show()
             }
         }
 
@@ -127,6 +135,7 @@ class RepairsFragment : Fragment() {
     private fun showRepairActions(repair: Repair) {
         val options = arrayOf(
             "Update Status (${repair.status.name})",
+            "🖨️ Print Thermal Claim & Phone Tag",
             "WhatsApp Status Update",
             "Call Customer",
             "Delete Repair Ticket"
@@ -137,7 +146,8 @@ class RepairsFragment : Fragment() {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showUpdateStatusDialog(repair)
-                    1 -> {
+                    1 -> com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showRepairTagDialog(requireContext(), repair)
+                    2 -> {
                         if (repair.customerPhone.isNotBlank()) {
                             val msg = "Assalam-o-Alaikum ${repair.customerName}, your ${repair.deviceBrand} ${repair.deviceModel} repair status is currently: ${repair.status.name.replace('_', ' ')}. Est: Rs.${repair.estimatedCost}. Mobile Shop."
                             ExportManager.shareWhatsApp(requireContext(), repair.customerPhone, msg)
@@ -145,14 +155,14 @@ class RepairsFragment : Fragment() {
                             Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    2 -> {
+                    3 -> {
                         if (repair.customerPhone.isNotBlank()) {
                             ExportManager.openDialer(requireContext(), repair.customerPhone)
                         } else {
                             Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    3 -> {
+                    4 -> {
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle("Delete Repair Ticket #${repair.id}?")
                             .setMessage("Are you sure you want to permanently delete this repair ticket for ${repair.customerName}?")

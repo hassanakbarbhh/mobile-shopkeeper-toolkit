@@ -83,7 +83,10 @@ class SalesListFragment : Fragment() {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Invoice #${sale.id} • ${sale.customerName}")
                 .setMessage("Date: ${sale.saleDate}\nSold by: ${sale.sellerName}\nTotal: Rs.${sale.finalAmount}\nPayment: ${sale.paymentMethod} (${sale.paymentStatus})\n\nItems:\n$itemsText")
-                .setPositiveButton("Share Invoice PDF") { _, _ ->
+                .setPositiveButton("🖨️ Thermal Receipt") { _, _ ->
+                    com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showSaleReceiptDialog(requireContext(), sale, items)
+                }
+                .setNeutralButton("PDF Invoice") { _, _ ->
                     val file = InvoiceGenerator.generate(requireContext(), sale, items)
                     val uri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.fileprovider", file)
                     val intent = Intent(Intent.ACTION_SEND).apply {
@@ -92,19 +95,6 @@ class SalesListFragment : Fragment() {
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                     startActivity(Intent.createChooser(intent, "Share Invoice PDF"))
-                }
-                .setNeutralButton("Delete / Void") { _, _ ->
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Delete Invoice #${sale.id}?")
-                        .setMessage("Are you sure you want to permanently delete this sale invoice? Items will be removed from sales history.")
-                        .setPositiveButton("Delete") { _, _ ->
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                repository.deleteSale(sale)
-                                Toast.makeText(requireContext(), "Invoice #${sale.id} deleted", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        .setNegativeButton("Cancel", null)
-                        .show()
                 }
                 .setNegativeButton("Close", null)
                 .show()

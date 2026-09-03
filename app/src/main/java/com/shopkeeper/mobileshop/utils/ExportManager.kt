@@ -1020,7 +1020,10 @@ object ExportManager {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            context.startActivity(Intent.createChooser(intent, "Open File"))
+            val chooser = Intent.createChooser(intent, "Open File").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(chooser)
         } catch (e: Exception) {
             Toast.makeText(context, "Cannot open file: ${e.message}", Toast.LENGTH_SHORT).show()
         }
@@ -1041,7 +1044,10 @@ object ExportManager {
             putExtra(Intent.EXTRA_SUBJECT, title)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(shareIntent, title))
+        val chooser = Intent.createChooser(shareIntent, title).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
     }
 
     fun showLedgerExportDialog(
@@ -1091,20 +1097,28 @@ object ExportManager {
         try {
             val cleanPhone = phone.replace(Regex("[^0-9+]"), "")
             val url = "https://api.whatsapp.com/send?phone=$cleanPhone&text=${Uri.encode(message)}"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             context.startActivity(intent)
         } catch (e: Exception) {
             val sendIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, message)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            context.startActivity(Intent.createChooser(sendIntent, "Send Message"))
+            val chooser = Intent.createChooser(sendIntent, "Send Message").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(chooser)
         }
     }
 
     fun openDialer(context: Context, phone: String) {
         try {
-            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${phone.trim()}"))
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${phone.trim()}")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             context.startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(context, "Cannot open dialer: ${e.message}", Toast.LENGTH_SHORT).show()

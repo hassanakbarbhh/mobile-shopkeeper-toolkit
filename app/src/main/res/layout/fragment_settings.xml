@@ -235,6 +235,89 @@
                 app:iconSize="14dp"/>
         </LinearLayout>
 
+        <!-- Data Import & Export -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Data Import &amp; Export"
+            android:textStyle="bold"
+            android:textColor="@color/green_900"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnImportCsvSettings"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="@color/green_800"
+                android:text="Import Data (CSV)"
+                android:textSize="11sp"
+                app:icon="@drawable/ic_import"
+                app:iconSize="14dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportAllCsvSettings"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Export All (CSV)"
+                android:textSize="11sp"
+                app:icon="@drawable/ic_export"
+                app:iconSize="14dp"/>
+        </LinearLayout>
+
+        <!-- Thermal Receipt Printer Section -->
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/divider" android:layout_marginVertical="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="POS Thermal Receipt Printer (58mm / 80mm)"
+            android:textStyle="bold"
+            android:textColor="@color/green_900"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestThermalPrint"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Test Sale Receipt"
+                android:textSize="11sp"
+                app:icon="@drawable/ic_thermal_printer"
+                app:iconSize="14dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestRepairTag"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Test Repair Tag"
+                android:textSize="11sp"
+                app:icon="@drawable/ic_thermal_printer"
+                app:iconSize="14dp"/>
+        </LinearLayout>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnResetDefaultStock"
             style="@style/Widget.Material3.Button.OutlinedButton"
@@ -260,7 +343,7 @@
             android:background="@color/divider" android:layout_marginVertical="18dp"/>
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Security &amp; Account (Key: Hassanisgreat)" android:textStyle="bold"
+            android:text="Role Passwords &amp; Security Keys" android:textStyle="bold"
             android:textColor="@color/green_900"/>
 
         <com.google.android.material.button.MaterialButton android:id="@+id/btnLockAppNow"
@@ -275,15 +358,22 @@
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Change Login Key (Default: Hassanisgreat)"/>
+            android:text="Manage Role Keys (Owner, Seller, Tech)"/>
+
         <com.google.android.material.button.MaterialButton android:id="@+id/btnSwitchRole"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" android:text="Switch Role (Owner / Repair)"/>
+            android:layout_marginTop="8dp" android:text="Switch Role (Owner / Seller / Tech)"/>
+
         <com.google.android.material.button.MaterialButton android:id="@+id/btnAbout"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" android:text="About Hassan ❤"/>
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/green_800"
+            android:text="About Developer: Hassan Akbar (+923172377565)"
+            app:icon="@drawable/ic_seller"
+            app:iconSize="18dp"/>
+
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:gravity="center" android:layout_marginTop="24dp"
             android:text="@string/version" android:textColor="@color/text_secondary" android:textSize="12sp"/>

@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
         Repair::class, Payment::class, Supplier::class, Purchase::class,
         PurchaseItem::class, Expense::class, Seller::class
     ],
-    version = 2,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -48,6 +48,10 @@ class CustomersFragment : Fragment() {
 
         binding.fabAddCustomer.setOnClickListener { showAddCustomerDialog(null) }
 
+        binding.btnImportCustomers.setOnClickListener {
+            com.shopkeeper.mobileshop.utils.ImportManager.showImportDialog(requireContext(), repository, defaultTypeIsProducts = false) {}
+        }
+
         binding.btnExportCustomers.setOnClickListener {
             if (currentCustomers.isEmpty()) {
                 Toast.makeText(requireContext(), "No customer records to export", Toast.LENGTH_SHORT).show()

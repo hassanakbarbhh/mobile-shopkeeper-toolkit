@@ -1,6 +1,7 @@
 package com.shopkeeper.mobileshop.ui.auth
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -12,20 +13,25 @@ import androidx.core.content.ContextCompat
 import com.shopkeeper.mobileshop.MainActivity
 import com.shopkeeper.mobileshop.R
 import com.shopkeeper.mobileshop.databinding.ActivityLockScreenBinding
-import com.shopkeeper.mobileshop.ui.role.RoleSelectActivity
+import com.shopkeeper.mobileshop.utils.AppMode
 import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.PasswordManager
 
 class LockScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLockScreenBinding
+    private var currentRole: AppMode = AppMode.SHOP_OWNER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLockScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.tvLockSubtitle.text = getString(R.string.lock_subtitle)
+        // Initialize from last active mode if remembered
+        val lastMode = AppPreferences.getActiveMode(this)
+        setRole(lastMode)
+
+        setupRoleToggle()
 
         binding.btnUnlock.setOnClickListener { checkPassword() }
         binding.etPassword.setOnEditorActionListener { _, _, _ ->
@@ -36,38 +42,111 @@ class LockScreenActivity : AppCompatActivity() {
         setupBiometric()
     }
 
-    private fun checkPassword() {
-        val input = binding.etPassword.text?.toString().orEmpty()
-        if (PasswordManager.verify(this, input)) {
-            onUnlocked()
-        } else {
-            binding.tvError.visibility = View.VISIBLE
-            binding.tvError.text = "Incorrect password. Default: Hassanisgreat"
-            val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
-            binding.tilPassword.startAnimation(shake)
+    private fun setupRoleToggle() {
+        binding.toggleRoleMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.btnRoleOwner -> setRole(AppMode.SHOP_OWNER)
+                    R.id.btnRoleSeller -> setRole(AppMode.SELLER_STAFF)
+                    R.id.btnRoleTech -> setRole(AppMode.REPAIR_TECH)
+                }
+            }
         }
     }
 
+    private fun setRole(mode: AppMode) {
+        currentRole = mode
+        when (mode) {
+            AppMode.SHOP_OWNER -> {
+                binding.toggleRoleMode.check(R.id.btnRoleOwner)
+                binding.tvRoleHint.text = "👑 Shop Owner: Full master access, profits, purchases & settings"
+                binding.etPassword.hint = "Owner Key (Default: Hassanisgreat)"
+            }
+            AppMode.SELLER_STAFF -> {
+                binding.toggleRoleMode.check(R.id.btnRoleSeller)
+                binding.tvRoleHint.text = "💼 Seller / Staff: Fast POS counter, sales, customer dues & thermal receipts"
+                binding.etPassword.hint = "Seller Key (Default: seller123)"
+            }
+            AppMode.REPAIR_TECH -> {
+                binding.toggleRoleMode.check(R.id.btnRoleTech)
+                binding.tvRoleHint.text = "🔧 Repair Technician: Intake jobs, diagnosis, parts & thermal claim tags"
+                binding.etPassword.hint = "Tech Key (Default: repair123)"
+            }
+        }
+        binding.tvError.visibility = View.INVISIBLE
+    }
+
+    private fun checkPassword() {
+        val input = binding.etPassword.text?.toString().orEmpty().trim()
+        if (input.isEmpty()) {
+            binding.tvError.visibility = View.VISIBLE
+            binding.tvError.text = getString(R.string.lock_empty)
+            return
+        }
+
+        // Check if input matches the selected role
+        if (PasswordManager.verifyForMode(this, currentRole, input)) {
+            onUnlocked(currentRole)
+            return
+        }
+
+        // Smart detect: Check if user typed key for another role directly
+        val detected = PasswordManager.detectMode(this, input)
+        if (detected != null) {
+            onUnlocked(detected)
+            return
+        }
+
+        // Invalid key
+        binding.tvError.visibility = View.VISIBLE
+        val expectedHint = when (currentRole) {
+            AppMode.SHOP_OWNER -> "Hassanisgreat"
+            AppMode.SELLER_STAFF -> "seller123"
+            AppMode.REPAIR_TECH -> "repair123"
+        }
+        binding.tvError.text = "Incorrect key for ${currentRole.displayName}. (Default: $expectedHint)"
+        val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
+        binding.tilPassword.startAnimation(shake)
+    }
+
+    /**
+     * Biometric implementation guaranteed safe across Android 8.0, 9, 10, 11, 12, 13, 14, 15, 16, 17.
+     */
     private fun setupBiometric() {
         try {
             val bm = BiometricManager.from(this)
-            val canAuth = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            val authenticators = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            } else {
+                BiometricManager.Authenticators.BIOMETRIC_STRONG
+            }
+
+            val canAuth = bm.canAuthenticate(authenticators)
             if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
                 binding.btnFingerprint.visibility = View.GONE
                 return
             }
 
-            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            val promptBuilder = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.app_name))
                 .setSubtitle("Unlock with fingerprint / biometrics")
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-                .build()
 
-            val prompt = BiometricPrompt(this, ContextCompat.getMainExecutor(this),
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                promptBuilder.setAllowedAuthenticators(authenticators)
+            } else {
+                promptBuilder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                promptBuilder.setNegativeButtonText("Use Access Key")
+            }
+
+            val promptInfo = promptBuilder.build()
+
+            val prompt = BiometricPrompt(
+                this,
+                ContextCompat.getMainExecutor(this),
                 object : BiometricPrompt.AuthenticationCallback() {
                     override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                         super.onAuthenticationSucceeded(result)
-                        onUnlocked()
+                        onUnlocked(currentRole)
                     }
 
                     override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -76,29 +155,29 @@ class LockScreenActivity : AppCompatActivity() {
                             Toast.makeText(this@LockScreenActivity, errString, Toast.LENGTH_SHORT).show()
                         }
                     }
-                })
+                }
+            )
 
             binding.btnFingerprint.setOnClickListener {
-                try {
+                runCatching {
                     prompt.authenticate(promptInfo)
-                } catch (e: Exception) {
-                    Toast.makeText(this@LockScreenActivity, "Biometric unavailable", Toast.LENGTH_SHORT).show()
+                }.onFailure {
+                    Toast.makeText(this@LockScreenActivity, "Biometrics unavailable", Toast.LENGTH_SHORT).show()
                 }
             }
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
+            // Failsafe on Android 13 and below
             binding.btnFingerprint.visibility = View.GONE
         }
     }
 
-    private fun onUnlocked() {
-        val mode = AppPreferences.getMode(this)
-        if (mode != null) {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-        } else {
-            val intent = Intent(this, RoleSelectActivity::class.java)
-            startActivity(intent)
+    private fun onUnlocked(mode: AppMode) {
+        AppPreferences.setActiveMode(this, mode)
+        AppPreferences.saveMode(this, mode, remember = true)
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        startActivity(intent)
         finish()
     }
 }

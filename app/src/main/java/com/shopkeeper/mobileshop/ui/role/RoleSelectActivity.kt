@@ -20,10 +20,16 @@ class RoleSelectActivity : AppCompatActivity() {
         binding = ActivityRoleSelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        selectedMode = AppPreferences.getActiveMode(this)
         updateSelection()
 
         binding.cardShopOwner.setOnClickListener {
             selectedMode = AppMode.SHOP_OWNER
+            updateSelection()
+        }
+
+        binding.cardSellerStaff.setOnClickListener {
+            selectedMode = AppMode.SELLER_STAFF
             updateSelection()
         }
 
@@ -34,7 +40,11 @@ class RoleSelectActivity : AppCompatActivity() {
 
         binding.btnContinue.setOnClickListener {
             AppPreferences.saveMode(this, selectedMode, binding.cbRemember.isChecked)
-            startActivity(Intent(this, MainActivity::class.java))
+            AppPreferences.setActiveMode(this, selectedMode)
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
             finish()
         }
     }
@@ -43,16 +53,13 @@ class RoleSelectActivity : AppCompatActivity() {
         val green500 = ContextCompat.getColor(this, R.color.green_500)
         val transparent = ContextCompat.getColor(this, android.R.color.transparent)
 
-        if (selectedMode == AppMode.SHOP_OWNER) {
-            binding.cardShopOwner.strokeWidth = 6
-            binding.cardShopOwner.strokeColor = green500
-            binding.cardRepairTech.strokeWidth = 0
-            binding.cardRepairTech.strokeColor = transparent
-        } else {
-            binding.cardRepairTech.strokeWidth = 6
-            binding.cardRepairTech.strokeColor = green500
-            binding.cardShopOwner.strokeWidth = 0
-            binding.cardShopOwner.strokeColor = transparent
-        }
+        binding.cardShopOwner.strokeWidth = if (selectedMode == AppMode.SHOP_OWNER) 6 else 0
+        binding.cardShopOwner.strokeColor = if (selectedMode == AppMode.SHOP_OWNER) green500 else transparent
+
+        binding.cardSellerStaff.strokeWidth = if (selectedMode == AppMode.SELLER_STAFF) 6 else 0
+        binding.cardSellerStaff.strokeColor = if (selectedMode == AppMode.SELLER_STAFF) green500 else transparent
+
+        binding.cardRepairTech.strokeWidth = if (selectedMode == AppMode.REPAIR_TECH) 6 else 0
+        binding.cardRepairTech.strokeColor = if (selectedMode == AppMode.REPAIR_TECH) green500 else transparent
     }
 }

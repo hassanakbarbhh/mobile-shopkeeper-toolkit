@@ -1,75 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="@color/background_light">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:gravity="center_horizontal"
+
+        <!-- Header Card with Gradient -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:background="@drawable/bg_gradient_green"
-            android:paddingTop="40dp" android:paddingBottom="28dp">
-            <androidx.cardview.widget.CardView android:layout_width="130dp"
-                android:layout_height="130dp" app:cardCornerRadius="65dp" app:cardElevation="10dp"
-                app:cardBackgroundColor="@color/white">
-                <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
-                    android:scaleType="centerCrop" android:src="@drawable/img_hassan_profile"
-                    android:contentDescription="Hassan"/>
-            </androidx.cardview.widget.CardView>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="14dp" android:text="Hassan"
-                android:textColor="@color/white" android:textSize="26sp" android:textStyle="bold"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/about_tagline" android:textColor="@color/green_100"
-                android:textSize="13sp" android:layout_marginTop="4dp"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="12dp" android:background="@drawable/bg_pill_white_10"
-                android:paddingHorizontal="18dp" android:paddingVertical="7dp"
-                android:text="@string/about_love" android:textColor="@color/green_100"
-                android:textSize="12sp" android:textStyle="italic"/>
+            android:paddingTop="36dp"
+            android:paddingBottom="24dp"
+            android:paddingHorizontal="20dp">
+
+            <!-- Profile Picture with Edit Overlay -->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardProfilePhoto"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    app:cardCornerRadius="60dp"
+                    app:cardElevation="8dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <ImageView
+                        android:id="@+id/ivHassanProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/img_hassan_profile"
+                        android:contentDescription="Hassan Akbar Profile Photo"/>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Camera badge to change photo -->
+                <FrameLayout
+                    android:id="@+id/btnChangePhotoBadge"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/bg_circle_green"
+                    android:elevation="10dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_edit"
+                        app:tint="@color/white"
+                        android:contentDescription="Change Photo"/>
+                </FrameLayout>
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/dev_name"
+                android:textColor="@color/white"
+                android:textSize="26sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dev_handle"
+                android:textColor="@color/green_300"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dev_title"
+                android:textColor="@color/green_100"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_pill_white_10"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="6dp"
+                android:text="@string/about_love"
+                android:textColor="@color/green_100"
+                android:textSize="12sp"
+                android:gravity="center"/>
         </LinearLayout>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:gravity="center" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@drawable/bg_badge_green" android:textColor="@color/green_800"
-                android:textStyle="bold" android:textSize="12sp"
-                android:paddingHorizontal="14dp" android:paddingVertical="8dp"
+
+        <!-- Experience Badges -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_green"
+                android:textColor="@color/green_800"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp"
                 android:text="📱 15+ yrs Mobile Business"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:background="@drawable/bg_badge_green" android:textColor="@color/green_800"
-                android:textStyle="bold" android:textSize="12sp"
-                android:paddingHorizontal="14dp" android:paddingVertical="8dp"
-                android:text="💻 10+ yrs Development"/>
+                android:background="@drawable/bg_badge_green"
+                android:textColor="@color/green_800"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp"
+                android:text="💻 10+ yrs App Development"/>
         </LinearLayout>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Connect with me" android:textStyle="bold" android:textSize="16sp"
-            android:textColor="@color/green_900" android:layout_marginStart="20dp"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:padding="20dp">
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnWhatsApp"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="WhatsApp" app:icon="@drawable/ic_whatsapp"
-                android:backgroundTint="#25D366" app:cornerRadius="14dp" android:layout_marginBottom="8dp"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnFacebook"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Facebook" app:icon="@drawable/ic_facebook"
-                android:backgroundTint="#1877F2" app:cornerRadius="14dp" android:layout_marginBottom="8dp"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnInstagram"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Instagram" app:icon="@drawable/ic_instagram"
-                android:backgroundTint="#E1306C" app:cornerRadius="14dp" android:layout_marginBottom="8dp"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnYouTube"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="YouTube" app:icon="@drawable/ic_youtube"
-                android:backgroundTint="#FF0000" app:cornerRadius="14dp" android:layout_marginBottom="8dp"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnEmail"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Email" app:icon="@drawable/ic_email"
-                android:backgroundTint="@color/green_800" app:cornerRadius="14dp"/>
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:gravity="center" android:layout_marginTop="20dp"
-                android:text="@string/version" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+
+        <!-- Photo Instructions Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            app:cardCornerRadius="14dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/divider"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📸 Personal Profile Picture"
+                        android:textColor="@color/green_900"
+                        android:textStyle="bold"
+                        android:textSize="15sp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUploadPhoto"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Choose Photo"
+                        android:textSize="12sp"
+                        app:icon="@drawable/ic_edit"
+                        app:iconSize="14dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="How to bundle your picture in APK permanently:\n1. Tap 'Choose Photo' to select your photo right now from your gallery.\n2. Or copy your picture to 'res/drawable/img_hassan_profile.jpg' in project files."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="3dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Connect with Developer -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Direct Contact &amp; Socials"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@color/green_900"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp">
+
+            <!-- Call & WhatsApp Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCall"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:text="Call Phone"
+                    app:icon="@drawable/ic_call"
+                    android:backgroundTint="@color/green_700"
+                    app:cornerRadius="14dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnWhatsApp"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:text="WhatsApp"
+                    app:icon="@drawable/ic_whatsapp"
+                    android:backgroundTint="#25D366"
+                    app:cornerRadius="14dp"/>
+            </LinearLayout>
+
+            <!-- Twitter / X -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTwitterX"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Twitter (X)  @hassanakbarbhh"
+                app:icon="@drawable/ic_twitter_x"
+                android:backgroundTint="#000000"
+                app:cornerRadius="14dp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Facebook -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFacebook"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Facebook  @hassanakbarbhh"
+                app:icon="@drawable/ic_facebook"
+                android:backgroundTint="#1877F2"
+                app:cornerRadius="14dp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Instagram -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnInstagram"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Instagram  @hassanakbarbhh"
+                app:icon="@drawable/ic_instagram"
+                android:backgroundTint="#E1306C"
+                app:cornerRadius="14dp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Email -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEmail"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Email: hassanakbarbhh@gmail.com"
+                app:icon="@drawable/ic_email"
+                android:backgroundTint="@color/green_900"
+                app:cornerRadius="14dp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                android:text="@string/version"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

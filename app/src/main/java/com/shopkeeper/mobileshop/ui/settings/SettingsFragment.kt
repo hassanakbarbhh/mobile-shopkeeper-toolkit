@@ -7,23 +7,34 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.shopkeeper.mobileshop.R
+import com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository
 import com.shopkeeper.mobileshop.data.db.AppDatabase
+import com.shopkeeper.mobileshop.data.db.entity.PaymentMethod
+import com.shopkeeper.mobileshop.data.db.entity.Repair
+import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
+import com.shopkeeper.mobileshop.data.db.entity.Sale
+import com.shopkeeper.mobileshop.data.db.entity.SaleItem
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
-import com.shopkeeper.mobileshop.databinding.DialogChangePasswordBinding
+import com.shopkeeper.mobileshop.databinding.DialogManageRoleKeysBinding
 import com.shopkeeper.mobileshop.databinding.FragmentSettingsBinding
 import com.shopkeeper.mobileshop.sync.GitHubSyncManager
 import com.shopkeeper.mobileshop.sync.SyncState
+import com.shopkeeper.mobileshop.ui.auth.LockScreenActivity
 import com.shopkeeper.mobileshop.ui.role.RoleSelectActivity
+import com.shopkeeper.mobileshop.utils.AppMode
 import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.CurrencyManager
 import com.shopkeeper.mobileshop.utils.ExportManager
+import com.shopkeeper.mobileshop.utils.ImportManager
 import com.shopkeeper.mobileshop.utils.PasswordManager
 import com.shopkeeper.mobileshop.utils.ShopProfile
+import com.shopkeeper.mobileshop.utils.ThermalPrintHelper
 import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -135,7 +146,7 @@ class SettingsFragment : Fragment() {
                 } else {
                     ExportManager.showLedgerExportDialog(
                         context = requireContext(),
-                        ledgerTitle = "Repair Tickets Ledger",
+                        ledgerTitle = "Repairs & Workshop Ledger",
                         onExportCsv = { ExportManager.exportRepairsCsv(requireContext(), list) },
                         onExportPdf = { ExportManager.exportRepairsPdf(requireContext(), list) }
                     )
@@ -145,97 +156,99 @@ class SettingsFragment : Fragment() {
 
         binding.btnExportMasterLedgerSettings.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                val prods = repository.allProducts.first()
-                val sales = repository.allSales.first()
-                val purchases = repository.allPurchases.first()
-                val customers = repository.allCustomers.first()
-                val repairs = repository.allRepairs.first()
-
-                val options = arrayOf(
-                    "📄 Open Master Shop PDF Report",
-                    "📤 Share Master Shop PDF Document"
-                )
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Consolidated Master Shop Ledger")
-                    .setItems(options) { _, which ->
-                        val pdfFile = ExportManager.exportMasterLedgerPdf(
-                            requireContext(), prods, sales, purchases, customers, repairs
-                        )
-                        if (which == 0) {
-                            ExportManager.openFile(requireContext(), pdfFile, "application/pdf")
-                        } else {
-                            ExportManager.shareFile(requireContext(), pdfFile, "application/pdf", "Complete Shop Master Ledger")
-                        }
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                val p = repository.allProducts.first()
+                val s = repository.allSales.first()
+                val r = repository.allRepairs.first()
+                val c = repository.allCustomers.first()
+                val pur = repository.allPurchases.first()
+                val file = ExportManager.exportMasterLedgerPdf(requireContext(), p, s, pur, c, r)
+                ExportManager.openFile(requireContext(), file, "application/pdf")
             }
         }
 
-        binding.btnResetDefaultStock.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Reset Stock & Clean Customer Data?")
-                .setMessage("This will remove sample dummy customer/stock entries and seed all phone brands and models into inventory with No Price and 0 stock, as requested.")
-                .setPositiveButton("Reset Now") { _, _ ->
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val db = AppDatabase.getDatabase(requireContext())
-                        db.customerDao().deleteAllCustomers()
-                        db.productDao().deleteAllProducts()
-                        val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map {
-                            it.toProductNoPrice()
-                        }
-                        db.productDao().insertAll(defaultPhoneProducts)
-                        Toast.makeText(requireContext(), "Stock reset! All ${defaultPhoneProducts.size} phone models added with no price.", Toast.LENGTH_LONG).show()
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+        // CSV Import & Export
+        binding.btnImportCsvSettings.setOnClickListener {
+            ImportManager.showImportDialog(requireContext(), repository) {
+                Toast.makeText(requireContext(), "Data refreshed successfully!", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        binding.btnLockAppNow.setOnClickListener {
-            val intent = Intent(requireContext(), com.shopkeeper.mobileshop.ui.auth.LockScreenActivity::class.java)
-            startActivity(intent)
-            requireActivity().finish()
+        binding.btnExportAllCsvSettings.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val products = repository.allProducts.first()
+                ExportManager.exportProductsCsv(requireContext(), products)
+            }
+        }
+
+        // Thermal Receipt Testing
+        binding.btnTestThermalPrint.setOnClickListener {
+            val dummySale = Sale(
+                id = 42,
+                customerName = "Ali Raza Khan",
+                totalAmount = 86600.0,
+                discount = 1000.0,
+                finalAmount = 85600.0,
+                paymentMethod = PaymentMethod.CASH,
+                sellerName = "Ahmed (Counter)",
+                saleDate = System.currentTimeMillis()
+            )
+            val dummyItems = listOf(
+                SaleItem(saleId = 42, productId = 1, productName = "Samsung Galaxy A54", quantity = 1, unitPrice = 85000.0, totalPrice = 85000.0, imei = "354892019283741"),
+                SaleItem(saleId = 42, productId = 2, productName = "Type-C Fast Cable", quantity = 2, unitPrice = 800.0, totalPrice = 1600.0)
+            )
+            ThermalPrintHelper.showSaleReceiptDialog(requireContext(), dummySale, dummyItems)
+        }
+
+        binding.btnTestRepairTag.setOnClickListener {
+            val dummyRepair = Repair(
+                id = 15,
+                customerName = "Usman Tariq",
+                customerPhone = "0312-9876543",
+                deviceBrand = "Apple",
+                deviceModel = "iPhone 13 Pro (Blue)",
+                imei = "352910293847561",
+                issueDescription = "Screen glass cracked & battery draining fast",
+                notes = "Passcode: 4892. Test cameras after screen replacement.",
+                estimatedCost = 14500.0,
+                actualCost = 5000.0,
+                status = RepairStatus.IN_REPAIR,
+                receivedDate = System.currentTimeMillis()
+            )
+            ThermalPrintHelper.showRepairTagDialog(requireContext(), dummyRepair)
+        }
+
+        // GitHub Sync Controls
+        binding.btnTestSyncSuccess.setOnClickListener {
+            GitHubSyncManager.setTestState(SyncState.Synced(System.currentTimeMillis()))
+            Toast.makeText(requireContext(), "Sync status marked as Synced", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnTestSyncPending.setOnClickListener {
+            GitHubSyncManager.setTestState(SyncState.Pending("Changes pending sync...", 3))
+            Toast.makeText(requireContext(), "Sync status marked as Changes Pending", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnTestSyncError.setOnClickListener {
+            GitHubSyncManager.setTestState(SyncState.Error("Simulated sync error", System.currentTimeMillis()))
+            Toast.makeText(requireContext(), "Sync status marked as Error", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnConfigureRepo.setOnClickListener {
+            showConfigureRepoDialog()
+        }
+
+        binding.btnResetDefaultStock.setOnClickListener {
+            showResetStockConfirmation()
         }
 
         binding.btnManageSellersSettings.setOnClickListener {
             findNavController().navigate(R.id.navigation_sellers)
         }
 
-        // GitHub Sync Controls
-        binding.btnTestSyncSuccess.setOnClickListener {
-            GitHubSyncManager.setTestState(
-                com.shopkeeper.mobileshop.sync.SyncState.Synced(
-                    lastSyncTimestamp = System.currentTimeMillis(),
-                    commitSha = "7e4b9a1",
-                    syncedItemsCount = 28
-                )
-            )
-            Toast.makeText(requireContext(), "Sync State set to: Synced", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnTestSyncPending.setOnClickListener {
-            GitHubSyncManager.setTestState(
-                com.shopkeeper.mobileshop.sync.SyncState.Pending(
-                    message = "Syncing local Room entities to GitHub repository...",
-                    pendingCount = 6
-                )
-            )
-            Toast.makeText(requireContext(), "Sync State set to: Pending", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnTestSyncError.setOnClickListener {
-            GitHubSyncManager.setTestState(
-                com.shopkeeper.mobileshop.sync.SyncState.Error(
-                    errorMessage = "GitHub API 403 / Network Timeout: Remote branch protection rejected commit without authentication token",
-                    canRetry = true
-                )
-            )
-            Toast.makeText(requireContext(), "Sync State set to: Error", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnConfigureRepo.setOnClickListener {
-            showConfigureRepoDialog()
+        binding.btnLockAppNow.setOnClickListener {
+            val intent = Intent(requireContext(), LockScreenActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
         }
 
         binding.btnChangePassword.setOnClickListener { showChangePasswordDialog() }
@@ -249,6 +262,26 @@ class SettingsFragment : Fragment() {
         binding.btnAbout.setOnClickListener {
             findNavController().navigate(R.id.navigation_about)
         }
+    }
+
+    private fun showResetStockConfirmation() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Reset Catalog & Clean Customers?")
+            .setMessage("This will wipe customer list and reset all phone models in stock with quantity 0 and empty prices so you can enter your actual shop pricing.")
+            .setPositiveButton("Reset Now") { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val db = AppDatabase.getDatabase(requireContext())
+                    db.customerDao().deleteAllCustomers()
+                    db.productDao().deleteAllProducts()
+                    val defaultPhoneProducts = OnlineCatalogRepository.allOnlineModels.map {
+                        it.toProductNoPrice()
+                    }
+                    db.productDao().insertAll(defaultPhoneProducts)
+                    Toast.makeText(requireContext(), "Stock catalog reset! Ready for custom pricing.", Toast.LENGTH_LONG).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun updateCurrencyDisplay() {
@@ -327,21 +360,62 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showChangePasswordDialog() {
-        val dBinding = DialogChangePasswordBinding.inflate(layoutInflater)
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Change Lock Password")
+        val dBinding = DialogManageRoleKeysBinding.inflate(layoutInflater)
+        var targetRole = AppMode.SHOP_OWNER
+
+        fun updateRoleInfo() {
+            when (targetRole) {
+                AppMode.SHOP_OWNER -> {
+                    dBinding.toggleKeyRole.check(R.id.btnKeyOwner)
+                    dBinding.tvKeyRoleSubtitle.text = "Modifying key for Shop Owner (Default: Hassanisgreat)"
+                }
+                AppMode.SELLER_STAFF -> {
+                    dBinding.toggleKeyRole.check(R.id.btnKeySeller)
+                    dBinding.tvKeyRoleSubtitle.text = "Modifying key for Seller / Staff (Default: seller123)"
+                }
+                AppMode.REPAIR_TECH -> {
+                    dBinding.toggleKeyRole.check(R.id.btnKeyTech)
+                    dBinding.tvKeyRoleSubtitle.text = "Modifying key for Repair Tech (Default: repair123)"
+                }
+            }
+        }
+
+        updateRoleInfo()
+
+        dBinding.toggleKeyRole.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                targetRole = when (checkedId) {
+                    R.id.btnKeyOwner -> AppMode.SHOP_OWNER
+                    R.id.btnKeySeller -> AppMode.SELLER_STAFF
+                    else -> AppMode.REPAIR_TECH
+                }
+                updateRoleInfo()
+            }
+        }
+
+        var dialog: AlertDialog? = null
+
+        dBinding.btnResetKeys.setOnClickListener {
+            PasswordManager.resetToDefaults(requireContext())
+            Toast.makeText(requireContext(), "All keys reset to defaults (Hassanisgreat, seller123, repair123)!", Toast.LENGTH_LONG).show()
+            dialog?.dismiss()
+        }
+
+        dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Manage Role Access Keys")
             .setView(dBinding.root)
-            .setPositiveButton("Change") { _, _ ->
-                val curr = dBinding.etCurrentPassword.text.toString()
-                val newP = dBinding.etNewPassword.text.toString()
-                if (PasswordManager.changePassword(requireContext(), curr, newP)) {
-                    Toast.makeText(requireContext(), "Password changed successfully!", Toast.LENGTH_SHORT).show()
+            .setPositiveButton("Save Key") { _, _ ->
+                val newKey = dBinding.etNewRoleKey.text?.toString().orEmpty().trim()
+                if (newKey.length < 3) {
+                    Toast.makeText(requireContext(), "Key must be at least 3 characters", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(requireContext(), "Incorrect current password", Toast.LENGTH_SHORT).show()
+                    PasswordManager.changeKeyForMode(requireContext(), targetRole, newKey)
+                    Toast.makeText(requireContext(), "Access key for ${targetRole.displayName} updated!", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        dialog.show()
     }
 
     override fun onDestroyView() {
