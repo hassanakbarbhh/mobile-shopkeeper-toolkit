@@ -30,9 +30,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Accept Android SDK Licenses
         run: |
           yes | sdkmanager --licenses || true
@@ -43,7 +40,7 @@ jobs:
           gradle-version: '9.3.1'
           cache-read-only: false
 
-      - name: Prepare Build Environment & Guaranteed Wrapper
+      - name: Prepare Build Environment (Keystore, Config & Wrapper)
         run: |
           echo "==> Preparing build environment..."
           touch .env
@@ -62,36 +59,12 @@ jobs:
             echo '{"project_info":{"project_number":"123456789","project_id":"shopkeeper-app","storage_bucket":"shopkeeper-app.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:123456789:android:abcdef","android_client_info":{"package_name":"com.shopkeeper.mobileshop"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyDummyKeyForBuildValidation"}],"services":{}}],"configuration_version":"1"}' > app/google-services.json
           fi
 
-          # 3. CRITICAL: Guarantee gradlew wrapper and wrapper jar exist
-          mkdir -p gradle/wrapper
-          if [ ! -f "gradle/wrapper/gradle-wrapper.properties" ]; then
-            cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-bin.zip
-          networkTimeout=10000
-          validateDistributionUrl=true
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
-          fi
-
-          # Try generating wrapper with system gradle if gradlew is missing
-          if [ ! -f "gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Generating gradle wrapper files with system gradle..."
-            gradle wrapper --gradle-version 9.3.1 || true
-          fi
-
-          # Fail-safe: If gradlew is still missing, create a direct executable runner script
+          # 3. Ensure gradlew script is present and executable
           if [ ! -f "gradlew" ]; then
-            echo "Creating fail-safe gradlew executable script..."
-            cat << 'EOF' > gradlew
-          #!/usr/bin/env bash
-          exec gradle "$@"
-          EOF
+            printf '#!/usr/bin/env bash\nexec gradle "$@"\n' > gradlew
           fi
-
           chmod +x gradlew || true
+
           echo "==> Build environment preparation complete."
 
       # ================================================================
@@ -102,12 +75,7 @@ jobs:
           echo "=========================================================="
           echo "==> [CHECK 1/2] Executing Unit Tests & Code Integrity Check..."
           echo "=========================================================="
-          BUILD_CMD="./gradlew"
-          if [ ! -x "./gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Using system gradle directly for Check 1..."
-            BUILD_CMD="gradle"
-          fi
-          $BUILD_CMD testDebugUnitTest --no-daemon --stacktrace
+          gradle testDebugUnitTest --no-daemon --stacktrace
           echo "==> [CHECK 1/2 PASSED] Code logic, Kotlin compilation & tests are 100% error-free."
 
       - name: "Verification Check 2 of 2: Assemble Debug APK & Packaging"
@@ -115,12 +83,7 @@ jobs:
           echo "=========================================================="
           echo "==> [CHECK 2/2] Executing Full Gradle APK Assembly & Packaging..."
           echo "=========================================================="
-          BUILD_CMD="./gradlew"
-          if [ ! -x "./gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Using system gradle directly for Check 2..."
-            BUILD_CMD="gradle"
-          fi
-          $BUILD_CMD assembleDebug --no-daemon --stacktrace
+          gradle assembleDebug --no-daemon --stacktrace
           echo "==> [CHECK 2/2 PASSED] APK assembly completed without errors."
 
       - name: "Double-Check Verification: Validate APK Output, Size & Checksum"
@@ -159,6 +122,7 @@ jobs:
 
       - name: Create GitHub Release with APK
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+        continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
           files: |
