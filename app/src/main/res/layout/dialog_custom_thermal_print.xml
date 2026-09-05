@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/white">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_thermal_printer"
+            app:tint="@color/green_800"
+            android:contentDescription="Thermal" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:text="Custom Thermal Print"
+            android:textColor="@color/green_900"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleCustomWidth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true">
+
+            <Button
+                android:id="@+id/btnCustom58mm"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="58mm"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/btnCustom80mm"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="80mm"
+                android:textSize="11sp" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Type or paste any custom invoice, quote, device diagnosis, or notice to print directly to thermal paper."
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <!-- Title field -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Receipt Title / Subject"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusTopStart="12dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCustomPrintTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SPECIAL ORDER / CUSTOM MEMO"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Quick preset chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPresetAdvance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Advance Token"
+                style="@style/Widget.Material3.Chip.Suggestion" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPresetRepairQuote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Repair Quote"
+                style="@style/Widget.Material3.Chip.Suggestion" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPresetWarranty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Warranty Slip"
+                style="@style/Widget.Material3.Chip.Suggestion" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPresetNotice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Counter Notice"
+                style="@style/Widget.Material3.Chip.Suggestion" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Content Field -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Receipt Content (Lines / Details)"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:helperText="Tip: Start lines with === for dividers or * for bold items">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCustomPrintContent"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:gravity="top|start"
+            android:fontFamily="monospace"
+            android:textSize="12sp"
+            android:text="Customer: Cash Customer\nDevice: iPhone 13 Pro 128GB\nCondition: Battery Replacement\nEst. Delivery: Today 6:00 PM\n------------------------------\n* Advance Received: $50.00\n* Remaining Due:    $30.00\n==============================\nPlease present this slip for collection." />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCustomDirectPrint"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:backgroundTint="@color/green_800"
+            android:text="Direct Print"
+            android:textSize="12sp"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_thermal_printer"
+            app:iconSize="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCustomRawBt"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="RawBT / App"
+            android:textSize="12sp"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCustomShareWhatsApp"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:backgroundTint="#25D366"
+            android:text="WhatsApp"
+            android:textSize="12sp"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_whatsapp"
+            app:iconSize="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCustomDismiss"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Close"
+            android:textSize="12sp"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+</LinearLayout>

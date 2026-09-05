@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        com.shopkeeper.mobileshop.utils.ThemeManager.applyNightMode(this)
+        com.shopkeeper.mobileshop.utils.ThemeManager.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

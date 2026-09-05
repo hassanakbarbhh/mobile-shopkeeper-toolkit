@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/white">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎨"
+            android:textSize="26sp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trending Themes &amp; Style"
+                android:textColor="@color/gray_900"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select from popular trending POS &amp; Store themes"
+                android:textColor="@color/text_secondary"
+                android:textSize="11.5sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Dark Mode Toggle Group -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="Appearance Mode"
+        android:textColor="@color/gray_900"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleNightMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        app:singleSelection="true">
+
+        <Button
+            android:id="@+id/btnModeSystem"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="Auto / System"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnModeLight"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="Light"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnModeDark"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="Dark / OLED"
+            android:textSize="11sp" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- Trending Themes List -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Trending Color Palettes"
+        android:textColor="@color/gray_900"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/rgThemes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp">
+
+        <!-- Theme 1: Emerald Green -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeEmerald"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="@color/green_300"
+            app:cardBackgroundColor="#F0FDF4">
+
+            <RadioButton
+                android:id="@+id/rbThemeEmerald"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="🌿 Emerald Green (Classic Pro Store)"
+                android:textColor="@color/green_950"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Theme 2: Midnight AMOLED -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeMidnight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="#374151"
+            app:cardBackgroundColor="#111827">
+
+            <RadioButton
+                android:id="@+id/rbThemeMidnight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="🌙 Midnight AMOLED (Pure Dark OLED Saver)"
+                android:textColor="#F9FAFB"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Theme 3: Royal Sapphire Blue -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeSapphire"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="@color/sapphire_100"
+            app:cardBackgroundColor="@color/sapphire_50">
+
+            <RadioButton
+                android:id="@+id/rbThemeSapphire"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="💎 Royal Sapphire Blue (Corporate Tech POS)"
+                android:textColor="@color/sapphire_900"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Theme 4: Sunset Amber & Gold -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeSunset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="@color/sunset_100"
+            app:cardBackgroundColor="@color/sunset_50">
+
+            <RadioButton
+                android:id="@+id/rbThemeSunset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="🌅 Sunset Amber &amp; Gold (Luxury Retail)"
+                android:textColor="@color/sunset_900"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Theme 5: Cyberpunk Violet / Neon -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemePurple"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="@color/violet_100"
+            app:cardBackgroundColor="@color/violet_50">
+
+            <RadioButton
+                android:id="@+id/rbThemePurple"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="⚡ Cyberpunk Neon Violet (Modern Electric)"
+                android:textColor="@color/violet_900"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Theme 6: Titanium Slate -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeSlate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="@color/slate_100"
+            app:cardBackgroundColor="@color/slate_50">
+
+            <RadioButton
+                android:id="@+id/rbThemeSlate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="⚙️ Titanium Slate (Minimalist Industrial)"
+                android:textColor="@color/slate_900"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+    </RadioGroup>
+
+    <!-- Close button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCloseThemePicker"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/green_800"
+        android:text="Apply &amp; Done"
+        android:textSize="13sp"
+        app:cornerRadius="12dp" />
+</LinearLayout>

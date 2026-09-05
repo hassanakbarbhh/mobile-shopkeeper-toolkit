@@ -278,7 +278,7 @@
                 android:id="@+id/btnEmail"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:text="Email: hassanakbarbhh@gmail.com"
+                android:text="Contact Support"
                 app:icon="@drawable/ic_email"
                 android:backgroundTint="@color/green_900"
                 app:cornerRadius="14dp"

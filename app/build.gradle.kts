@@ -86,6 +86,9 @@ dependencies {
   implementation(libs.androidx.navigation.ui.ktx)
   implementation(libs.androidx.biometric)
   implementation(libs.mpandroidchart)
+  implementation(libs.play.services.auth)
+  implementation(platform(libs.firebase.bom))
+  implementation(libs.firebase.auth)
 
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)

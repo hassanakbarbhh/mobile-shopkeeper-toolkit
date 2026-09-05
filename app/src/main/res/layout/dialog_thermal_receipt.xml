@@ -99,35 +99,64 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="14dp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrintThermal"
+            android:id="@+id/btnPrintDirect"
             style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
             android:backgroundTint="@color/green_800"
-            android:text="Print / RawBT"
+            android:text="Direct Print"
             android:textSize="12sp"
             app:cornerRadius="12dp"
             app:icon="@drawable/ic_thermal_printer"
             app:iconSize="16dp"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShareWhatsApp"
-            style="@style/Widget.Material3.Button"
+            android:id="@+id/btnPrintThermal"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
+            android:text="RawBT App"
+            android:textSize="12sp"
+            app:cornerRadius="12dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShareWhatsApp"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
             android:backgroundTint="#25D366"
             android:text="WhatsApp"
             android:textSize="12sp"
             app:cornerRadius="12dp"
             app:icon="@drawable/ic_whatsapp"
             app:iconSize="16dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnThermalOptions"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Custom Options"
+            android:textSize="12sp"
+            app:cornerRadius="12dp"/>
     </LinearLayout>
 
     <LinearLayout

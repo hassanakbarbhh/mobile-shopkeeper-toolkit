@@ -92,7 +92,7 @@ class AboutFragment : Fragment() {
         binding.btnEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${getString(R.string.hassan_email)}"))
             runCatching { startActivity(intent) }.onFailure {
-                Toast.makeText(requireContext(), getString(R.string.hassan_email), Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "No email app found on device.", Toast.LENGTH_SHORT).show()
             }
         }
     }

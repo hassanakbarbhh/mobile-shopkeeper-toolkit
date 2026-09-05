@@ -70,8 +70,17 @@ object ThermalReceiptManager {
         canvas.drawText(ShopProfile.name(ctx).ifBlank { "MOBILE SHOP" }, centerX, y, paint)
         y += 20f * scale
 
+        // Custom Header / Slogan
+        val customHeader = AppPreferences.getThermalCustomHeader(ctx)
+        if (customHeader.isNotBlank()) {
+            paint.textSize = 12f * scale
+            paint.isFakeBoldText = true
+            canvas.drawText(customHeader, centerX, y, paint)
+            y += 16f * scale
+        }
+
         // Shop Subtitle & Phone
-        paint.textSize = 12f * scale
+        paint.textSize = 11.5f * scale
         paint.isFakeBoldText = false
         val address = ShopProfile.address(ctx)
         if (address.isNotBlank()) {
@@ -79,7 +88,7 @@ object ThermalReceiptManager {
             y += 16f * scale
         }
         val phone = ShopProfile.phone(ctx)
-        if (phone.isNotBlank()) {
+        if (phone.isNotBlank() && AppPreferences.isThermalShowPhone(ctx)) {
             canvas.drawText("Tel: $phone", centerX, y, paint)
             y += 16f * scale
         }
@@ -133,7 +142,7 @@ object ThermalReceiptManager {
             canvas.drawText(item.totalPrice.money(), right, y, paint)
             y += 16f * scale
 
-            if (item.imei.isNotBlank()) {
+            if (item.imei.isNotBlank() && AppPreferences.isThermalShowImei(ctx)) {
                 paint.textAlign = Paint.Align.LEFT
                 paint.textSize = 10f * scale
                 paint.isFakeBoldText = false
@@ -173,25 +182,70 @@ object ThermalReceiptManager {
 
         drawDivider(doubleLine = true)
 
-        // Policies & Footer
+        // Custom Policies & Footer
         paint.textAlign = Paint.Align.CENTER
         paint.textSize = 11f * scale
         paint.isFakeBoldText = false
-        canvas.drawText("* 3 Days Checking Warranty *", centerX, y, paint)
-        y += 15f * scale
-        canvas.drawText("* Goods sold cannot be returned *", centerX, y, paint)
-        y += 15f * scale
-        paint.isFakeBoldText = true
-        canvas.drawText("Thank you for your visit!", centerX, y, paint)
-        y += 18f * scale
+
+        val customFooter = AppPreferences.getThermalCustomFooter(ctx)
+        customFooter.lines().forEach { line ->
+            if (line.isNotBlank()) {
+                canvas.drawText(line, centerX, y, paint)
+                y += 15f * scale
+            }
+        }
+
+        // Barcode (Optional)
+        if (AppPreferences.isThermalShowBarcode(ctx)) {
+            y += 4f * scale
+            val barcodeCode = "INV-${sale.id.toString().padStart(6, '0')}"
+            drawThermalBarcode(canvas, barcodeCode, centerX, y, 28f * scale, scale, paint)
+            y += 32f * scale
+            paint.textSize = 9.5f * scale
+            paint.textAlign = Paint.Align.CENTER
+            canvas.drawText("* $barcodeCode *", centerX, y, paint)
+            y += 14f * scale
+        }
+
+        y += 4f * scale
         paint.textSize = 9.5f * scale
         paint.isFakeBoldText = false
+        paint.textAlign = Paint.Align.CENTER
         canvas.drawText("Software by Hassan Akbar (+923172377565)", centerX, y, paint)
         y += 18f * scale
 
         // Crop bitmap to actual y
         val finalHeight = (y + 16f * scale).toInt()
         return Bitmap.createBitmap(bitmap, 0, 0, width, finalHeight.coerceAtLeast(100))
+    }
+
+    /**
+     * Draws a clean monochrome 1D barcode on thermal receipt canvas.
+     */
+    fun drawThermalBarcode(
+        canvas: Canvas,
+        code: String,
+        centerX: Float,
+        yStart: Float,
+        height: Float,
+        scale: Float,
+        paint: Paint
+    ) {
+        val barWidth = 2.4f * scale
+        val cleanCode = code.filter { it.isLetterOrDigit() || it == '-' }.ifBlank { "0000" }
+        val barCount = cleanCode.length * 6
+        var startX = centerX - (barCount * barWidth) / 2f
+
+        paint.style = Paint.Style.FILL
+        for (char in cleanCode) {
+            val pattern = (char.code * 31).toString(2).padStart(6, '0')
+            for (bit in pattern) {
+                if (bit == '1') {
+                    canvas.drawRect(startX, yStart, startX + barWidth * 0.85f, yStart + height, paint)
+                }
+                startX += barWidth
+            }
+        }
     }
 
     /**
@@ -469,5 +523,135 @@ object ThermalReceiptManager {
         }.onFailure {
             Toast.makeText(ctx, "Print intent error: ${it.localizedMessage}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /**
+     * Prints receipt directly using Android Native Print Spooler (supports Bluetooth, Wi-Fi, USB, and PDF).
+     */
+    fun printDirectly(activity: android.app.Activity, jobName: String, bitmap: Bitmap) {
+        DirectPrintHelper.printBitmapDirectly(activity, jobName, bitmap)
+    }
+
+    /**
+     * Generates a custom thermal receipt bitmap from any custom title & body text entered by the user.
+     */
+    fun generateCustomReceiptBitmap(
+        ctx: Context,
+        title: String,
+        content: String,
+        widthMm: Int = AppPreferences.getThermalPaperWidth(ctx)
+    ): Bitmap {
+        val width = getPixelWidth(widthMm)
+        val scale = if (widthMm == 80) 1.4f else 1.0f
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK
+            typeface = Typeface.MONOSPACE
+        }
+
+        val lines = content.lines()
+        val estimatedHeight = ((lines.size + 14) * (18f * scale) + 120 * scale).toInt()
+        val bitmap = Bitmap.createBitmap(width, estimatedHeight.coerceAtLeast(200), Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(Color.WHITE)
+
+        var y = 24f * scale
+        val left = 14f * scale
+        val right = width - (14f * scale)
+        val centerX = width / 2f
+
+        fun drawDivider(doubleLine: Boolean = false) {
+            paint.strokeWidth = if (doubleLine) 2.5f * scale else 1.5f * scale
+            paint.style = Paint.Style.STROKE
+            paint.pathEffect = if (doubleLine) null else DashPathEffect(floatArrayOf(6f * scale, 4f * scale), 0f)
+            canvas.drawLine(left, y, right, y, paint)
+            paint.pathEffect = null
+            paint.style = Paint.Style.FILL
+            y += 16f * scale
+        }
+
+        // Shop Header
+        paint.textAlign = Paint.Align.CENTER
+        paint.textSize = 18f * scale
+        paint.isFakeBoldText = true
+        canvas.drawText(ShopProfile.name(ctx).ifBlank { "MOBILE SHOP" }, centerX, y, paint)
+        y += 20f * scale
+
+        // Custom Title
+        paint.textSize = 13f * scale
+        paint.isFakeBoldText = true
+        canvas.drawText(title.ifBlank { "CUSTOM RECEIPT / MEMO" }, centerX, y, paint)
+        y += 18f * scale
+
+        val dateStr = java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date())
+        paint.textSize = 10.5f * scale
+        paint.isFakeBoldText = false
+        canvas.drawText(dateStr, centerX, y, paint)
+        y += 14f * scale
+        drawDivider(doubleLine = true)
+
+        // Custom Content Body
+        paint.textAlign = Paint.Align.LEFT
+        paint.textSize = 11.5f * scale
+        paint.isFakeBoldText = false
+
+        for (line in lines) {
+            val trimmed = line.trimEnd()
+            if (trimmed.startsWith("===") || trimmed.startsWith("---")) {
+                drawDivider()
+            } else if (trimmed.startsWith("*") || trimmed.startsWith("#")) {
+                paint.isFakeBoldText = true
+                canvas.drawText(trimmed, left, y, paint)
+                paint.isFakeBoldText = false
+                y += 16f * scale
+            } else {
+                canvas.drawText(trimmed, left, y, paint)
+                y += 16f * scale
+            }
+        }
+
+        drawDivider(doubleLine = true)
+
+        // Custom Footer
+        val customFooter = AppPreferences.getThermalCustomFooter(ctx)
+        paint.textAlign = Paint.Align.CENTER
+        paint.textSize = 10f * scale
+        customFooter.lines().forEach { fLine ->
+            if (fLine.isNotBlank()) {
+                canvas.drawText(fLine, centerX, y, paint)
+                y += 14f * scale
+            }
+        }
+
+        if (AppPreferences.isThermalShowBarcode(ctx)) {
+            y += 4f * scale
+            val code = "MEMO-${System.currentTimeMillis() % 100000}"
+            drawThermalBarcode(canvas, code, centerX, y, 26f * scale, scale, paint)
+            y += 30f * scale
+            paint.textSize = 9f * scale
+            canvas.drawText("* $code *", centerX, y, paint)
+            y += 14f * scale
+        }
+
+        val finalHeight = (y + 16f * scale).toInt()
+        return Bitmap.createBitmap(bitmap, 0, 0, width, finalHeight.coerceAtLeast(100))
+    }
+
+    /**
+     * Generates plain text for custom thermal receipts.
+     */
+    fun generateCustomReceiptText(ctx: Context, title: String, content: String): String {
+        val width = if (AppPreferences.getThermalPaperWidth(ctx) == 80) 48 else 32
+        val div = "=".repeat(width)
+        val subDiv = "-".repeat(width)
+        val sb = StringBuilder()
+        sb.appendLine(ShopProfile.name(ctx).ifBlank { "MOBILE SHOP" })
+        sb.appendLine(title.ifBlank { "CUSTOM RECEIPT / MEMO" })
+        sb.appendLine(java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date()))
+        sb.appendLine(div)
+        sb.appendLine(content)
+        sb.appendLine(subDiv)
+        sb.appendLine(AppPreferences.getThermalCustomFooter(ctx))
+        return sb.toString()
     }
 }

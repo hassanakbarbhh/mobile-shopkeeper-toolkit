@@ -35,7 +35,7 @@ class SplashActivity : AppCompatActivity() {
     private fun navigateToNext() {
         if (isFinishing || isDestroyed) return
         try {
-            // Master security login interface (Key: Hassanisgreat)
+            // Security login interface
             startActivity(Intent(this, LockScreenActivity::class.java))
         } catch (e: Exception) {
             startActivity(Intent(this, MainActivity::class.java))

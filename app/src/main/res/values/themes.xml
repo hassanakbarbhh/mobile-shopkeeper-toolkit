@@ -27,6 +27,102 @@
 
     <style name="Theme.MobileShop" parent="Theme.MobileShopkeeper" />
 
+    <!-- TRENDING THEMES -->
+    <!-- 1. Midnight AMOLED Dark Theme -->
+    <style name="Theme.MobileShopkeeper.Midnight" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/amoled_primary</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorPrimaryContainer">#064E3B</item>
+        <item name="colorOnPrimaryContainer">#A7F3D0</item>
+        <item name="colorSecondary">#34D399</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="colorSurface">@color/amoled_card</item>
+        <item name="colorOnSurface">@color/amoled_text</item>
+        <item name="android:colorBackground">@color/amoled_bg</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
+        <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+    </style>
+
+    <!-- 2. Royal Sapphire Blue Theme -->
+    <style name="Theme.MobileShopkeeper.Sapphire" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/sapphire_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/sapphire_100</item>
+        <item name="colorOnPrimaryContainer">@color/sapphire_900</item>
+        <item name="colorSecondary">@color/sapphire_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/gray_900</item>
+        <item name="android:colorBackground">#F8FAFC</item>
+        <item name="android:statusBarColor">@color/sapphire_900</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
+        <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+    </style>
+
+    <!-- 3. Sunset Amber & Gold Theme -->
+    <style name="Theme.MobileShopkeeper.Sunset" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/sunset_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/sunset_100</item>
+        <item name="colorOnPrimaryContainer">@color/sunset_900</item>
+        <item name="colorSecondary">@color/sunset_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">#271C10</item>
+        <item name="android:colorBackground">#FFFDF7</item>
+        <item name="android:statusBarColor">@color/sunset_900</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
+        <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+    </style>
+
+    <!-- 4. Cyberpunk Violet / Neon Theme -->
+    <style name="Theme.MobileShopkeeper.Purple" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/violet_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/violet_100</item>
+        <item name="colorOnPrimaryContainer">@color/violet_900</item>
+        <item name="colorSecondary">@color/violet_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">#1E1B2E</item>
+        <item name="android:colorBackground">#FAF8FF</item>
+        <item name="android:statusBarColor">@color/violet_900</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
+        <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+    </style>
+
+    <!-- 5. Titanium Slate Theme -->
+    <style name="Theme.MobileShopkeeper.Slate" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/slate_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/slate_100</item>
+        <item name="colorOnPrimaryContainer">@color/slate_950</item>
+        <item name="colorSecondary">@color/slate_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/slate_900</item>
+        <item name="android:colorBackground">#F8FAFC</item>
+        <item name="android:statusBarColor">@color/slate_950</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
+        <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+    </style>
+
     <style name="Theme.MobileShop.Splash" parent="Theme.MobileShop">
         <item name="android:windowBackground">@drawable/bg_gradient_green</item>
         <item name="android:statusBarColor">@color/green_950</item>
