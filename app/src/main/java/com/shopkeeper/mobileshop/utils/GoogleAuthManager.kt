@@ -29,15 +29,29 @@ object GoogleAuthManager {
     // Default owner email requested by user
     const val DEFAULT_OWNER_EMAIL = "hassanakbarbhh@gmail.com"
 
+    // Official Web Client ID from Firebase google-services.json for ID Token generation
+    const val FIREBASE_WEB_CLIENT_ID = "762164247372-k4lhffr6qfk4a9ho6shmdc30fmhjrs61.apps.googleusercontent.com"
+
     private fun getPrefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun getGoogleSignInClient(context: Context): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val webClientId = try {
+            val resId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+            if (resId != 0) context.getString(resId) else FIREBASE_WEB_CLIENT_ID
+        } catch (_: Throwable) {
+            FIREBASE_WEB_CLIENT_ID
+        }
+
+        val builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
             .requestProfile()
-            .build()
-        return GoogleSignIn.getClient(context, gso)
+
+        if (webClientId.isNotBlank()) {
+            builder.requestIdToken(webClientId)
+        }
+
+        return GoogleSignIn.getClient(context, builder.build())
     }
 
     fun getOwnerEmail(context: Context): String {

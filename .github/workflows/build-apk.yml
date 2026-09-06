@@ -55,8 +55,8 @@ jobs:
           # 2. Guarantee google-services.json is present
           mkdir -p app
           if [ ! -f "app/google-services.json" ]; then
-            echo "Provisioning build-validation google-services.json..."
-            echo '{"project_info":{"project_number":"123456789","project_id":"shopkeeper-app","storage_bucket":"shopkeeper-app.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:123456789:android:abcdef","android_client_info":{"package_name":"com.shopkeeper.mobileshop"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyDummyKeyForBuildValidation"}],"services":{}}],"configuration_version":"1"}' > app/google-services.json
+            echo "Provisioning authentic google-services.json fallback..."
+            echo '{"project_info":{"project_number":"762164247372","project_id":"gen-lang-client-0566344564","storage_bucket":"gen-lang-client-0566344564.firebasestorage.app"},"client":[{"client_info":{"mobilesdk_app_id":"1:762164247372:android:8e3f95e351b3e6ed2bede9","android_client_info":{"package_name":"com.shopkeeper.mobileshop"}},"oauth_client":[{"client_id":"762164247372-p8dqul9kt9j4tirrp6927l3idb4sl3ho.apps.googleusercontent.com","client_type":1,"android_info":{"package_name":"com.shopkeeper.mobileshop","certificate_hash":"8ead3d83332a148c38734936778a612bf1c9b7ba"}},{"client_id":"762164247372-k4lhffr6qfk4a9ho6shmdc30fmhjrs61.apps.googleusercontent.com","client_type":3}],"api_key":[{"current_key":"AIzaSyBv5rSbMrM2QwSMeXTE9K18loXJvjgu7zU"}],"services":{"appinvite_service":{"other_platform_oauth_client":[{"client_id":"762164247372-k4lhffr6qfk4a9ho6shmdc30fmhjrs61.apps.googleusercontent.com","client_type":3}]}}}],"configuration_version":"1"}' > app/google-services.json
           fi
 
           # 3. Ensure gradlew script is present and executable
