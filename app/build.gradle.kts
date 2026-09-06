@@ -14,7 +14,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.mobileshop.zxpqwe"
+    applicationId = "com.shopkeeper.mobileshop"
     minSdk = 26
     targetSdk = 36
     versionCode = 5
@@ -88,6 +88,8 @@ dependencies {
   implementation(libs.play.services.auth)
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
+  implementation(libs.firebase.database)
+  implementation(libs.firebase.analytics)
 
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
