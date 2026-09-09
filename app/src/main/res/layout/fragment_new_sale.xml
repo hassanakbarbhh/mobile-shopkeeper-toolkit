@@ -66,7 +66,10 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-        app:startIconDrawable="@drawable/ic_search">
+        android:id="@+id/tilProductSearch"
+        app:startIconDrawable="@drawable/ic_search"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_barcode">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etProductSearch"

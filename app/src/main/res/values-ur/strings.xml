@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Mobile Inventory Toolkit</string>
+    <string name="app_tagline">Your complete mobile shop &amp; inventory companion</string>
+    <string name="made_by">Crafted with ❤ by Hassan Akbar</string>
+    <string name="version">Version 5.0 (Build 5)</string>
+
+    <string name="splash_loading">Preparing your shop…</string>
+
+    <string name="lock_title">Shop Access &amp; Security</string>
+    <string name="lock_subtitle">Select role or enter your access key to continue</string>
+    <string name="lock_hint">Enter Access Key</string>
+    <string name="lock_unlock">Unlock Toolkit</string>
+    <string name="lock_fingerprint">Unlock with Biometrics</string>
+    <string name="lock_wrong">Invalid key for selected role. Please check credentials.</string>
+    <string name="lock_empty">Please enter your access key</string>
+    <string name="lock_locked_out">Too many attempts. Try again in %1$d s</string>
+
+    <string name="role_title">Select Shop Access Mode</string>
+    <string name="role_shop">Shop Owner (Master)</string>
+    <string name="role_shop_desc">Full store control, financial analytics, inventory costs &amp; settings</string>
+    <string name="role_seller">Seller / Cashier (Counter)</string>
+    <string name="role_seller_desc">Quick POS sales, inventory at retail price, customer invoices &amp; thermal prints</string>
+    <string name="role_repair">Repair Technician (Workshop)</string>
+    <string name="role_repair_desc">Repair intake, diagnosis, job tracking, spare parts &amp; thermal claim tags</string>
+    <string name="role_remember">Remember my login mode</string>
+    <string name="role_continue">Enter Selected Mode</string>
+
+    <string name="dev_name">Hassan Akbar</string>
+    <string name="dev_handle">@hassanakbarbhh</string>
+    <string name="dev_phone">+923172377565</string>
+    <string name="dev_title">Mobile Solutions Engineer &amp; Android Developer</string>
+    <string name="about_tagline">15+ yrs Mobile Business Specialist • 10+ yrs Application Developer</string>
+    <string name="about_love">This toolkit is built for modern mobile shopkeepers — with love by Hassan Akbar</string>
+
+    <string name="url_whatsapp">https://wa.me/923172377565</string>
+    <string name="url_facebook">https://facebook.com/hassanakbarbhh</string>
+    <string name="url_instagram">https://instagram.com/hassanakbarbhh</string>
+    <string name="url_twitter">https://x.com/hassanakbarbhh</string>
+    <string name="hassan_email">hassanakbarbhh@gmail.com</string>
+</resources>

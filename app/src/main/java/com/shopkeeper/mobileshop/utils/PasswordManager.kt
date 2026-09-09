@@ -12,9 +12,10 @@ object PasswordManager {
 
     private fun getPrefKeyForMode(mode: AppMode): String {
         return when (mode) {
-            AppMode.SHOP_OWNER -> KEY_OWNER_HASH
+            AppMode.OWNER, AppMode.SHOP_OWNER -> KEY_OWNER_HASH
             AppMode.SELLER_STAFF -> KEY_SELLER_HASH
             AppMode.REPAIR_TECH -> KEY_REPAIR_HASH
+            else -> ""
         }
     }
 
