@@ -4,7 +4,9 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "sales")
+import androidx.room.Index
+
+@Entity(tableName = "sales", indices = [Index(value = ["customerId"]), Index(value = ["saleDate"])])
 data class Sale(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val customerId: Long? = null,

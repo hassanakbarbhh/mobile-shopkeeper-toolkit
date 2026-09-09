@@ -1,4 +1,7 @@
 [versions]
+itea = "7.2.3"
+zxing = "3.5.3"
+zxingAndroid = "4.3.0"
 agp = "9.1.1"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -55,6 +58,9 @@ coordinatorlayout = "1.2.0"
 
 
 [libraries]
+itext7-core = { group = "com.itextpdf", name = "itext7-core", version.ref = "itea" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxingAndroid" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }

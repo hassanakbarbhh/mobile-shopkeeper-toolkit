@@ -90,9 +90,10 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     val currentDest = navController.currentDestination?.id
                     val isStartDest = when (activeMode) {
-                        AppMode.SHOP_OWNER -> currentDest == R.id.navigation_dashboard
+                        AppMode.OWNER, AppMode.SHOP_OWNER -> currentDest == R.id.navigation_dashboard
                         AppMode.SELLER_STAFF -> currentDest == R.id.navigation_sales || currentDest == R.id.navigation_new_sale
                         AppMode.REPAIR_TECH -> currentDest == R.id.navigation_repairs
+                        else -> true
                     }
                     if (!isStartDest && navController.navigateUp()) {
                         // Navigated up
@@ -107,29 +108,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun configureDrawerForRole(mode: AppMode) {
-        val menu = binding.navView.menu
         val headerView = binding.navView.getHeaderView(0)
-        val tvHeaderShopName = headerView?.findViewById<TextView>(R.id.tvHeaderShopName)
-        val tvHeaderRoleBadge = headerView?.findViewById<TextView>(R.id.tvHeaderRoleBadge)
-
-        tvHeaderShopName?.text = ShopProfile.name(this).ifBlank { getString(R.string.app_name) }
+        val tvHeaderRoleBadge = headerView?.findViewById<android.widget.TextView>(R.id.tvHeaderRoleBadge)
+        val menu = binding.navView.menu
 
         when (mode) {
-            AppMode.SHOP_OWNER -> {
-                tvHeaderRoleBadge?.text = "👑 Shop Owner (Master)"
-                // Owner sees all items
+            AppMode.OWNER, AppMode.SHOP_OWNER -> {
+                tvHeaderRoleBadge?.text = if (mode == AppMode.OWNER) "👑 App Owner" else "👑 Shop Owner (Master)"
                 for (i in 0 until menu.size()) {
                     menu.getItem(i).isVisible = true
                 }
-                // Default start
-                // Dashboard is default
             }
+
 
             AppMode.SELLER_STAFF -> {
                 tvHeaderRoleBadge?.text = "💼 Seller / Staff Mode"
                 // Hide sensitive store finances, purchases, expenses, reports & admin settings
                 menu.findItem(R.id.navigation_dashboard)?.isVisible = false
-                menu.findItem(R.id.navigation_purchases)?.isVisible = false
+                                menu.findItem(R.id.navigation_purchases)?.isVisible = false
                 menu.findItem(R.id.navigation_expenses)?.isVisible = false
                 menu.findItem(R.id.navigation_reports)?.isVisible = false
                 menu.findItem(R.id.navigation_sellers)?.isVisible = false
@@ -155,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                 tvHeaderRoleBadge?.text = "🔧 Repair Technician Mode"
                 // Hide store finances, sales POS, purchases, expenses, reports, sellers & settings
                 menu.findItem(R.id.navigation_dashboard)?.isVisible = false
-                menu.findItem(R.id.navigation_new_sale)?.isVisible = false
+                                menu.findItem(R.id.navigation_new_sale)?.isVisible = false
                 menu.findItem(R.id.navigation_sales)?.isVisible = false
                 menu.findItem(R.id.navigation_purchases)?.isVisible = false
                 menu.findItem(R.id.navigation_expenses)?.isVisible = false
@@ -174,6 +170,14 @@ class MainActivity : AppCompatActivity() {
                 // Start on Repairs
                 navController.navigate(R.id.navigation_repairs)
             }
+            AppMode.BASIC_USER -> {
+                tvHeaderRoleBadge?.text = "Pending Approval"
+                for (i in 0 until menu.size()) {
+                    menu.getItem(i).isVisible = false
+                }
+                menu.findItem(R.id.navigation_lock_app)?.isVisible = true
+            }
+            else -> {}
         }
     }
 

@@ -1,48 +1,40 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper functions for security validation
-    function isAuthenticated() {
-      return request.auth != null;
+    function signed() { return request.auth != null; }
+    function isAppOwner() {
+      return signed() && request.auth.token.email == "hassanakbarbhh@gmail.com";
     }
-    
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-    
-    function isValidTimestamp() {
-      return request.resource.data.updatedAt == request.time || 
-             request.resource.data.createdAt == request.time;
-    }
-
-    // User profile access: Locked strictly to the record owner
-    match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isOwner']);
-      allow delete: if false; // Disallow user record deletion from client
-    }
-
-    // Shop business data: Row-Level Security locked by Shop Owner UID
-    match /shops/{shopId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
-        resource == null ? request.resource.data.ownerUid == request.auth.uid : resource.data.ownerUid == request.auth.uid
+    function shopMember(shopId) {
+      return signed() && (
+        get(/databases/$(database)/documents/shops/$(shopId)).data.ownerUid == request.auth.uid ||
+        request.auth.uid in get(/databases/$(database)/documents/shops/$(shopId)).data.get('members', [])
       );
-
-      // Sub-collections: sales, inventory, repairs, customers, dues
-      match /{subcollection}/{docId} {
-        allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && 
-          request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
-        allow delete: if isAuthenticated();
+    }
+    match /users/{userId} {
+      allow read: if signed() && (request.auth.uid == userId || isAppOwner());
+      allow create: if signed() && request.auth.uid == userId
+                    && request.resource.data.role == 'BASIC_USER';
+      allow update: if signed() && (
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data)
+            .affectedKeys().hasAny(['role','isAppOwner','approved']))
+        || (isAppOwner() && request.resource.data.diff(resource.data)
+            .affectedKeys().hasOnly(['role','approved','approvedBy','updatedAt']))
+      );
+      allow delete: if false;
+    }
+    match /shops/{shopId} {
+      allow read: if shopMember(shopId);
+      allow create: if signed() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if signed() && resource.data.ownerUid == request.auth.uid;
+      allow delete: if false;
+      match /{sub}/{docId} {
+        allow read: if shopMember(shopId);
+        allow create, update: if shopMember(shopId)
+          && request.resource.data.keys().hasAll(['createdAt','updatedAt']);
+        allow delete: if shopMember(shopId) && isAppOwner();
       }
     }
-    
-    // Default deny-all fallback for any unspecified routes
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

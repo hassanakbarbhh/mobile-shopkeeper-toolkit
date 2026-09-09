@@ -127,8 +127,8 @@ object GoogleAuthManager {
     fun canAccessRole(context: Context, role: AppMode, user: AuthenticatedUser?): Boolean {
         if (user == null) return false
         return when (role) {
-            AppMode.SHOP_OWNER -> user.isOwner
-            AppMode.SELLER_STAFF, AppMode.REPAIR_TECH -> true // Staff access allowed for signed in user
+            AppMode.OWNER, AppMode.SHOP_OWNER -> user.isOwner
+            AppMode.SELLER_STAFF, AppMode.REPAIR_TECH, AppMode.BASIC_USER -> true // Staff access allowed for signed in user
         }
     }
 

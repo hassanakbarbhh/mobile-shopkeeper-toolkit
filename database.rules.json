@@ -12,19 +12,19 @@
         ".read": "auth != null && (data.child('ownerUid').val() == auth.uid || data.child('members').child(auth.uid).exists())",
         ".write": "auth != null && data.child('ownerUid').val() == auth.uid",
         "sales": {
-          ".read": "auth != null",
-          ".write": "auth != null && (data.parent().child('ownerUid').val() == auth.uid || data.parent().child('members').child(auth.uid).exists())",
+          ".read": "auth != null && (root.child('shops').child($shopId).child('ownerUid').val() == auth.uid || root.child('shops').child($shopId).child('members').child(auth.uid).exists())",
+          ".write": "auth != null && (root.child('shops').child($shopId).child('ownerUid').val() == auth.uid || root.child('shops').child($shopId).child('members').child(auth.uid).exists())",
           "$saleId": {
             ".validate": "newData.hasChildren(['totalAmount', 'timestamp', 'sellerId'])"
           }
         },
         "inventory": {
-          ".read": "auth != null",
-          ".write": "auth != null && (data.parent().child('ownerUid').val() == auth.uid || data.parent().child('members').child(auth.uid).exists())"
+          ".read": "auth != null && (root.child('shops').child($shopId).child('ownerUid').val() == auth.uid || root.child('shops').child($shopId).child('members').child(auth.uid).exists())",
+          ".write": "auth != null && (root.child('shops').child($shopId).child('ownerUid').val() == auth.uid || root.child('shops').child($shopId).child('members').child(auth.uid).exists())"
         },
         "repairs": {
-          ".read": "auth != null",
-          ".write": "auth != null && (data.parent().child('ownerUid').val() == auth.uid || data.parent().child('members').child(auth.uid).exists())"
+          ".read": "auth != null && (root.child('shops').child($shopId).child('ownerUid').val() == auth.uid || root.child('shops').child($shopId).child('members').child(auth.uid).exists())",
+          ".write": "auth != null && (root.child('shops').child($shopId).child('ownerUid').val() == auth.uid || root.child('shops').child($shopId).child('members').child(auth.uid).exists())"
         }
       }
     },

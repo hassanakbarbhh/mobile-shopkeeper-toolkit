@@ -411,7 +411,7 @@ class SettingsFragment : Fragment() {
 
         fun updateRoleInfo() {
             when (targetRole) {
-                AppMode.SHOP_OWNER -> {
+                AppMode.OWNER, AppMode.SHOP_OWNER -> {
                     dBinding.toggleKeyRole.check(R.id.btnKeyOwner)
                     dBinding.tvKeyRoleSubtitle.text = "Modifying security key for Shop Owner"
                 }

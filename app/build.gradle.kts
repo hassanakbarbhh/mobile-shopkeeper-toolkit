@@ -17,8 +17,8 @@ android {
     applicationId = "com.shopkeeper.mobileshop"
     minSdk = 26
     targetSdk = 36
-    versionCode = 5
-    versionName = "5.0"
+    versionCode = 6
+    versionName = "6.0"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
@@ -57,6 +57,9 @@ googleServices {
 }
 
 dependencies {
+    // implementation(libs.itext7.core) // iText is paid/AGPL, let's use Android's native PdfDocument for free
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.android.embedded)
   implementation("androidx.security:security-crypto:1.1.0-alpha06")
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.appcompat)
@@ -73,6 +76,7 @@ dependencies {
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
   implementation(libs.firebase.database)
+  implementation(libs.firebase.firestore)
   implementation(libs.firebase.analytics)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)

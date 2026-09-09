@@ -3,7 +3,9 @@ package com.shopkeeper.mobileshop.data.db.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "products")
+import androidx.room.Index
+
+@Entity(tableName = "products", indices = [Index(value = ["imei"], unique = true), Index(value = ["name"])])
 data class Product(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,

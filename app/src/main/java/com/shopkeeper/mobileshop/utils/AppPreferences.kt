@@ -2,11 +2,6 @@ package com.shopkeeper.mobileshop.utils
 
 import android.content.Context
 
-enum class AppMode(val displayName: String, val roleSubtitle: String, val defaultKey: String) {
-    SHOP_OWNER("Shop Owner", "👑 Shop Owner (Full Master Access)", "Hassanisgreat"),
-    SELLER_STAFF("Seller / Staff", "💼 Counter Seller & Cashier Mode", "seller123"),
-    REPAIR_TECH("Repair Technician", "🔧 Workshop & Repair Mode", "repair123")
-}
 
 object AppPreferences {
     private const val PREFS = "shop_app_prefs"

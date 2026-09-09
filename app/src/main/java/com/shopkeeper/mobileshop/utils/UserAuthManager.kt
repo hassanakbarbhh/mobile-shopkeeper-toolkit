@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 import com.shopkeeper.mobileshop.security.LoginRateLimiter
 import com.shopkeeper.mobileshop.security.SecureStorage
 import com.shopkeeper.mobileshop.security.SecuritySanitizer
@@ -106,12 +107,12 @@ object UserAuthManager {
         }
 
         val existing = getAllAccounts(context).toMutableList()
-        if (existing.any { it.email.equals(cleanEmail, ignoreCase = true) }) {
+        if (existing.any { acc -> acc.email.equals(cleanEmail, ignoreCase = true) }) {
             onResult(false, "An account with this email already exists. Please sign in.", null)
             return
         }
 
-        // Real Firebase Auth account creation
+                // Real Firebase Auth account creation
         try {
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(cleanEmail, password)
                 .addOnCompleteListener { task ->
@@ -119,28 +120,35 @@ object UserAuthManager {
                         val fbUser = task.result?.user
                         // Send real email verification link
                         fbUser?.sendEmailVerification()
-
+                        
                         val newUser = UserAccount(
                             email = cleanEmail,
                             displayName = cleanName,
-                            role = role,
+                            role = AppMode.BASIC_USER,
                             passwordHash = SecureStorage.hashPassword(context, password),
                             authProvider = "firebase_email",
                             isVerified = fbUser?.isEmailVerified ?: false
                         )
+                        
+                        // Add to Firestore
+                        fbUser?.let {
+                            val userDoc = hashMapOf(
+                                "email" to cleanEmail,
+                                "displayName" to cleanName,
+                                "role" to "BASIC_USER",
+                                "approved" to false,
+                                "updatedAt" to System.currentTimeMillis()
+                            )
+                            FirebaseFirestore.getInstance().collection("users").document(it.uid).set(userDoc)
+                        }
+
                         existing.add(newUser)
                         saveAccounts(context, existing)
                         saveSession(context, newUser)
                         LoginRateLimiter.reset(context)
-
-                        onResult(
-                            true,
-                            "Account created! A verification link has been sent to $cleanEmail.",
-                            newUser
-                        )
+                        onResult(true, "Registration successful!", newUser)
                     } else {
-                        val errorMsg = task.exception?.localizedMessage ?: "Sign up failed. Please try again."
-                        onResult(false, errorMsg, null)
+                        onResult(false, task.exception?.localizedMessage ?: "Registration failed.", null)
                     }
                 }
         } catch (e: Throwable) {
@@ -197,23 +205,54 @@ object UserAuthManager {
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val fbUser = task.result?.user
-                            val user = UserAccount(
-                                email = fbUser?.email ?: cleanInput,
-                                displayName = fbUser?.displayName ?: cleanInput.substringBefore("@"),
-                                role = selectedRole,
-                                passwordHash = SecureStorage.hashPassword(context, cleanPass),
-                                authProvider = "firebase_email",
-                                isVerified = fbUser?.isEmailVerified ?: false
-                            )
-
-                            val list = getAllAccounts(context).toMutableList()
-                            val idx = list.indexOfFirst { it.email.equals(user.email, ignoreCase = true) }
-                            if (idx >= 0) list[idx] = user else list.add(user)
-                            saveAccounts(context, list)
-
-                            saveSession(context, user)
-                            LoginRateLimiter.reset(context)
-                            onResult(true, "Signed in successfully via Firebase Auth!", user)
+                            
+                            // Query Firestore for Role
+                            fbUser?.let {
+                                FirebaseFirestore.getInstance().collection("users").document(it.uid).get()
+                                    .addOnSuccessListener { doc ->
+                                        val roleStr = if (doc.exists()) doc.getString("role") ?: "BASIC_USER" else "BASIC_USER"
+                                        val mappedRole = when (roleStr) {
+                                            "OWNER" -> AppMode.OWNER
+                                            "SHOP_OWNER" -> AppMode.SHOP_OWNER
+                                            "RESELLER" -> AppMode.SELLER_STAFF
+                                            "REPAIR_SHOP" -> AppMode.REPAIR_TECH
+                                            else -> AppMode.BASIC_USER
+                                        }
+                                        val user = UserAccount(
+                                            email = fbUser.email ?: cleanInput,
+                                            displayName = fbUser.displayName ?: cleanInput.substringBefore("@"),
+                                            role = mappedRole,
+                                            passwordHash = SecureStorage.hashPassword(context, cleanPass),
+                                            authProvider = "firebase_email",
+                                            isVerified = fbUser.isEmailVerified
+                                        )
+                                        val list = getAllAccounts(context).toMutableList()
+                                        val idx = list.indexOfFirst { acc -> acc.email.equals(user.email, ignoreCase = true) }
+                                        if (idx >= 0) list[idx] = user else list.add(user)
+                                        saveAccounts(context, list)
+                                        saveSession(context, user)
+                                        LoginRateLimiter.reset(context)
+                                        onResult(true, "Signed in successfully via Firebase Auth!", user)
+                                    }
+                                    .addOnFailureListener {
+                                        // Fallback if offline
+                                        val user = UserAccount(
+                                            email = fbUser.email ?: cleanInput,
+                                            displayName = fbUser.displayName ?: cleanInput.substringBefore("@"),
+                                            role = selectedRole,
+                                            passwordHash = SecureStorage.hashPassword(context, cleanPass),
+                                            authProvider = "firebase_email",
+                                            isVerified = fbUser.isEmailVerified
+                                        )
+                                        val list = getAllAccounts(context).toMutableList()
+                                        val idx = list.indexOfFirst { acc -> acc.email.equals(user.email, ignoreCase = true) }
+                                        if (idx >= 0) list[idx] = user else list.add(user)
+                                        saveAccounts(context, list)
+                                        saveSession(context, user)
+                                        LoginRateLimiter.reset(context)
+                                        onResult(true, "Signed in (Offline).", user)
+                                    }
+                            }
                         } else {
                             // Check registered local accounts if Firebase failed or user is offline
                             verifyLocalCredentials(context, cleanInput, cleanPass, selectedRole, onResult)
@@ -237,9 +276,12 @@ object UserAuthManager {
     ) {
         // Check registered accounts
         val accounts = getAllAccounts(context)
-        val matched = accounts.firstOrNull {
-            it.email.equals(cleanInput, ignoreCase = true) ||
-            it.displayName.equals(cleanInput, ignoreCase = true)
+        val matched = accounts.firstOrNull { acc ->
+
+            acc.email.equals(cleanInput, ignoreCase = true) ||
+
+            acc.displayName.equals(cleanInput, ignoreCase = true)
+
         }
 
         if (matched != null) {
@@ -298,7 +340,7 @@ object UserAuthManager {
         )
 
         val list = getAllAccounts(context).toMutableList()
-        val idx = list.indexOfFirst { it.email == phone }
+        val idx = list.indexOfFirst { acc -> acc.email == phone }
         if (idx >= 0) list[idx] = user else list.add(user)
         saveAccounts(context, list)
 
@@ -320,7 +362,7 @@ object UserAuthManager {
         val cleanEmail = SecuritySanitizer.sanitize(email).lowercase()
         val name = SecuritySanitizer.sanitize(displayName).ifEmpty { cleanEmail.substringBefore("@") }
         val accounts = getAllAccounts(context).toMutableList()
-        val existingIndex = accounts.indexOfFirst { it.email.equals(cleanEmail, ignoreCase = true) }
+        val existingIndex = accounts.indexOfFirst { acc -> acc.email.equals(cleanEmail, ignoreCase = true) }
 
         val user = UserAccount(
             email = cleanEmail,
@@ -383,15 +425,14 @@ object UserAuthManager {
     }
 
     fun signOut(context: Context) {
-        getPrefs(context).edit()
-            .remove(KEY_SESSION_EMAIL)
-            .remove(KEY_SESSION_NAME)
-            .remove(KEY_SESSION_ROLE)
-            .remove(KEY_SESSION_PROVIDER)
-            .remove(KEY_SESSION_PHOTO)
-            .remove(KEY_SESSION_VERIFIED)
-            .apply()
-
+        val editor = getPrefs(context).edit()
+        editor.remove(KEY_SESSION_EMAIL)
+        editor.remove(KEY_SESSION_NAME)
+        editor.remove(KEY_SESSION_ROLE)
+        editor.remove(KEY_SESSION_PROVIDER)
+        editor.remove(KEY_SESSION_PHOTO)
+        editor.remove(KEY_SESSION_VERIFIED)
+        editor.apply()
         runCatching { FirebaseAuth.getInstance().signOut() }
     }
 
@@ -414,5 +455,17 @@ object UserAuthManager {
         } catch (e: Throwable) {
             onResult(false, "Could not send reset email: ${e.message}")
         }
+    }
+    fun updateLocalRole(context: Context, roleStr: String) {
+        val mappedRole = when (roleStr) {
+            "OWNER" -> AppMode.OWNER
+            "SHOP_OWNER" -> AppMode.SHOP_OWNER
+            "RESELLER" -> AppMode.SELLER_STAFF
+            "REPAIR_SHOP" -> AppMode.REPAIR_TECH
+            else -> AppMode.BASIC_USER
+        }
+        val user = getCurrentUser(context) ?: return
+        val updatedUser = user.copy(role = mappedRole)
+        saveSession(context, updatedUser)
     }
 }

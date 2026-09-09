@@ -115,6 +115,7 @@ class LockScreenActivity : AppCompatActivity() {
                 AppMode.SHOP_OWNER -> "👑 Shop Owner"
                 AppMode.SELLER_STAFF -> "💼 Counter Seller"
                 AppMode.REPAIR_TECH -> "🔧 Repair Tech"
+                else -> "User"
             }
 
             binding.btnSessionEnter.setOnClickListener {
@@ -178,7 +179,7 @@ class LockScreenActivity : AppCompatActivity() {
     private fun setRole(mode: AppMode) {
         currentRole = mode
         when (mode) {
-            AppMode.SHOP_OWNER -> {
+            AppMode.OWNER, AppMode.SHOP_OWNER -> {
                 binding.toggleRoleMode.check(R.id.btnRoleOwner)
                 binding.tvRoleHint.text = "👑 Shop Owner: Full master access, profits, purchases & settings"
                 binding.btnLoginSubmit.text = "Sign In as Shop Owner"
@@ -492,6 +493,14 @@ class LockScreenActivity : AppCompatActivity() {
     }
 
     private fun onUnlocked(mode: AppMode) {
+        if (mode == AppMode.BASIC_USER) {
+            val intent = Intent(this, PendingApprovalActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            finish()
+            return
+        }
         AppPreferences.setActiveMode(this, mode)
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("EXTRA_ROLE", mode.name)
