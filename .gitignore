@@ -15,4 +15,11 @@
 .cxx
 local.properties
 .env
+.env.*
+*.jks
+*.keystore
+*.p12
+*.key
 debug.keystore
+debug.keystore.base64
+release_output/

@@ -31,6 +31,8 @@ class LockScreenActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLockScreenBinding
     private var currentRole: AppMode = AppMode.SHOP_OWNER
     private var isSignUpMode: Boolean = false
+    private var isOtpMode: Boolean = false
+    private var phoneVerificationId: String? = null
 
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -80,6 +82,7 @@ class LockScreenActivity : AppCompatActivity() {
         setupRoleToggle()
         setupGoogleAuth()
         setupEmailAuth()
+        setupOtpAuth()
         setupBiometric()
 
         checkExistingSession()
@@ -88,6 +91,17 @@ class LockScreenActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkExistingSession()
+        checkRateLimitStatus()
+    }
+
+    private fun checkRateLimitStatus() {
+        val (isLocked, secondsRemaining) = com.shopkeeper.mobileshop.security.LoginRateLimiter.checkLockout(this)
+        if (isLocked) {
+            binding.btnLoginSubmit.isEnabled = false
+            showError("Login locked: $secondsRemaining seconds remaining due to repeated failed attempts.")
+        } else {
+            binding.btnLoginSubmit.isEnabled = true
+        }
     }
 
     private fun checkExistingSession() {
@@ -121,14 +135,28 @@ class LockScreenActivity : AppCompatActivity() {
     private fun setupAuthModeToggle() {
         binding.toggleAuthMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
-                if (checkedId == R.id.btnTabSignIn) {
-                    isSignUpMode = false
-                    binding.layoutSignInForm.visibility = View.VISIBLE
-                    binding.layoutSignUpForm.visibility = View.GONE
-                } else {
-                    isSignUpMode = true
-                    binding.layoutSignInForm.visibility = View.GONE
-                    binding.layoutSignUpForm.visibility = View.VISIBLE
+                when (checkedId) {
+                    R.id.btnTabSignIn -> {
+                        isSignUpMode = false
+                        isOtpMode = false
+                        binding.layoutSignInForm.visibility = View.VISIBLE
+                        binding.layoutOtpForm.visibility = View.GONE
+                        binding.layoutSignUpForm.visibility = View.GONE
+                    }
+                    R.id.btnTabOtp -> {
+                        isSignUpMode = false
+                        isOtpMode = true
+                        binding.layoutSignInForm.visibility = View.GONE
+                        binding.layoutOtpForm.visibility = View.VISIBLE
+                        binding.layoutSignUpForm.visibility = View.GONE
+                    }
+                    R.id.btnTabSignUp -> {
+                        isSignUpMode = true
+                        isOtpMode = false
+                        binding.layoutSignInForm.visibility = View.GONE
+                        binding.layoutOtpForm.visibility = View.GONE
+                        binding.layoutSignUpForm.visibility = View.VISIBLE
+                    }
                 }
                 binding.tvAuthError.visibility = View.GONE
             }
@@ -242,6 +270,80 @@ class LockScreenActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupOtpAuth() {
+        binding.btnSendOtp.setOnClickListener {
+            val rawPhone = binding.etPhoneNumber.text?.toString()?.trim().orEmpty()
+            if (!com.shopkeeper.mobileshop.security.SecuritySanitizer.isValidPhone(rawPhone)) {
+                showError("Please enter a valid phone number with country code (e.g. +14155552671 or +923001234567).")
+                return@setOnClickListener
+            }
+
+            binding.btnSendOtp.isEnabled = false
+            binding.btnSendOtp.text = "Sending OTP..."
+            binding.tvAuthError.visibility = View.GONE
+
+            com.shopkeeper.mobileshop.security.PhoneAuthHelper.sendOtp(
+                activity = this,
+                phoneNumber = rawPhone,
+                callback = object : com.shopkeeper.mobileshop.security.PhoneAuthHelper.OtpCallback {
+                    override fun onOtpSent(verificationId: String) {
+                        phoneVerificationId = verificationId
+                        binding.btnSendOtp.isEnabled = true
+                        binding.btnSendOtp.text = "Resend Code"
+                        binding.layoutOtpCodeInput.visibility = View.VISIBLE
+                        binding.tvOtpCodePrompt.text = "Code sent to $rawPhone. Enter 6-digit code below:"
+                        Toast.makeText(this@LockScreenActivity, "SMS verification code sent!", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onAutoVerified(user: com.google.firebase.auth.FirebaseUser) {
+                        val session = UserAuthManager.signInWithPhoneUser(this@LockScreenActivity, user, currentRole)
+                        Toast.makeText(this@LockScreenActivity, "Auto-verified: Welcome ${session.displayName}!", Toast.LENGTH_SHORT).show()
+                        onUnlocked(currentRole)
+                    }
+
+                    override fun onError(message: String) {
+                        binding.btnSendOtp.isEnabled = true
+                        binding.btnSendOtp.text = "Send 6-Digit SMS Code"
+                        showError(message)
+                    }
+                }
+            )
+        }
+
+        binding.btnVerifyOtp.setOnClickListener {
+            val vId = phoneVerificationId
+            if (vId.isNullOrEmpty()) {
+                showError("Please request an SMS verification code first.")
+                return@setOnClickListener
+            }
+
+            val code = binding.etOtpCode.text?.toString()?.trim().orEmpty()
+            if (code.length != 6) {
+                showError("Please enter the complete 6-digit verification code.")
+                return@setOnClickListener
+            }
+
+            binding.btnVerifyOtp.isEnabled = false
+            binding.btnVerifyOtp.text = "Verifying..."
+
+            com.shopkeeper.mobileshop.security.PhoneAuthHelper.verifyOtp(
+                activity = this,
+                verificationId = vId,
+                code = code,
+                onSuccess = { fbUser ->
+                    val user = UserAuthManager.signInWithPhoneUser(this, fbUser, currentRole)
+                    Toast.makeText(this, "Phone verified successfully! Welcome, ${user.displayName}", Toast.LENGTH_SHORT).show()
+                    onUnlocked(currentRole)
+                },
+                onError = { err ->
+                    binding.btnVerifyOtp.isEnabled = true
+                    binding.btnVerifyOtp.text = "Verify Code & Sign In"
+                    showError(err)
+                }
+            )
+        }
+    }
+
     private fun handleSignIn() {
         val emailOrId = binding.etLoginEmail.text?.toString()?.trim().orEmpty()
         val pass = binding.etLoginPassword.text?.toString()?.trim().orEmpty()
@@ -337,10 +439,10 @@ class LockScreenActivity : AppCompatActivity() {
         binding.tvAuthError.text = message
         binding.tvAuthError.visibility = View.VISIBLE
         val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
-        if (isSignUpMode) {
-            binding.layoutSignUpForm.startAnimation(shake)
-        } else {
-            binding.layoutSignInForm.startAnimation(shake)
+        when {
+            isSignUpMode -> binding.layoutSignUpForm.startAnimation(shake)
+            isOtpMode -> binding.layoutOtpForm.startAnimation(shake)
+            else -> binding.layoutSignInForm.startAnimation(shake)
         }
     }
 

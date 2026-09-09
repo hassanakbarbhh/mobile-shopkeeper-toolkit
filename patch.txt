@@ -1,0 +1,70 @@
+--- app/src/main/java/com/shopkeeper/mobileshop/utils/ThermalPrintHelper.kt
++++ app/src/main/java/com/shopkeeper/mobileshop/utils/ThermalPrintHelper.kt
+@@ -4,4 +4,6 @@
+ import android.content.ClipboardManager
+ import android.content.Context
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.launch
+ import android.graphics.Bitmap
+ import android.view.LayoutInflater
+@@ -52,9 +54,16 @@
+ 
+         // Direct System Print (USB / Bluetooth / Wi-Fi / System Spooler)
+         binding.btnPrintDirect.setOnClickListener {
+-            if (ctx is Activity) {
+-                DirectPrintHelper.printBitmapDirectly(ctx, "Receipt_${sale.id}", currentBitmap)
+-            } else {
+-                ThermalReceiptManager.sendToPrinterApp(ctx, currentBitmap, currentText)
++            val savedAddress = AppPreferences.getBluetoothPrinterAddress(ctx)
++            if (savedAddress.isEmpty()) {
++                BluetoothPrinterManager.showPrinterSelectionDialog(ctx) { selectedAddress ->
++                    CoroutineScope(Dispatchers.Main).launch {
++                        BluetoothPrinterManager.connectAndPrint(ctx, selectedAddress, currentText)
++                    }
++                }
++            } else {
++                CoroutineScope(Dispatchers.Main).launch {
++                    BluetoothPrinterManager.connectAndPrint(ctx, savedAddress, currentText)
++                }
+             }
+         }
+ 
+@@ -66,7 +75,7 @@
+ 
+         // Share via WhatsApp or image apps
+         binding.btnShareWhatsApp.setOnClickListener {
+-            ThermalReceiptManager.shareReceiptImage(ctx, currentBitmap, "Receipt #${sale.id}")
++            WhatsAppHelper.sendTextToWhatsApp(ctx, "", currentText)
+         }
+ 
+         // Custom Thermal Options (Header, Footer, Barcode, etc.)
+@@ -124,9 +133,16 @@
+ 
+         binding.btnPrintDirect.setOnClickListener {
+-            if (ctx is Activity) {
+-                DirectPrintHelper.printBitmapDirectly(ctx, "Repair_${repair.id}", currentBitmap)
+-            } else {
+-                ThermalReceiptManager.sendToPrinterApp(ctx, currentBitmap, currentText)
++            val savedAddress = AppPreferences.getBluetoothPrinterAddress(ctx)
++            if (savedAddress.isEmpty()) {
++                BluetoothPrinterManager.showPrinterSelectionDialog(ctx) { selectedAddress ->
++                    CoroutineScope(Dispatchers.Main).launch {
++                        BluetoothPrinterManager.connectAndPrint(ctx, selectedAddress, currentText)
++                    }
++                }
++            } else {
++                CoroutineScope(Dispatchers.Main).launch {
++                    BluetoothPrinterManager.connectAndPrint(ctx, savedAddress, currentText)
++                }
+             }
+         }
+ 
+@@ -137,7 +153,7 @@
+ 
+         binding.btnShareWhatsApp.setOnClickListener {
+-            ThermalReceiptManager.shareReceiptImage(ctx, currentBitmap, "Repair Tag #${repair.id}")
++            WhatsAppHelper.sendTextToWhatsApp(ctx, repair.customerPhone, currentText)
+         }
+ 
+         binding.btnThermalOptions.setOnClickListener {

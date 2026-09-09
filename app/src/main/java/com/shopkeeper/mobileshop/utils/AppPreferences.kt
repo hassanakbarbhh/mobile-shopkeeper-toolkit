@@ -172,4 +172,14 @@ object AppPreferences {
     fun setNightMode(ctx: Context, modeName: String) {
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_NIGHT_MODE, modeName).apply()
     }
+
+
+    fun getBluetoothPrinterAddress(ctx: Context): String {
+        return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("bt_printer_address", "") ?: ""
+    }
+
+    fun setBluetoothPrinterAddress(ctx: Context, address: String) {
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("bt_printer_address", address).apply()
+    }
+
 }

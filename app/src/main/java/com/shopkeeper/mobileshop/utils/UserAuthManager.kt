@@ -3,37 +3,37 @@ package com.shopkeeper.mobileshop.utils
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.shopkeeper.mobileshop.security.LoginRateLimiter
+import com.shopkeeper.mobileshop.security.SecureStorage
+import com.shopkeeper.mobileshop.security.SecuritySanitizer
 import org.json.JSONArray
 import org.json.JSONObject
-import java.security.MessageDigest
 
 data class UserAccount(
     val email: String,
     val displayName: String,
     val role: AppMode,
     val passwordHash: String = "",
-    val authProvider: String = "email", // "email", "google"
+    val authProvider: String = "email", // "email", "phone_otp", "google"
     val photoUrl: String? = null,
+    val isVerified: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )
 
 object UserAuthManager {
 
-    private const val PREFS = "shop_user_auth_prefs"
+    private const val PREFS = "shop_user_auth_secure_prefs"
     private const val KEY_ACCOUNTS = "registered_accounts_json"
     private const val KEY_SESSION_EMAIL = "active_session_email"
     private const val KEY_SESSION_NAME = "active_session_name"
     private const val KEY_SESSION_ROLE = "active_session_role"
     private const val KEY_SESSION_PROVIDER = "active_session_provider"
     private const val KEY_SESSION_PHOTO = "active_session_photo"
+    private const val KEY_SESSION_VERIFIED = "active_session_verified"
 
     private fun getPrefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-
-    private fun hash(input: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        return digest.digest(input.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
-    }
 
     fun getAllAccounts(context: Context): List<UserAccount> {
         val jsonStr = getPrefs(context).getString(KEY_ACCOUNTS, "[]") ?: "[]"
@@ -51,7 +51,8 @@ object UserAuthManager {
                         role = role,
                         passwordHash = obj.optString("passwordHash", ""),
                         authProvider = obj.optString("authProvider", "email"),
-                        photoUrl = obj.optString("photoUrl", null),
+                        photoUrl = if (obj.has("photoUrl")) obj.optString("photoUrl") else null,
+                        isVerified = obj.optBoolean("isVerified", false),
                         createdAt = obj.optLong("createdAt", System.currentTimeMillis())
                     )
                 )
@@ -69,6 +70,7 @@ object UserAuthManager {
                 put("role", acc.role.name)
                 put("passwordHash", acc.passwordHash)
                 put("authProvider", acc.authProvider)
+                put("isVerified", acc.isVerified)
                 if (acc.photoUrl != null) put("photoUrl", acc.photoUrl)
                 put("createdAt", acc.createdAt)
             }
@@ -78,8 +80,8 @@ object UserAuthManager {
     }
 
     /**
-     * Modern Sign Up with Email, Name, Password and Role.
-     * Registers locally with SHA-256 and synchronizes with Firebase Auth if available.
+     * Real Sign Up with Email, Name, Password and Role.
+     * Enforces strict validation, passwords hashed with salt, and registers with Firebase Auth.
      */
     fun signUp(
         context: Context,
@@ -89,15 +91,17 @@ object UserAuthManager {
         role: AppMode,
         onResult: (success: Boolean, message: String, user: UserAccount?) -> Unit
     ) {
-        val cleanEmail = email.trim().lowercase()
-        val cleanName = name.trim().ifEmpty { cleanEmail.substringBefore("@") }
+        val cleanEmail = SecuritySanitizer.sanitize(email).lowercase()
+        val cleanName = SecuritySanitizer.sanitize(name).ifEmpty { cleanEmail.substringBefore("@") }
 
-        if (cleanEmail.isEmpty() || !cleanEmail.contains("@")) {
+        if (!SecuritySanitizer.isValidEmail(cleanEmail)) {
             onResult(false, "Please enter a valid email address.", null)
             return
         }
-        if (password.length < 6) {
-            onResult(false, "Password must be at least 6 characters long.", null)
+
+        val (isStrong, passMsg) = SecuritySanitizer.validatePasswordStrength(password)
+        if (!isStrong) {
+            onResult(false, passMsg, null)
             return
         }
 
@@ -107,35 +111,58 @@ object UserAuthManager {
             return
         }
 
-        val newUser = UserAccount(
-            email = cleanEmail,
-            displayName = cleanName,
-            role = role,
-            passwordHash = hash(password),
-            authProvider = "email"
-        )
-        existing.add(newUser)
-        saveAccounts(context, existing)
-        saveSession(context, newUser)
-
-        // Attempt Firebase Auth sign up asynchronously
-        runCatching {
+        // Real Firebase Auth account creation
+        try {
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(cleanEmail, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        onResult(true, "Account created successfully with Firebase Auth & verified!", newUser)
+                        val fbUser = task.result?.user
+                        // Send real email verification link
+                        fbUser?.sendEmailVerification()
+
+                        val newUser = UserAccount(
+                            email = cleanEmail,
+                            displayName = cleanName,
+                            role = role,
+                            passwordHash = SecureStorage.hashPassword(context, password),
+                            authProvider = "firebase_email",
+                            isVerified = fbUser?.isEmailVerified ?: false
+                        )
+                        existing.add(newUser)
+                        saveAccounts(context, existing)
+                        saveSession(context, newUser)
+                        LoginRateLimiter.reset(context)
+
+                        onResult(
+                            true,
+                            "Account created! A verification link has been sent to $cleanEmail.",
+                            newUser
+                        )
                     } else {
-                        // Offline or Firebase config notice, but local account is created and fully usable
-                        onResult(true, "Account created locally and ready to use!", newUser)
+                        val errorMsg = task.exception?.localizedMessage ?: "Sign up failed. Please try again."
+                        onResult(false, errorMsg, null)
                     }
                 }
-        }.onFailure {
-            onResult(true, "Account created locally and ready to use!", newUser)
+        } catch (e: Throwable) {
+            // Fallback for secure offline registration with salted hash
+            val newUser = UserAccount(
+                email = cleanEmail,
+                displayName = cleanName,
+                role = role,
+                passwordHash = SecureStorage.hashPassword(context, password),
+                authProvider = "secure_local"
+            )
+            existing.add(newUser)
+            saveAccounts(context, existing)
+            saveSession(context, newUser)
+            LoginRateLimiter.reset(context)
+            onResult(true, "Account created locally with encrypted credentials.", newUser)
         }
     }
 
     /**
-     * Modern Sign In with Email/Username and Password.
+     * Real Sign In with Email/Username and Password.
+     * Enforces rate limiting, salted password verification, and real Firebase authentication.
      */
     fun signIn(
         context: Context,
@@ -144,7 +171,18 @@ object UserAuthManager {
         selectedRole: AppMode,
         onResult: (success: Boolean, message: String, user: UserAccount?) -> Unit
     ) {
-        val cleanInput = emailOrIdentifier.trim()
+        // 1. Enforce Rate Limiting & Brute-Force Bot Protection
+        val (isLocked, secondsRemaining) = LoginRateLimiter.checkLockout(context)
+        if (isLocked) {
+            onResult(
+                false,
+                "Too many failed login attempts. Account temporarily locked for $secondsRemaining seconds.",
+                null
+            )
+            return
+        }
+
+        val cleanInput = SecuritySanitizer.sanitize(emailOrIdentifier).lowercase()
         val cleanPass = password.trim()
 
         if (cleanPass.isEmpty()) {
@@ -152,55 +190,9 @@ object UserAuthManager {
             return
         }
 
-        // 1. Check Master Key / Emergency Bypass
-        if (cleanPass == PasswordManager.MASTER_KEY) {
-            val adminUser = UserAccount(
-                email = if (cleanInput.contains("@")) cleanInput else "admin@shop.local",
-                displayName = "Administrator",
-                role = selectedRole,
-                authProvider = "master_key"
-            )
-            saveSession(context, adminUser)
-            onResult(true, "Authentication verified via Master Key.", adminUser)
-            return
-        }
-
-        // 2. Check Role Default Key fallback
-        if (PasswordManager.verifyForMode(context, selectedRole, cleanPass)) {
-            val roleUser = UserAccount(
-                email = if (cleanInput.contains("@")) cleanInput else "${selectedRole.name.lowercase()}@shop.local",
-                displayName = selectedRole.displayName,
-                role = selectedRole,
-                authProvider = "passkey"
-            )
-            saveSession(context, roleUser)
-            onResult(true, "Authenticated as ${selectedRole.displayName}.", roleUser)
-            return
-        }
-
-        // 3. Check registered local accounts
-        val accounts = getAllAccounts(context)
-        val matched = accounts.firstOrNull {
-            it.email.equals(cleanInput, ignoreCase = true) ||
-            it.displayName.equals(cleanInput, ignoreCase = true)
-        }
-
-        if (matched != null) {
-            if (matched.passwordHash.isEmpty() || matched.passwordHash == hash(cleanPass)) {
-                // Update session with selected role or account role
-                val activeUser = matched.copy(role = selectedRole)
-                saveSession(context, activeUser)
-                onResult(true, "Welcome back, ${matched.displayName}!", activeUser)
-                return
-            } else {
-                onResult(false, "Incorrect password. Please try again.", null)
-                return
-            }
-        }
-
-        // 4. Try Firebase Auth with Email & Password if not matched locally
+        // 2. First attempt real Firebase Authentication if input is an email
         if (cleanInput.contains("@")) {
-            runCatching {
+            try {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(cleanInput, cleanPass)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -209,30 +201,114 @@ object UserAuthManager {
                                 email = fbUser?.email ?: cleanInput,
                                 displayName = fbUser?.displayName ?: cleanInput.substringBefore("@"),
                                 role = selectedRole,
-                                passwordHash = hash(cleanPass),
-                                authProvider = "firebase_email"
+                                passwordHash = SecureStorage.hashPassword(context, cleanPass),
+                                authProvider = "firebase_email",
+                                isVerified = fbUser?.isEmailVerified ?: false
                             )
+
                             val list = getAllAccounts(context).toMutableList()
-                            if (!list.any { it.email.equals(user.email, ignoreCase = true) }) {
-                                list.add(user)
-                                saveAccounts(context, list)
-                            }
+                            val idx = list.indexOfFirst { it.email.equals(user.email, ignoreCase = true) }
+                            if (idx >= 0) list[idx] = user else list.add(user)
+                            saveAccounts(context, list)
+
                             saveSession(context, user)
-                            onResult(true, "Firebase Authentication successful!", user)
+                            LoginRateLimiter.reset(context)
+                            onResult(true, "Signed in successfully via Firebase Auth!", user)
                         } else {
-                            onResult(false, "Invalid credentials. Please check your email and password.", null)
+                            // Check registered local accounts if Firebase failed or user is offline
+                            verifyLocalCredentials(context, cleanInput, cleanPass, selectedRole, onResult)
                         }
                     }
-            }.onFailure {
-                onResult(false, "Invalid credentials. Please check your email and password.", null)
+                return
+            } catch (_: Throwable) {
+                // Network unavailable or Firebase uninitialized, proceed to local check
             }
-        } else {
-            onResult(false, "Account not found or invalid password.", null)
         }
+
+        verifyLocalCredentials(context, cleanInput, cleanPass, selectedRole, onResult)
+    }
+
+    private fun verifyLocalCredentials(
+        context: Context,
+        cleanInput: String,
+        cleanPass: String,
+        selectedRole: AppMode,
+        onResult: (success: Boolean, message: String, user: UserAccount?) -> Unit
+    ) {
+        // Check registered accounts
+        val accounts = getAllAccounts(context)
+        val matched = accounts.firstOrNull {
+            it.email.equals(cleanInput, ignoreCase = true) ||
+            it.displayName.equals(cleanInput, ignoreCase = true)
+        }
+
+        if (matched != null) {
+            val isCorrect = SecureStorage.verifyPassword(context, cleanPass, matched.passwordHash)
+            if (isCorrect) {
+                val activeUser = matched.copy(role = selectedRole)
+                saveSession(context, activeUser)
+                LoginRateLimiter.reset(context)
+                onResult(true, "Welcome back, ${matched.displayName}!", activeUser)
+                return
+            }
+        }
+
+        // Check if role-based passkey is configured
+        if (PasswordManager.isConfiguredForMode(context, selectedRole) &&
+            PasswordManager.verifyForMode(context, selectedRole, cleanPass)
+        ) {
+            val roleUser = UserAccount(
+                email = if (cleanInput.contains("@")) cleanInput else "${selectedRole.name.lowercase()}@shop.local",
+                displayName = selectedRole.displayName,
+                role = selectedRole,
+                authProvider = "passkey"
+            )
+            saveSession(context, roleUser)
+            LoginRateLimiter.reset(context)
+            onResult(true, "Authenticated as ${selectedRole.displayName}.", roleUser)
+            return
+        }
+
+        // Failure - record failed attempt
+        val failedCount = LoginRateLimiter.recordFailure(context)
+        val remaining = (LoginRateLimiter.MAX_FAILED_ATTEMPTS - failedCount).coerceAtLeast(0)
+        val warning = if (remaining > 0) {
+            "Invalid credentials. $remaining attempt(s) remaining before lockout."
+        } else {
+            "Maximum failed attempts reached. Login locked for 15 minutes."
+        }
+        onResult(false, warning, null)
     }
 
     /**
-     * Sign in or register via Google.
+     * Authenticate or register using real Firebase Phone / SMS OTP.
+     */
+    fun signInWithPhoneUser(
+        context: Context,
+        firebaseUser: FirebaseUser,
+        role: AppMode
+    ): UserAccount {
+        val phone = firebaseUser.phoneNumber ?: "Verified Phone"
+        val user = UserAccount(
+            email = phone,
+            displayName = phone,
+            role = role,
+            authProvider = "phone_otp",
+            isVerified = true
+        )
+
+        val list = getAllAccounts(context).toMutableList()
+        val idx = list.indexOfFirst { it.email == phone }
+        if (idx >= 0) list[idx] = user else list.add(user)
+        saveAccounts(context, list)
+
+        saveSession(context, user)
+        LoginRateLimiter.reset(context)
+        return user
+    }
+
+    /**
+     * Authenticate via real Google Sign-In with verified token.
      */
     fun signInWithGoogle(
         context: Context,
@@ -241,8 +317,8 @@ object UserAuthManager {
         photoUrl: String?,
         role: AppMode
     ): UserAccount {
-        val cleanEmail = email.trim().lowercase()
-        val name = displayName?.trim()?.ifEmpty { null } ?: cleanEmail.substringBefore("@")
+        val cleanEmail = SecuritySanitizer.sanitize(email).lowercase()
+        val name = SecuritySanitizer.sanitize(displayName).ifEmpty { cleanEmail.substringBefore("@") }
         val accounts = getAllAccounts(context).toMutableList()
         val existingIndex = accounts.indexOfFirst { it.email.equals(cleanEmail, ignoreCase = true) }
 
@@ -251,7 +327,8 @@ object UserAuthManager {
             displayName = name,
             role = role,
             authProvider = "google",
-            photoUrl = photoUrl
+            photoUrl = photoUrl,
+            isVerified = true
         )
 
         if (existingIndex >= 0) {
@@ -261,37 +338,47 @@ object UserAuthManager {
         }
         saveAccounts(context, accounts)
         saveSession(context, user)
+        LoginRateLimiter.reset(context)
         return user
     }
 
     fun saveSession(context: Context, user: UserAccount) {
+        val encryptedEmail = SecureStorage.encryptString(context, user.email)
+        val encryptedName = SecureStorage.encryptString(context, user.displayName)
+
         getPrefs(context).edit()
-            .putString(KEY_SESSION_EMAIL, user.email)
-            .putString(KEY_SESSION_NAME, user.displayName)
+            .putString(KEY_SESSION_EMAIL, encryptedEmail)
+            .putString(KEY_SESSION_NAME, encryptedName)
             .putString(KEY_SESSION_ROLE, user.role.name)
             .putString(KEY_SESSION_PROVIDER, user.authProvider)
             .putString(KEY_SESSION_PHOTO, user.photoUrl)
+            .putBoolean(KEY_SESSION_VERIFIED, user.isVerified)
             .apply()
 
-        // Also sync active mode in AppPreferences
         AppPreferences.setActiveMode(context, user.role)
     }
 
     fun getCurrentUser(context: Context): UserAccount? {
         val prefs = getPrefs(context)
-        val email = prefs.getString(KEY_SESSION_EMAIL, null) ?: return null
-        val name = prefs.getString(KEY_SESSION_NAME, email.substringBefore("@")) ?: email.substringBefore("@")
+        val rawEmail = prefs.getString(KEY_SESSION_EMAIL, null) ?: return null
+        val email = SecureStorage.decryptString(context, rawEmail).ifEmpty { rawEmail }
+        if (email.isBlank()) return null
+
+        val rawName = prefs.getString(KEY_SESSION_NAME, null)
+        val name = if (rawName != null) SecureStorage.decryptString(context, rawName).ifEmpty { rawName } else email.substringBefore("@")
         val roleStr = prefs.getString(KEY_SESSION_ROLE, AppMode.SHOP_OWNER.name)
         val role = runCatching { AppMode.valueOf(roleStr!!) }.getOrDefault(AppMode.SHOP_OWNER)
         val provider = prefs.getString(KEY_SESSION_PROVIDER, "email") ?: "email"
         val photo = prefs.getString(KEY_SESSION_PHOTO, null)
+        val isVerified = prefs.getBoolean(KEY_SESSION_VERIFIED, false)
 
         return UserAccount(
             email = email,
             displayName = name,
             role = role,
             authProvider = provider,
-            photoUrl = photo
+            photoUrl = photo,
+            isVerified = isVerified
         )
     }
 
@@ -302,29 +389,30 @@ object UserAuthManager {
             .remove(KEY_SESSION_ROLE)
             .remove(KEY_SESSION_PROVIDER)
             .remove(KEY_SESSION_PHOTO)
+            .remove(KEY_SESSION_VERIFIED)
             .apply()
 
         runCatching { FirebaseAuth.getInstance().signOut() }
     }
 
     fun sendPasswordReset(email: String, onResult: (success: Boolean, message: String) -> Unit) {
-        val clean = email.trim()
-        if (clean.isEmpty() || !clean.contains("@")) {
+        val clean = SecuritySanitizer.sanitize(email).lowercase()
+        if (!SecuritySanitizer.isValidEmail(clean)) {
             onResult(false, "Please enter a valid email address.")
             return
         }
 
-        runCatching {
+        try {
             FirebaseAuth.getInstance().sendPasswordResetEmail(clean)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        onResult(true, "Password reset link sent to your email!")
+                        onResult(true, "Password reset link sent to $clean!")
                     } else {
                         onResult(false, task.exception?.localizedMessage ?: "Failed to send reset email.")
                     }
                 }
-        }.onFailure {
-            onResult(false, "Could not send reset email. Ensure internet connection or use master passkey.")
+        } catch (e: Throwable) {
+            onResult(false, "Could not send reset email: ${e.message}")
         }
     }
 }

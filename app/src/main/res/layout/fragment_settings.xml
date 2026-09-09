@@ -122,75 +122,53 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+
+
         <View android:layout_width="match_parent" android:layout_height="1dp"
             android:background="@color/divider" android:layout_marginVertical="18dp"/>
 
+        <!-- Database Backup Center -->
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="GitHub Remote Synchronization" android:textStyle="bold"
+            android:text="Secure Database Backup (Google Drive / Local)" android:textStyle="bold"
             android:textColor="@color/green_900"/>
 
-        <com.shopkeeper.mobileshop.ui.components.SyncStatusIndicatorView
-            android:id="@+id/settingsSyncIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Safely backup your entire shop database to Google Drive or internal storage to prevent data loss."
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="10dp">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTestSyncSuccess"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:id="@+id/btnBackupDatabase"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:text="Set Synced"
-                android:textSize="11sp"/>
+                android:backgroundTint="@color/green_800"
+                android:text="Export Backup"
+                android:textSize="11sp"
+                app:icon="@drawable/ic_export"
+                app:iconSize="14dp"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTestSyncPending"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="4dp"
-                android:text="Set Pending"
-                android:textSize="11sp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTestSyncError"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:id="@+id/btnRestoreDatabase"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="Set Error"
-                android:textSize="11sp"/>
+                android:text="Import &amp; Restore"
+                android:textSize="11sp"
+                app:icon="@drawable/ic_import"
+                app:iconSize="14dp"/>
         </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConfigureRepo"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Configure GitHub Repo &amp; Branch"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGitHubActionsApkBuilder"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/gray_900"
-            android:text="GitHub Actions APK Builder (Twice-Checked)"
-            android:textColor="@color/white"
-            app:icon="@drawable/ic_github"
-            app:iconSize="16dp"/>
 
         <View android:layout_width="match_parent" android:layout_height="1dp"
             android:background="@color/divider" android:layout_marginVertical="18dp"/>
@@ -364,7 +342,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:text="Test Sale Receipt"
+                android:text="Print Sample Sale Receipt"
                 android:textSize="11sp"
                 app:icon="@drawable/ic_thermal_printer"
                 app:iconSize="14dp"/>
@@ -376,7 +354,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="Test Repair Tag"
+                android:text="Print Sample Repair Tag"
                 android:textSize="11sp"
                 app:icon="@drawable/ic_thermal_printer"
                 app:iconSize="14dp"/>

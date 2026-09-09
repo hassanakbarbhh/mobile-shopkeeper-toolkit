@@ -237,7 +237,7 @@
                     android:background="@color/divider"/>
             </LinearLayout>
 
-            <!-- TAB SWITCHER: SIGN IN vs CREATE ACCOUNT -->
+            <!-- TAB SWITCHER: SIGN IN vs SMS OTP vs CREATE ACCOUNT -->
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/toggleAuthMode"
                 android:layout_width="match_parent"
@@ -253,7 +253,17 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Sign In"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+                <Button
+                    android:id="@+id/btnTabOtp"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="SMS OTP"
+                    android:textSize="12sp"
                     android:textStyle="bold"/>
 
                 <Button
@@ -262,8 +272,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Create Account"
-                    android:textSize="13sp"
+                    android:text="Register"
+                    android:textSize="12sp"
                     android:textStyle="bold"/>
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -537,6 +547,107 @@
                     app:cornerRadius="12dp"
                     app:icon="@drawable/ic_person"
                     app:iconGravity="textStart"/>
+            </LinearLayout>
+
+            <!-- SMS OTP VERIFICATION FORM -->
+            <LinearLayout
+                android:id="@+id/layoutOtpForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enter mobile phone number (with country code):"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="6dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPhoneNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MobileShop.TextInput"
+                    app:startIconDrawable="@drawable/ic_call"
+                    app:startIconTint="@color/green_700"
+                    app:boxStrokeWidth="1.5dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPhoneNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Phone (e.g., +923001234567)"
+                        android:inputType="phone"
+                        android:imeOptions="actionDone"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSendOtp"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="@color/green_800"
+                    android:text="Send 6-Digit SMS Code"
+                    android:textSize="13sp"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_email"
+                    app:iconGravity="textStart"/>
+
+                <LinearLayout
+                    android:id="@+id/layoutOtpCodeInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvOtpCodePrompt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enter the 6-digit code sent to your phone:"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilOtpCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MobileShop.TextInput"
+                        app:startIconDrawable="@drawable/ic_lock"
+                        app:startIconTint="@color/green_700"
+                        app:boxStrokeWidth="1.5dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etOtpCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="6-Digit SMS Code"
+                            android:inputType="number"
+                            android:maxLength="6"
+                            android:gravity="center"
+                            android:textSize="18sp"
+                            android:letterSpacing="0.15"
+                            android:maxLines="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnVerifyOtp"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="8dp"
+                        android:backgroundTint="@color/green_900"
+                        android:text="Verify Code &amp; Sign In"
+                        android:textSize="14sp"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_sync_done"
+                        app:iconGravity="textStart"/>
+                </LinearLayout>
             </LinearLayout>
 
             <TextView

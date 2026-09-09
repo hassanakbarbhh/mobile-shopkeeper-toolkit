@@ -1,6 +1,7 @@
 package com.shopkeeper.mobileshop.ui.settings
 
 import android.content.Intent
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +25,7 @@ import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogGoogleFirebaseAuthBinding
 import com.shopkeeper.mobileshop.databinding.DialogManageRoleKeysBinding
 import com.shopkeeper.mobileshop.databinding.FragmentSettingsBinding
-import com.shopkeeper.mobileshop.sync.GitHubSyncManager
+
 import com.shopkeeper.mobileshop.sync.SyncState
 import com.shopkeeper.mobileshop.ui.auth.LockScreenActivity
 import com.shopkeeper.mobileshop.ui.role.RoleSelectActivity
@@ -40,10 +41,10 @@ import com.shopkeeper.mobileshop.utils.ThermalPrintHelper
 import com.shopkeeper.mobileshop.utils.ThemeManager
 import com.shopkeeper.mobileshop.utils.AppTheme
 import com.shopkeeper.mobileshop.utils.NightModeOption
-import com.shopkeeper.mobileshop.utils.GitHubActionsHelper
+
 import com.shopkeeper.mobileshop.utils.FirebaseAuthDiagnosticHelper
 import com.shopkeeper.mobileshop.databinding.DialogThemePickerBinding
-import com.shopkeeper.mobileshop.databinding.DialogGithubActionsApkBinding
+
 import com.shopkeeper.mobileshop.databinding.DialogFirebaseAuthCheckBinding
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -56,11 +57,45 @@ import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+import android.app.Activity
+import androidx.activity.result.contract.ActivityResultContracts
+import com.shopkeeper.mobileshop.utils.DatabaseBackupManager
+
 class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private lateinit var repository: ShopRepository
+
+    private val backupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val success = DatabaseBackupManager.performBackup(requireContext(), uri)
+                    if (success) {
+                        Toast.makeText(requireContext(), "Database backup saved successfully!", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to save backup", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private val restoreLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val success = DatabaseBackupManager.performRestore(requireContext(), uri)
+                    if (success) {
+                        Toast.makeText(requireContext(), "Database restored successfully! Please restart the app.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to restore database", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -90,6 +125,24 @@ class SettingsFragment : Fragment() {
             val addr = binding.etShopAddress.text.toString().trim()
             ShopProfile.save(requireContext(), name, phone, addr)
             Toast.makeText(requireContext(), "Shop profile saved!", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnBackupDatabase.setOnClickListener {
+            val dateStr = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_TITLE, "MobileShop_Backup_$dateStr.db")
+            }
+            backupLauncher.launch(intent)
+        }
+
+        binding.btnRestoreDatabase.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+            }
+            restoreLauncher.launch(intent)
         }
 
         // Export Center Click Listeners with CSV & PDF Options
@@ -244,30 +297,6 @@ class SettingsFragment : Fragment() {
             ThermalPrintHelper.showThermalCustomOptionsDialog(requireContext())
         }
 
-        // GitHub Sync Controls
-        binding.btnTestSyncSuccess.setOnClickListener {
-            GitHubSyncManager.setTestState(SyncState.Synced(System.currentTimeMillis()))
-            Toast.makeText(requireContext(), "Sync status marked as Synced", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnTestSyncPending.setOnClickListener {
-            GitHubSyncManager.setTestState(SyncState.Pending("Changes pending sync...", 3))
-            Toast.makeText(requireContext(), "Sync status marked as Changes Pending", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnTestSyncError.setOnClickListener {
-            GitHubSyncManager.setTestState(SyncState.Error("Simulated sync error", System.currentTimeMillis()))
-            Toast.makeText(requireContext(), "Sync status marked as Error", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnConfigureRepo.setOnClickListener {
-            showConfigureRepoDialog()
-        }
-
-        binding.btnGitHubActionsApkBuilder.setOnClickListener {
-            showGitHubActionsDialog()
-        }
-
         binding.btnResetDefaultStock.setOnClickListener {
             showResetStockConfirmation()
         }
@@ -370,29 +399,6 @@ class SettingsFragment : Fragment() {
                     CurrencyManager.setCurrency(requireContext(), "CUSTOM", symbol)
                     updateCurrencyDisplay()
                     Toast.makeText(requireContext(), "Custom currency symbol set to $symbol", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun showConfigureRepoDialog() {
-        val currentRepo = GitHubSyncManager.getRepoName(requireContext())
-        val input = EditText(requireContext()).apply {
-            setText(currentRepo)
-            hint = "username/repository-name"
-            setPadding(50, 40, 50, 40)
-        }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Configure GitHub Repository")
-            .setMessage("Set the target remote GitHub repository to synchronize local Room database state:")
-            .setView(input)
-            .setPositiveButton("Save & Sync") { _, _ ->
-                val repo = input.text.toString().trim()
-                if (repo.isNotEmpty()) {
-                    GitHubSyncManager.setRepoName(requireContext(), repo)
-                    GitHubSyncManager.triggerSync(requireContext())
-                    Toast.makeText(requireContext(), "Target repository updated to $repo", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -604,62 +610,6 @@ class SettingsFragment : Fragment() {
         dBinding.rbThemeSlate.setOnClickListener { selectTheme(AppTheme.SLATE) }
 
         dBinding.btnCloseThemePicker.setOnClickListener { dialog.dismiss() }
-
-        dialog.show()
-    }
-
-    private fun showGitHubActionsDialog() {
-        val dBinding = DialogGithubActionsApkBinding.inflate(layoutInflater)
-        val currentRepo = AppPreferences.getGitHubRepo(requireContext()).ifEmpty { "hassanakbarbhh/shopkeeper" }
-        dBinding.etGitHubRepoTarget.setText(currentRepo)
-
-        fun updatePreflight() {
-            val repoText = dBinding.etGitHubRepoTarget.text?.toString().orEmpty().trim()
-            val check = GitHubActionsHelper.runPreflightCheck(requireContext(), repoText)
-            dBinding.tvPreflightSummary.text = check.formatForDisplay()
-        }
-
-        updatePreflight()
-
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dBinding.root)
-            .create()
-
-        dBinding.btnVerifyPreflight.setOnClickListener {
-            val repoText = dBinding.etGitHubRepoTarget.text?.toString().orEmpty().trim()
-            val check = GitHubActionsHelper.runPreflightCheck(requireContext(), repoText)
-            dBinding.tvPreflightSummary.text = check.formatForDisplay()
-            Toast.makeText(
-                requireContext(),
-                if (check.allPassed) "✅ Pre-flight checks PASSED! Ready to build." else "⚠️ Please verify repository format.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        dBinding.btnBuildApkWeb.setOnClickListener {
-            val repoText = dBinding.etGitHubRepoTarget.text?.toString().orEmpty().trim()
-            if (repoText.isNotEmpty()) {
-                AppPreferences.setGitHubRepo(requireContext(), repoText)
-            }
-            GitHubActionsHelper.openGitHubActionsInBrowser(requireContext(), repoText)
-            Toast.makeText(requireContext(), "Opening GitHub Actions Workflow in browser...", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dBinding.btnViewWorkflowConfig.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Twice-Checking CI/CD Workflow")
-                .setMessage("Configuration: /.github/workflows/build-apk.yml\n\n" +
-                        "1. Pre-Check: Unit tests & Roborazzi regression validation\n" +
-                        "2. Build Check: Full Gradle APK build (assembleDebug)\n" +
-                        "3. Verification: APK size verification (must be > 2 MB)\n" +
-                        "4. Integrity: Generates and records SHA-256 Checksum\n" +
-                        "5. Artifacts: Automatically saved in GitHub Actions artifacts for 30 days.")
-                .setPositiveButton("OK", null)
-                .show()
-        }
-
-        dBinding.btnCloseGitHubDialog.setOnClickListener { dialog.dismiss() }
 
         dialog.show()
     }
