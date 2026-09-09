@@ -423,6 +423,8 @@ class SettingsFragment : Fragment() {
                     dBinding.toggleKeyRole.check(R.id.btnKeyTech)
                     dBinding.tvKeyRoleSubtitle.text = "Modifying security key for Repair Tech"
                 }
+                AppMode.BASIC_USER -> {}
+                else -> {}
             }
         }
 

@@ -194,6 +194,11 @@ class LockScreenActivity : AppCompatActivity() {
                 binding.tvRoleHint.text = "🔧 Repair Technician: Intake jobs, diagnosis & parts tracking"
                 binding.btnLoginSubmit.text = "Sign In as Repair Tech"
             }
+            AppMode.BASIC_USER -> {
+                binding.tvRoleHint.text = "Basic User"
+                binding.btnLoginSubmit.text = "Sign In"
+            }
+            else -> {}
         }
         binding.tvAuthError.visibility = View.GONE
     }
