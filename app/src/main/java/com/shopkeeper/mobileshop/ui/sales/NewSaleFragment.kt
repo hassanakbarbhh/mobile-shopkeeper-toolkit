@@ -22,6 +22,9 @@ import com.shopkeeper.mobileshop.databinding.DialogProductSearchBinding
 import com.shopkeeper.mobileshop.databinding.FragmentNewSaleBinding
 import com.shopkeeper.mobileshop.ui.inventory.ProductAdapter
 import com.shopkeeper.mobileshop.utils.InvoiceGenerator
+
+import com.shopkeeper.mobileshop.domain.MarginGuard
+import com.shopkeeper.mobileshop.domain.DiscountApprovalGuard
 import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -169,13 +172,24 @@ class NewSaleFragment : Fragment() {
     }
 
     private fun recalculateTotals() {
-        val subtotal = cartItems.sumOf { it.totalPrice }
-        val discount = binding.etDiscount.text.toString().toDoubleOrNull() ?: 0.0
-        val tax = binding.etTax.text.toString().toDoubleOrNull() ?: 0.0
-        val grandTotal = (subtotal - discount + tax).coerceAtLeast(0.0)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val subtotal = cartItems.sumOf { it.totalPrice }
+            val discount = binding.etDiscount.text.toString().toDoubleOrNull() ?: 0.0
+            val tax = binding.etTax.text.toString().toDoubleOrNull() ?: 0.0
+            val grandTotal = (subtotal - discount + tax).coerceAtLeast(0.0)
 
-        binding.tvSubtotal.text = subtotal.money()
-        binding.tvTotal.text = grandTotal.money()
+            binding.tvSubtotal.text = subtotal.money()
+            binding.tvTotal.text = grandTotal.money()
+
+            var totalPurchasePrice = 0.0
+            for (item in cartItems) {
+                val product = repository.getProduct(item.productId)
+                totalPurchasePrice += (product?.purchasePrice ?: 0.0) * item.quantity
+            }
+            val marginGuard = MarginGuard()
+            val isAcceptable = marginGuard.isMarginAcceptable(grandTotal, totalPurchasePrice, 3.0)
+            binding.tvMarginWarning.visibility = if (!isAcceptable && totalPurchasePrice > 0) android.view.View.VISIBLE else android.view.View.GONE
+        }
     }
 
     private fun showProductSearchDialog() {
@@ -248,6 +262,16 @@ class NewSaleFragment : Fragment() {
         val tax = binding.etTax.text.toString().toDoubleOrNull() ?: 0.0
         val grandTotal = (subtotal - discount + tax).coerceAtLeast(0.0)
 
+
+        val discountApprovalGuard = DiscountApprovalGuard()
+        if (discountApprovalGuard.requiresOwnerApproval(discount, subtotal, 15.0)) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Owner Approval Required")
+                .setMessage("This discount exceeds the 15% maximum threshold. Please have the owner approve this transaction.")
+                .setPositiveButton("OK", null)
+                .show()
+            return
+        }
         val method = when (binding.chipGroupPayment.checkedChipId) {
             R.id.chipCard -> PaymentMethod.CARD
             R.id.chipUpi -> PaymentMethod.UPI

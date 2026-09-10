@@ -3,7 +3,7 @@ package com.shopkeeper.mobileshop.data.db.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "repairs")
+@Entity(tableName = "repairs", indices = [androidx.room.Index(value = ["status"])])
 data class Repair(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val customerId: Long? = null,

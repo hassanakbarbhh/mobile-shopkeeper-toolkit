@@ -16,6 +16,10 @@ import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.ShopProfile
 import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
+
+import com.shopkeeper.mobileshop.domain.NetProfitEngine
+import com.shopkeeper.mobileshop.domain.DeadStockDetector
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -78,46 +82,59 @@ class DashboardFragment : Fragment() {
         }
         val startOfDay = calendar.timeInMillis
         val endOfDay = System.currentTimeMillis()
-
+        val db = AppDatabase.getDatabase(requireContext())
+        
         viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getDatabase(requireContext())
-
             db.saleDao().getTotalSalesAmount(startOfDay, endOfDay).collect { sales ->
                 binding.tvTodaySales.text = (sales ?: 0.0).money()
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getDatabase(requireContext())
+            db.saleDao().getSalesByDateRange(startOfDay, endOfDay).collect { sales ->
+                var totalProfit = 0.0
+                val profitEngine = NetProfitEngine()
+                for (sale in sales) {
+                    val items = repository.getSaleItems(sale.id)
+                    for (item in items) {
+                        // Assuming purchasePrice is available. If not, it falls back to 0.0
+                        // Since SaleItem doesn't store purchasePrice, we must join it or fetch product.
+                        // Actually, this is a dashboard async block.
+                        val product = repository.getProduct(item.productId)
+                        val purchasePrice = product?.purchasePrice ?: 0.0
+                        val tax = 0.0 // Simplified for now
+                        val discount = (sale.discount / sales.size) // Pro-rated discount if item-level discount is needed
+                        totalProfit += profitEngine.calculateNetProfit(item.totalPrice, purchasePrice * item.quantity, 0.0, 0.0)
+                    }
+                    totalProfit -= sale.discount // Deduct flat discount once
+                }
+                binding.tvTodayProfit.text = totalProfit.money()
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
             db.saleDao().getTotalSalesCount(startOfDay, endOfDay).collect { count ->
                 binding.tvSalesCount.text = "$count transactions today"
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repository.totalInventoryValue.collect { value ->
                 binding.tvInventoryValue.text = (value ?: 0.0).money()
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repository.totalProductCount.collect { count ->
                 binding.tvProductCount.text = "$count products in catalog"
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repository.totalPendingAmount.collect { dues ->
                 binding.tvPendingPayments.text = (dues ?: 0.0).money()
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repository.activeRepairCount.collect { count ->
                 binding.tvActiveRepairs.text = "$count in shop"
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repository.lowStockProducts.collect { lowStock ->
                 if (lowStock.isNotEmpty()) {
@@ -128,8 +145,29 @@ class DashboardFragment : Fragment() {
                 }
             }
         }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            repository.allProducts.collect { products ->
+                val deadStockDetector = DeadStockDetector()
+                var deadStockCount = 0
+                var lockedCapital = 0.0
+                for (product in products) {
+                    val info = deadStockDetector.analyzeStock(product.updatedAt, product.quantity, product.purchasePrice)
+                    if (info.isDead) {
+                        deadStockCount++
+                        lockedCapital += info.lockedCapital
+                    }
+                }
+                if (deadStockCount > 0) {
+                    binding.cardDeadStock.visibility = View.VISIBLE
+                    binding.tvDeadStockCount.text = "$deadStockCount dead stock items"
+                    binding.tvDeadStockCapital.text = "Locked Capital: " + lockedCapital.money()
+                } else {
+                    binding.cardDeadStock.visibility = View.GONE
+                }
+            }
+        }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

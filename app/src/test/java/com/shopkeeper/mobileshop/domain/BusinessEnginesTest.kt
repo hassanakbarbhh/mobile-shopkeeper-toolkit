@@ -1,5 +1,6 @@
 package com.shopkeeper.mobileshop.domain
 
+import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -19,25 +20,22 @@ class BusinessEnginesTest {
         val guard = ImeiUniquenessGuard()
         assertTrue(guard.isImeiUnique("12345", listOf("54321", "99999")))
         assertFalse(guard.isImeiUnique("12345", listOf("12345", "99999")))
-        assertTrue(guard.isImeiUnique("", listOf("12345"))) // Accessory
+        assertTrue(guard.isImeiUnique("", listOf("12345")))
     }
 
     @Test
     fun testMarginGuard() {
         val guard = MarginGuard()
-        assertTrue(guard.isMarginAcceptable(120.0, 100.0, 15.0)) // 20% margin
-        assertFalse(guard.isMarginAcceptable(110.0, 100.0, 15.0)) // 10% margin
+        assertTrue(guard.isMarginAcceptable(120.0, 100.0, 15.0))
+        assertFalse(guard.isMarginAcceptable(110.0, 100.0, 15.0))
     }
 
     @Test
     fun testUdhaarAgingAnalyzer() {
         val analyzer = UdhaarAgingAnalyzer()
         val now = System.currentTimeMillis()
-        val tenDaysAgo = now - (10L * 24 * 60 * 60 * 1000)
-        val fortyDaysAgo = now - (40L * 24 * 60 * 60 * 1000)
-        
-        assertEquals("0-30 Days Overdue", analyzer.getAgingCategory(tenDaysAgo, now))
-        assertEquals("31-60 Days Overdue", analyzer.getAgingCategory(fortyDaysAgo, now))
+        assertEquals("0-30 Days Overdue", analyzer.getAgingCategory(now - (10L * 24 * 60 * 60 * 1000), now))
+        assertEquals("31-60 Days Overdue", analyzer.getAgingCategory(now - (40L * 24 * 60 * 60 * 1000), now))
     }
 
     @Test
@@ -50,8 +48,9 @@ class BusinessEnginesTest {
     @Test
     fun testRepairStatusStateRouter() {
         val router = RepairStatusStateRouter()
-        assertEquals("DIAGNOSING", router.getNextStatus("INTAKE"))
-        assertEquals("REPAIRED", router.getNextStatus("WAITING_FOR_PARTS"))
+        assertEquals(RepairStatus.DIAGNOSING, router.getNextStatus(RepairStatus.RECEIVED))
+        assertEquals(RepairStatus.IN_REPAIR, router.getNextStatus(RepairStatus.WAITING_PARTS))
+        assertEquals(RepairStatus.DELIVERED, router.getNextStatus(RepairStatus.DELIVERED))
     }
 
     @Test
@@ -65,8 +64,8 @@ class BusinessEnginesTest {
     fun testCustomerTrustScorer() {
         val scorer = CustomerTrustScorer()
         assertEquals(100, scorer.calculateScore(0, 0))
-        assertEquals(89, scorer.calculateScore(2, 1)) // 100 - 15 + 4
-        assertEquals(100, scorer.calculateScore(10, 0)) // bounded by 100
+        assertEquals(89, scorer.calculateScore(2, 1))
+        assertEquals(100, scorer.calculateScore(10, 0))
     }
 
     @Test
@@ -79,16 +78,14 @@ class BusinessEnginesTest {
     @Test
     fun testDiscountApprovalGuard() {
         val guard = DiscountApprovalGuard()
-        assertTrue(guard.requiresOwnerApproval(200.0, 1000.0, 15.0)) // 20% > 15%
-        assertFalse(guard.requiresOwnerApproval(100.0, 1000.0, 15.0)) // 10% < 15%
+        assertTrue(guard.requiresOwnerApproval(200.0, 1000.0, 15.0))
+        assertFalse(guard.requiresOwnerApproval(100.0, 1000.0, 15.0))
     }
 
     @Test
     fun testCashClosingReconciler() {
         val reconciler = CashClosingReconciler()
-        // Expected: 1000 + 500 - 100 = 1400. Actual = 1400. Variance = 0
         assertEquals(0.0, reconciler.reconcile(1000.0, 500.0, 100.0, 1400.0), 0.001)
-        // Actual 1350, Variance = -50
         assertEquals(-50.0, reconciler.reconcile(1000.0, 500.0, 100.0, 1350.0), 0.001)
     }
 
@@ -104,10 +101,8 @@ class BusinessEnginesTest {
     fun testWarrantyExpirationTracker() {
         val tracker = WarrantyExpirationTracker()
         val now = System.currentTimeMillis()
-        val twoMonthsAgo = now - (60L * 24 * 60 * 60 * 1000)
-        
-        assertTrue(tracker.isWarrantyValid(twoMonthsAgo, 3, now))
-        assertFalse(tracker.isWarrantyValid(twoMonthsAgo, 1, now))
+        assertTrue(tracker.isWarrantyValid(now - (60L * 24 * 60 * 60 * 1000), 3, now))
+        assertFalse(tracker.isWarrantyValid(now - (60L * 24 * 60 * 60 * 1000), 1, now))
     }
 
     @Test
@@ -120,9 +115,41 @@ class BusinessEnginesTest {
     @Test
     fun testDuplicateCustomerMerger() {
         val merger = DuplicateCustomerMerger()
-        // Our basic cleaner strips non-digits, so 923001234567 != 03001234567 directly unless we strip country codes too.
-        // Let's just test the basic digit extraction
         assertTrue(merger.isDuplicate("0300 123 4567", "03001234567"))
         assertFalse(merger.isDuplicate("03001234567", "03011234567"))
+    }
+
+    @Test
+    fun testStockoutForecaster() {
+        val forecaster = StockoutForecaster()
+        assertEquals(5, forecaster.forecastDaysLeft(10, 2.0))
+        assertEquals(Int.MAX_VALUE, forecaster.forecastDaysLeft(10, 0.0))
+    }
+
+    @Test
+    fun testSupplierScoreEngine() {
+        val engine = SupplierScoreEngine()
+        assertEquals(100.0, engine.calculateScore(0.0, 1.0), 0.001)
+        assertEquals(90.0, engine.calculateScore(0.1, 1.0), 0.001)
+    }
+
+    @Test
+    fun testOfflineConflictResolver() {
+        val resolver = OfflineConflictResolver()
+        val conflicts = resolver.detectConflicts(1000L, 2000L, "IMEI1", "IMEI1")
+        assertEquals(1, conflicts.size)
+    }
+
+    @Test
+    fun testDeadStockDetector() {
+        val detector = DeadStockDetector()
+        val now = System.currentTimeMillis()
+        val deadInfo = detector.analyzeStock(now - (70L * 24 * 60 * 60 * 1000), 5, 100.0, now)
+        assertTrue(deadInfo.isDead)
+        assertEquals(500.0, deadInfo.lockedCapital, 0.001)
+        
+        val aliveInfo = detector.analyzeStock(now - (10L * 24 * 60 * 60 * 1000), 5, 100.0, now)
+        assertFalse(aliveInfo.isDead)
+        assertEquals(0.0, aliveInfo.lockedCapital, 0.001)
     }
 }

@@ -8,14 +8,19 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.shopkeeper.mobileshop.R
 import com.shopkeeper.mobileshop.data.db.entity.Repair
-import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
+
+import android.graphics.Color
 import com.shopkeeper.mobileshop.databinding.ItemRepairBinding
+import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
 import com.shopkeeper.mobileshop.utils.dateText
 import com.shopkeeper.mobileshop.utils.money
 
 class RepairAdapter(
-    private val onItemClick: (Repair) -> Unit
+    private val onItemClick: (Repair) -> Unit,
+    private val onAdvanceClick: (Repair) -> Unit = {}
 ) : ListAdapter<Repair, RepairAdapter.ViewHolder>(DiffCallback) {
+    var warrantyStatuses: Map<Long, Boolean> = emptyMap()
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemRepairBinding.inflate(LayoutInflater.from(parent.context), parent, false)

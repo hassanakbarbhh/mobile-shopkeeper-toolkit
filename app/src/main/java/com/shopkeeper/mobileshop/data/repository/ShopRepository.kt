@@ -11,6 +11,7 @@ class ShopRepository(private val db: AppDatabase) {
     val totalInventoryValue: Flow<Double?> = db.productDao().getTotalInventoryValue()
     val totalProductCount: Flow<Int> = db.productDao().getTotalProductCount()
     fun searchProducts(q: String) = db.productDao().searchProducts("%$q%")
+    suspend fun getProduct(id: Long) = db.productDao().getProductById(id)
     suspend fun getProductByBarcode(barcode: String) = db.productDao().getByImei(barcode)
     suspend fun insertProduct(p: Product) = db.productDao().insert(p)
     suspend fun updateProduct(p: Product) = db.productDao().update(p)
@@ -25,6 +26,7 @@ class ShopRepository(private val db: AppDatabase) {
     val allSales: Flow<List<Sale>> = db.saleDao().getAllSales()
     val dueSales: Flow<List<Sale>> = db.saleDao().getDueSales()
     val totalPendingAmount: Flow<Double?> = db.saleDao().getTotalPendingAmount()
+    suspend fun getPendingSales() = db.saleDao().getPendingSales()
     suspend fun insertSale(sale: Sale, items: List<SaleItem>): Long {
         val id = db.saleDao().insertSale(sale)
         val linked = items.map { it.copy(saleId = id) }

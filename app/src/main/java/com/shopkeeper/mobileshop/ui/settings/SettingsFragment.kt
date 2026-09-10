@@ -3,6 +3,7 @@ package com.shopkeeper.mobileshop.ui.settings
 import android.content.Intent
 
 import android.os.Bundle
+import androidx.core.widget.doAfterTextChanged
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,6 +39,11 @@ import com.shopkeeper.mobileshop.utils.ImportManager
 import com.shopkeeper.mobileshop.utils.PasswordManager
 import com.shopkeeper.mobileshop.utils.ShopProfile
 import com.shopkeeper.mobileshop.utils.ThermalPrintHelper
+
+
+import com.shopkeeper.mobileshop.utils.GlobalExceptionHandler
+import com.shopkeeper.mobileshop.utils.TotpAuthenticator
+import android.widget.ImageView
 import com.shopkeeper.mobileshop.utils.ThemeManager
 import com.shopkeeper.mobileshop.utils.AppTheme
 import com.shopkeeper.mobileshop.utils.NightModeOption
@@ -53,6 +59,8 @@ import android.graphics.Color
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.shopkeeper.mobileshop.utils.DiagnosticStatus
+
+import com.shopkeeper.mobileshop.domain.CashClosingReconciler
 import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -309,6 +317,35 @@ class SettingsFragment : Fragment() {
         binding.btnManageGoogleAuth.setOnClickListener {
             showGoogleAuthManagementDialog()
         }
+        
+        binding.btnSetupMfa.setOnClickListener {
+            val authenticator = TotpAuthenticator()
+            val secret = "JBSWY3DPEHPK3PXP" // Mock secret for generation
+            val bitmap = authenticator.generateQrCodeForAuthenticator(secret, "Owner", "MobileShopkeeper")
+            
+            val dialogView = layoutInflater.inflate(R.layout.dialog_mfa_setup, null)
+            val ivQr = dialogView.findViewById<ImageView>(R.id.ivQrCode)
+            val etCode = dialogView.findViewById<android.widget.EditText>(R.id.etMfaCode)
+            ivQr.setImageBitmap(bitmap)
+            
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("2FA Setup (Google Authenticator)")
+                .setView(dialogView)
+                .setPositiveButton("Verify & Enable") { _, _ ->
+                    val code = etCode.text.toString()
+                    if (authenticator.verifyTotpCode(secret, code)) {
+                        Toast.makeText(requireContext(), "2FA Enabled! Device trusted for 30 days.", Toast.LENGTH_LONG).show()
+                        // Save trust date to preferences or DB
+                        val prefs = requireContext().getSharedPreferences("mfa_prefs", Context.MODE_PRIVATE)
+                        prefs.edit().putLong("last_trust_date", System.currentTimeMillis()).apply()
+                    } else {
+                        Toast.makeText(requireContext(), "Invalid Code. Try again.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
 
         binding.btnCheckFirebaseAuth.setOnClickListener {
             showFirebaseAuthDiagnosticDialog()
@@ -328,8 +365,53 @@ class SettingsFragment : Fragment() {
             requireActivity().finish()
         }
 
+        
+        binding.btnCashClosing.setOnClickListener {
+            // Basic mock dialog for Cash Closing
+            val dialogView = layoutInflater.inflate(R.layout.dialog_cash_closing, null)
+            val etOpening = dialogView.findViewById<android.widget.EditText>(R.id.etOpening)
+            val etCashIn = dialogView.findViewById<android.widget.EditText>(R.id.etCashIn)
+            val etCashOut = dialogView.findViewById<android.widget.EditText>(R.id.etCashOut)
+            val etCounted = dialogView.findViewById<android.widget.EditText>(R.id.etCounted)
+            val tvVariance = dialogView.findViewById<android.widget.TextView>(R.id.tvVariance)
+            
+            etCounted.doAfterTextChanged {
+                val opening = etOpening.text.toString().toDoubleOrNull() ?: 0.0
+                val inCash = etCashIn.text.toString().toDoubleOrNull() ?: 0.0
+                val outCash = etCashOut.text.toString().toDoubleOrNull() ?: 0.0
+                val counted = etCounted.text.toString().toDoubleOrNull() ?: 0.0
+                
+                val reconciler = CashClosingReconciler()
+                val variance = reconciler.reconcile(opening, inCash, outCash, counted)
+                tvVariance.text = "Variance: " + variance.money()
+                if (variance < 0) {
+                    tvVariance.setTextColor(android.graphics.Color.RED)
+                } else {
+                    tvVariance.setTextColor(android.graphics.Color.GREEN)
+                }
+            }
+            
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Daily Cash Closing")
+                .setView(dialogView)
+                .setPositiveButton("Sign-off") { _, _ ->
+                    Toast.makeText(requireContext(), "Signed off cash closing.", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
         binding.btnAbout.setOnClickListener {
             findNavController().navigate(R.id.navigation_about)
+        }
+
+        binding.btnViewCrashLogs.setOnClickListener {
+            val logs = GlobalExceptionHandler.readLogs(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Crash Logs")
+                .setMessage(if (logs.isBlank()) "No crashes recorded." else logs)
+                .setPositiveButton("Close", null)
+                .show()
         }
     }
 

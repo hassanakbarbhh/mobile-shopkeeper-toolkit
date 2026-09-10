@@ -18,6 +18,9 @@ import com.shopkeeper.mobileshop.databinding.DialogRepairBinding
 import com.shopkeeper.mobileshop.databinding.FragmentRepairsBinding
 import com.shopkeeper.mobileshop.utils.ExportManager
 import kotlinx.coroutines.flow.collectLatest
+
+import com.shopkeeper.mobileshop.domain.WarrantyExpirationTracker
+import com.shopkeeper.mobileshop.domain.RepairStatusStateRouter
 import kotlinx.coroutines.launch
 
 class RepairsFragment : Fragment() {
@@ -40,7 +43,17 @@ class RepairsFragment : Fragment() {
         val db = AppDatabase.getDatabase(requireContext())
         repository = ShopRepository(db)
 
-        adapter = RepairAdapter { repair -> showRepairActions(repair) }
+        adapter = RepairAdapter({ repair -> showRepairActions(repair) }, { repair ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                val router = com.shopkeeper.mobileshop.domain.RepairStatusStateRouter()
+                val nextStatus = router.getNextStatus(repair.status)
+                if (nextStatus != repair.status) {
+                    val updated = repair.copy(status = nextStatus)
+                    repository.updateRepair(updated)
+                    android.widget.Toast.makeText(requireContext(), "Advanced to ${nextStatus.name}", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
         binding.rvRepairs.layoutManager = LinearLayoutManager(requireContext())
         binding.rvRepairs.adapter = adapter
 

@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    
+    <TextView
+        android:id="@+id/tvMarginWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFCDD2"
+        android:textColor="#B71C1C"
+        android:padding="8dp"
+        android:text="Warning: Profit margin is critically low (&lt; 3%)"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:visibility="gone"/>
+
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -18,6 +18,9 @@ import com.shopkeeper.mobileshop.data.db.entity.Sale
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.FragmentSalesListBinding
 import com.shopkeeper.mobileshop.utils.ExportManager
+
+import com.shopkeeper.mobileshop.domain.SalesCommissionCalculator
+import com.shopkeeper.mobileshop.utils.money
 import com.shopkeeper.mobileshop.utils.InvoiceGenerator
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -80,9 +83,12 @@ class SalesListFragment : Fragment() {
                     if (it.imei.isNotBlank()) " (IMEI: ${it.imei})" else ""
             }
 
+            val commissionCalc = SalesCommissionCalculator()
+            val commission = commissionCalc.calculateCommission(sale.finalAmount, 5.0) // 5% standard staff commission
+            
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Invoice #${sale.id} • ${sale.customerName}")
-                .setMessage("Date: ${sale.saleDate}\nSold by: ${sale.sellerName}\nTotal: Rs.${sale.finalAmount}\nPayment: ${sale.paymentMethod} (${sale.paymentStatus})\n\nItems:\n$itemsText")
+                .setMessage("Date: ${sale.saleDate}\nSold by: ${sale.sellerName} (Commission: ${commission.money()})\nTotal: Rs.${sale.finalAmount}\nPayment: ${sale.paymentMethod} (${sale.paymentStatus})\n\nItems:\n$itemsText")
                 .setPositiveButton("🖨️ Thermal Receipt") { _, _ ->
                     com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showSaleReceiptDialog(requireContext(), sale, items)
                 }

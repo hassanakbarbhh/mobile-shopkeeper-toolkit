@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.shopkeeper.mobileshop.data.db.entity.Sale
 import com.shopkeeper.mobileshop.databinding.ItemDueBinding
 import com.shopkeeper.mobileshop.utils.dateTimeText
+
+import android.graphics.Color
+import com.shopkeeper.mobileshop.domain.UdhaarAgingAnalyzer
 import com.shopkeeper.mobileshop.utils.money
 
 class DueAdapter(
@@ -28,7 +31,18 @@ class DueAdapter(
             binding.tvCustName.text = sale.customerName
             binding.tvBalance.text = "Due: ${sale.finalAmount.money()}"
             binding.tvDueDate.text = "Invoice #${sale.id} • ${sale.saleDate.dateTimeText()}"
-            binding.tvPaidInfo.text = "Status: ${sale.paymentStatus}"
+            
+            val analyzer = UdhaarAgingAnalyzer()
+            val category = analyzer.getAgingCategory(sale.saleDate) // Assuming due date is sale date + some offset, or just sale date
+            binding.tvPaidInfo.text = "Status: ${sale.paymentStatus} • $category"
+            
+            when {
+                category.contains("Critical") -> binding.root.setBackgroundColor(Color.parseColor("#FFCDD2")) // Red
+                category.contains("61-90") -> binding.root.setBackgroundColor(Color.parseColor("#FFE0B2")) // Orange
+                category.contains("31-60") -> binding.root.setBackgroundColor(Color.parseColor("#FFF9C4")) // Yellow
+                else -> binding.root.setBackgroundColor(Color.WHITE)
+            }
+            
             binding.root.setOnClickListener { onItemClick(sale) }
         }
     }

@@ -1096,7 +1096,7 @@ object ExportManager {
     fun shareWhatsApp(context: Context, phone: String, message: String) {
         try {
             val cleanPhone = phone.replace(Regex("[^0-9+]"), "")
-            val url = "https://api.whatsapp.com/send?phone=$cleanPhone&text=${Uri.encode(message)}"
+            val url = "https://wa.me/$cleanPhone?text=${Uri.encode(message)}"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }

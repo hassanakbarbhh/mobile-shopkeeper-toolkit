@@ -1,5 +1,7 @@
 package com.shopkeeper.mobileshop.domain
 
+import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
+
 // 1. NetProfitEngine
 class NetProfitEngine {
     fun calculateNetProfit(sellingPrice: Double, purchasePrice: Double, discount: Double, tax: Double): Double {
@@ -47,13 +49,15 @@ class LowStockAlertEngine {
 
 // 6. RepairStatusStateRouter
 class RepairStatusStateRouter {
-    fun getNextStatus(currentStatus: String): String {
+    fun getNextStatus(currentStatus: RepairStatus): RepairStatus {
         return when (currentStatus) {
-            "INTAKE" -> "DIAGNOSING"
-            "DIAGNOSING" -> "WAITING_FOR_PARTS"
-            "WAITING_FOR_PARTS" -> "REPAIRED"
-            "REPAIRED" -> "DELIVERED"
-            else -> "DELIVERED"
+            RepairStatus.RECEIVED -> RepairStatus.DIAGNOSING
+            RepairStatus.DIAGNOSING -> RepairStatus.WAITING_PARTS
+            RepairStatus.WAITING_PARTS -> RepairStatus.IN_REPAIR
+            RepairStatus.IN_REPAIR -> RepairStatus.COMPLETED
+            RepairStatus.COMPLETED -> RepairStatus.DELIVERED
+            RepairStatus.DELIVERED -> RepairStatus.DELIVERED
+            RepairStatus.CANCELLED -> RepairStatus.CANCELLED
         }
     }
 }
@@ -130,5 +134,54 @@ class DuplicateCustomerMerger {
         val clean1 = phone1.replace(Regex("[^0-9]"), "")
         val clean2 = phone2.replace(Regex("[^0-9]"), "")
         return clean1 == clean2 && clean1.isNotEmpty()
+    }
+}
+
+
+// 16. StockoutForecaster
+class StockoutForecaster {
+    fun forecastDaysLeft(currentQty: Int, avgDailySales: Double): Int {
+        if (avgDailySales <= 0.0) return Int.MAX_VALUE
+        return (currentQty / avgDailySales).toInt()
+    }
+}
+
+// 17. SupplierScore
+class SupplierScoreEngine {
+    fun calculateScore(priceTrend: Double, fulfillmentRate: Double): Double {
+        val priceScore = if (priceTrend <= 0) 50.0 else (50.0 - (priceTrend * 100)).coerceAtLeast(0.0)
+        val fulfillmentScore = fulfillmentRate * 50.0
+        return priceScore + fulfillmentScore
+    }
+}
+
+// 18. OfflineConflictResolver
+data class ConflictRecord(val id: String, val reason: String)
+class OfflineConflictResolver {
+    fun detectConflicts(
+        localUpdatedAt: Long, 
+        remoteUpdatedAt: Long, 
+        localImei: String, 
+        remoteImei: String
+    ): List<ConflictRecord> {
+        val conflicts = mutableListOf<ConflictRecord>()
+        if (localImei == remoteImei && localUpdatedAt < remoteUpdatedAt) {
+             conflicts.add(ConflictRecord(localImei, "Remote has newer update for same IMEI"))
+        }
+        return conflicts
+    }
+}
+
+// 19. DeadStockDetector
+data class DeadStockInfo(val isDead: Boolean, val lockedCapital: Double)
+class DeadStockDetector {
+    fun analyzeStock(lastSaleDateMillis: Long?, qty: Int, cost: Double, currentTimeMillis: Long = System.currentTimeMillis()): DeadStockInfo {
+        if (lastSaleDateMillis == null) {
+            return DeadStockInfo(false, 0.0) 
+        }
+        val daysSinceLastSale = (currentTimeMillis - lastSaleDateMillis) / (1000 * 60 * 60 * 24)
+        val isDead = daysSinceLastSale >= 60 && qty > 0
+        val lockedCapital = if (isDead) (qty * cost) else 0.0
+        return DeadStockInfo(isDead, lockedCapital)
     }
 }

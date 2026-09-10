@@ -17,9 +17,26 @@
                     android:layout_height="wrap_content" android:textSize="12sp"
                     android:textColor="@color/text_secondary"/>
             </LinearLayout>
+            
+            <TextView android:id="@+id/tvWarranty" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold"
+                android:paddingHorizontal="6dp" android:paddingVertical="3dp"
+                android:layout_marginEnd="6dp"
+                android:background="#E0E0E0" android:textColor="#424242"/>
+
             <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:textSize="11sp" android:textStyle="bold"
                 android:paddingHorizontal="10dp" android:paddingVertical="5dp"/>
+        
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdvanceStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Advance"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_marginStart="8dp"/>
+
         </LinearLayout>
         <TextView android:id="@+id/tvIssue" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:textSize="13sp"

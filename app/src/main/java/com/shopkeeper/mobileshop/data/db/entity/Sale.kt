@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 import androidx.room.Index
 
-@Entity(tableName = "sales", indices = [Index(value = ["customerId"]), Index(value = ["saleDate"])])
+@Entity(tableName = "sales", indices = [Index(value = ["customerId"]), Index(value = ["saleDate"]), Index(value = ["paymentStatus"])])
 data class Sale(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val customerId: Long? = null,

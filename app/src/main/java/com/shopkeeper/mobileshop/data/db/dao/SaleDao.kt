@@ -32,6 +32,9 @@ interface SaleDao {
     @Query("SELECT * FROM sale_items WHERE saleId = :saleId")
     suspend fun getSaleItems(saleId: Long): List<SaleItem>
 
+    @Query("SELECT * FROM sale_items WHERE productId = :productId")
+    suspend fun getSaleItemsByProductId(productId: Long): List<SaleItem>
+
     @Query("SELECT * FROM sale_items WHERE imei = :imei")
     suspend fun saleItemsByImei(imei: String): List<SaleItem>
 
@@ -52,4 +55,7 @@ interface SaleDao {
 
     @Query("SELECT SUM(finalAmount) FROM sales WHERE paymentStatus = 'PENDING'")
     fun getTotalPendingAmount(): Flow<Double?>
+
+    @Query("SELECT * FROM sales WHERE paymentStatus = 'PENDING' OR paymentStatus = 'PARTIAL'")
+    suspend fun getPendingSales(): List<Sale>
 }

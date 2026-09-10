@@ -389,6 +389,23 @@
                 android:textSize="11sp"/>
         </LinearLayout>
 
+        
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBackupData"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Backup Database (JSON) to Device"/>
+            
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRestoreData"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Restore Database (JSON) from Device"/>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnResetDefaultStock"
             style="@style/Widget.Material3.Button.OutlinedButton"
@@ -400,8 +417,19 @@
             app:icon="@drawable/ic_online_phone"
             app:iconSize="16dp"/>
 
+                <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCashClosing"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Cash Closing (Daily Reconciliation)"
+            app:icon="@drawable/ic_seller"
+            app:iconSize="18dp"/>
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageSellersSettings"
+
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -484,6 +512,18 @@
                     app:icon="@drawable/ic_google"
                     app:iconSize="16dp"
                     app:iconTint="@null"/>
+                
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSetupMfa"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Setup 2FA (Google Authenticator)"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_lock"
+                    app:iconSize="16dp"/>
+
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCheckFirebaseAuth"
@@ -525,6 +565,10 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp" android:text="Switch Role (Owner / Seller / Tech)"/>
 
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnViewCrashLogs"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="View Crash Logs"/>
         <com.google.android.material.button.MaterialButton android:id="@+id/btnAbout"
             style="@style/Widget.Material3.Button"
             android:layout_width="match_parent" android:layout_height="wrap_content"

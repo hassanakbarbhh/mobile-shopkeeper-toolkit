@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+    
+    <EditText android:id="@+id/etOpening" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Opening Cash"/>
+    <EditText android:id="@+id/etCashIn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Total Cash Sales" android:layout_marginTop="8dp"/>
+    <EditText android:id="@+id/etCashOut" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Expenses / Cash Out" android:layout_marginTop="8dp"/>
+    <EditText android:id="@+id/etCounted" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Actual Counted Cash" android:layout_marginTop="8dp"/>
+    
+    <TextView android:id="@+id/tvVariance" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Variance: ₹0" android:textStyle="bold" android:textSize="16sp" android:layout_marginTop="16dp"/>
+</LinearLayout>

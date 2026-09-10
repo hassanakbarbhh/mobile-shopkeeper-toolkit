@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MobileShopkeeper" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#4CAF50</item>
+        <item name="colorSecondary">#2E7D32</item>
+        <item name="colorSurface">#121212</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+    </style>
+</resources>

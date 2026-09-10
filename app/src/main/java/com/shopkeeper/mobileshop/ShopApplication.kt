@@ -2,6 +2,8 @@ package com.shopkeeper.mobileshop
 
 import android.app.Application
 import android.util.Log
+
+import com.shopkeeper.mobileshop.utils.GlobalExceptionHandler
 import com.google.firebase.FirebaseApp
 import com.shopkeeper.mobileshop.data.db.AppDatabase
 import com.shopkeeper.mobileshop.utils.CurrencyManager
@@ -11,6 +13,7 @@ class ShopApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this))
         instance = this
 
         // 1. Crash Shield: Global Uncaught Exception Handler to prevent hard app crashes
