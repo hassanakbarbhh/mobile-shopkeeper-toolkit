@@ -331,3 +331,4 @@ class NewSaleFragment : Fragment() {
         _binding = null
     }
 }
+// Block B: UI Wiring complete

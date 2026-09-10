@@ -2,22 +2,19 @@ package com.shopkeeper.mobileshop.domain
 
 import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
 
-// 1. NetProfitEngine
 class NetProfitEngine {
     fun calculateNetProfit(sellingPrice: Double, purchasePrice: Double, discount: Double, tax: Double): Double {
         return (sellingPrice - discount + tax) - purchasePrice
     }
 }
 
-// 2. ImeiUniquenessGuard
 class ImeiUniquenessGuard {
     fun isImeiUnique(newImei: String, existingImeis: List<String>): Boolean {
-        if (newImei.isBlank()) return true // Accessories don't have IMEI
+        if (newImei.isBlank()) return true
         return !existingImeis.contains(newImei)
     }
 }
 
-// 3. MarginGuard
 class MarginGuard {
     fun isMarginAcceptable(sellingPrice: Double, purchasePrice: Double, minimumMarginPercent: Double): Boolean {
         if (purchasePrice <= 0) return true
@@ -26,7 +23,6 @@ class MarginGuard {
     }
 }
 
-// 4. UdhaarAgingAnalyzer
 class UdhaarAgingAnalyzer {
     fun getAgingCategory(dueDateMillis: Long, currentTimeMillis: Long = System.currentTimeMillis()): String {
         val diffDays = (currentTimeMillis - dueDateMillis) / (1000 * 60 * 60 * 24)
@@ -40,14 +36,12 @@ class UdhaarAgingAnalyzer {
     }
 }
 
-// 5. LowStockAlertEngine
 class LowStockAlertEngine {
     fun requiresReorder(currentQuantity: Int, minimumThreshold: Int): Boolean {
         return currentQuantity <= minimumThreshold
     }
 }
 
-// 6. RepairStatusStateRouter
 class RepairStatusStateRouter {
     fun getNextStatus(currentStatus: RepairStatus): RepairStatus {
         return when (currentStatus) {
@@ -62,7 +56,6 @@ class RepairStatusStateRouter {
     }
 }
 
-// 7. SalesCommissionCalculator
 class SalesCommissionCalculator {
     fun calculateCommission(profit: Double, commissionRate: Double): Double {
         if (profit <= 0) return 0.0
@@ -70,7 +63,6 @@ class SalesCommissionCalculator {
     }
 }
 
-// 8. CustomerTrustScorer
 class CustomerTrustScorer {
     fun calculateScore(totalPurchases: Int, overduePayments: Int): Int {
         val baseScore = 100
@@ -80,14 +72,12 @@ class CustomerTrustScorer {
     }
 }
 
-// 9. InventoryValuationEngine
 class InventoryValuationEngine {
-    fun calculateTotalValue(products: List<Pair<Double, Int>>): Double { // Pair<PurchasePrice, Quantity>
+    fun calculateTotalValue(products: List<Pair<Double, Int>>): Double { 
         return products.sumOf { it.first * it.second }
     }
 }
 
-// 10. DiscountApprovalGuard
 class DiscountApprovalGuard {
     fun requiresOwnerApproval(discountAmount: Double, totalPrice: Double, maxAllowedPercent: Double): Boolean {
         if (totalPrice <= 0) return false
@@ -96,15 +86,13 @@ class DiscountApprovalGuard {
     }
 }
 
-// 11. CashClosingReconciler
 class CashClosingReconciler {
     fun reconcile(openingBalance: Double, cashSales: Double, cashExpenses: Double, actualClosingCash: Double): Double {
         val expectedCash = openingBalance + cashSales - cashExpenses
-        return actualClosingCash - expectedCash // Returns variance (0 means perfect)
+        return actualClosingCash - expectedCash 
     }
 }
 
-// 12. BulkImportSanitizer
 class BulkImportSanitizer {
     fun sanitizeProductName(rawName: String): String {
         return rawName.trim().replace(Regex("\\s+"), " ")
@@ -112,23 +100,20 @@ class BulkImportSanitizer {
     fun isValidPrice(price: Double): Boolean = price >= 0
 }
 
-// 13. WarrantyExpirationTracker
 class WarrantyExpirationTracker {
     fun isWarrantyValid(saleDateMillis: Long, warrantyMonths: Int, currentTimeMillis: Long = System.currentTimeMillis()): Boolean {
         if (warrantyMonths <= 0) return false
-        val expiryTime = saleDateMillis + (warrantyMonths * 30L * 24L * 60L * 60L * 1000L) // Approx 30 days/month
+        val expiryTime = saleDateMillis + (warrantyMonths * 30L * 24L * 60L * 60L * 1000L) 
         return currentTimeMillis <= expiryTime
     }
 }
 
-// 14. FastMovingItemDetector
 class FastMovingItemDetector {
     fun isFastMoving(salesLast30Days: Int, threshold: Int): Boolean {
         return salesLast30Days >= threshold
     }
 }
 
-// 15. DuplicateCustomerMerger
 class DuplicateCustomerMerger {
     fun isDuplicate(phone1: String, phone2: String): Boolean {
         val clean1 = phone1.replace(Regex("[^0-9]"), "")
@@ -137,8 +122,6 @@ class DuplicateCustomerMerger {
     }
 }
 
-
-// 16. StockoutForecaster
 class StockoutForecaster {
     fun forecastDaysLeft(currentQty: Int, avgDailySales: Double): Int {
         if (avgDailySales <= 0.0) return Int.MAX_VALUE
@@ -146,7 +129,6 @@ class StockoutForecaster {
     }
 }
 
-// 17. SupplierScore
 class SupplierScoreEngine {
     fun calculateScore(priceTrend: Double, fulfillmentRate: Double): Double {
         val priceScore = if (priceTrend <= 0) 50.0 else (50.0 - (priceTrend * 100)).coerceAtLeast(0.0)
@@ -155,7 +137,6 @@ class SupplierScoreEngine {
     }
 }
 
-// 18. OfflineConflictResolver
 data class ConflictRecord(val id: String, val reason: String)
 class OfflineConflictResolver {
     fun detectConflicts(
@@ -165,14 +146,13 @@ class OfflineConflictResolver {
         remoteImei: String
     ): List<ConflictRecord> {
         val conflicts = mutableListOf<ConflictRecord>()
-        if (localImei == remoteImei && localUpdatedAt < remoteUpdatedAt) {
+        if (localImei == remoteImei && localUpdatedAt < remoteUpdatedAt) { 
              conflicts.add(ConflictRecord(localImei, "Remote has newer update for same IMEI"))
         }
         return conflicts
     }
 }
 
-// 19. DeadStockDetector
 data class DeadStockInfo(val isDead: Boolean, val lockedCapital: Double)
 class DeadStockDetector {
     fun analyzeStock(lastSaleDateMillis: Long?, qty: Int, cost: Double, currentTimeMillis: Long = System.currentTimeMillis()): DeadStockInfo {

@@ -117,3 +117,4 @@ class DuesFragment : Fragment() {
         _binding = null
     }
 }
+// Block B: UI Wiring complete

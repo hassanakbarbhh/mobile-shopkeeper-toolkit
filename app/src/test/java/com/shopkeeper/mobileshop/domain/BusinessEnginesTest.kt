@@ -7,7 +7,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BusinessEnginesTest {
-
     @Test
     fun testNetProfitEngine() {
         val engine = NetProfitEngine()
