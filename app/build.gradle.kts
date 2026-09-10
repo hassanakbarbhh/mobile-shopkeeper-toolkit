@@ -17,15 +17,34 @@ android {
     applicationId = "com.shopkeeper.mobileshop"
     minSdk = 26
     targetSdk = 36
-    versionCode = 6
-    versionName = "6.0"
+    versionCode = 7
+    versionName = "6.0.0"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  signingConfigs {
+    create("release") {
+      val keyFile = System.getenv("KEYSTORE_FILE") ?: project.findProperty("KEYSTORE_FILE")?.toString() ?: ""
+      if (keyFile.isNotEmpty() && file(keyFile).exists()) {
+        storeFile = file(keyFile)
+        storePassword = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD")?.toString()
+        keyAlias = System.getenv("KEY_ALIAS") ?: project.findProperty("KEY_ALIAS")?.toString()
+        keyPassword = System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD")?.toString()
+      } else {
+        storeFile = getByName("debug").storeFile
+        storePassword = getByName("debug").storePassword
+        keyAlias = getByName("debug").keyAlias
+        keyPassword = getByName("debug").keyPassword
+      }
+    }
   }
 
   buildTypes {
     release {
+      signingConfig = signingConfigs.getByName("release")
       isCrunchPngs = false
-      isMinifyEnabled = false
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
   }

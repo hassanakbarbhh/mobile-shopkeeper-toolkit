@@ -1,0 +1,8 @@
+- Firebase security rules implementation
+- 19 automated business logic engines for deep retail insights
+- Dark mode compatibility
+- Full Urdu translation support
+- 2FA via Google Authenticator
+- Built-in barcode and IMEI scanner
+- Offline sync queue for spotty connections
+- Local crash-log viewer

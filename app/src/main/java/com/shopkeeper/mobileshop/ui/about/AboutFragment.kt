@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import com.shopkeeper.mobileshop.BuildConfig
 import com.shopkeeper.mobileshop.R
 import com.shopkeeper.mobileshop.databinding.FragmentAboutBinding
 import com.shopkeeper.mobileshop.utils.AppPreferences

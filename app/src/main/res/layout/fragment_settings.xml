@@ -578,6 +578,17 @@
             app:icon="@drawable/ic_seller"
             app:iconSize="18dp"/>
 
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnDeleteAccount"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="#D32F2F"
+            app:iconTint="#D32F2F"
+            app:backgroundTint="#FFEBEE"
+            android:text="Delete my account &amp; cloud data"
+            app:icon="@drawable/ic_delete"
+            app:iconSize="18dp"/>
+        
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:gravity="center" android:layout_marginTop="24dp"
             android:text="@string/version" android:textColor="@color/text_secondary" android:textSize="12sp"/>

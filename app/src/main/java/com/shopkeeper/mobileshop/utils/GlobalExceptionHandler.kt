@@ -30,5 +30,16 @@ class GlobalExceptionHandler(private val context: Context) : Thread.UncaughtExce
             val logFile = File(context.filesDir, "crash_logs.txt")
             return if (logFile.exists()) logFile.readText() else "No crash logs found."
         }
+
+        fun clearLogs(context: Context) {
+            try {
+                val logFile = File(context.filesDir, "crash_logs.txt")
+                if (logFile.exists()) {
+                    logFile.delete()
+                }
+            } catch (e: Exception) {
+                Log.e("GlobalExceptionHandler", "Failed to clear logs", e)
+            }
+        }
     }
 }

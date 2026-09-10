@@ -14,6 +14,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import android.util.Log
 import com.shopkeeper.mobileshop.R
 import com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository
 import com.shopkeeper.mobileshop.data.db.AppDatabase
@@ -409,9 +413,17 @@ class SettingsFragment : Fragment() {
             val logs = GlobalExceptionHandler.readLogs(requireContext())
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Crash Logs")
-                .setMessage(if (logs.isBlank()) "No crashes recorded." else logs)
-                .setPositiveButton("Close", null)
+                .setMessage(logs.ifBlank { "No crash logs found." })
+                .setPositiveButton("OK", null)
+                .setNeutralButton("Clear") { _, _ ->
+                    GlobalExceptionHandler.clearLogs(requireContext())
+                    Toast.makeText(requireContext(), "Logs cleared", Toast.LENGTH_SHORT).show()
+                }
                 .show()
+        }
+
+        binding.btnDeleteAccount.setOnClickListener {
+            showDeleteAccountDialog()
         }
     }
 
@@ -630,6 +642,65 @@ class SettingsFragment : Fragment() {
         val currentTheme = ThemeManager.getCurrentTheme(requireContext())
         binding.tvCurrentThemeName.text = "${currentTheme.badgeIcon} ${currentTheme.title} (Active)"
         binding.tvCurrentThemeDetails.text = "${currentTheme.subtitle} • 6 Trending Themes Available"
+    }
+
+    private fun showDeleteAccountDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete Account & Data")
+            .setMessage("Are you sure you want to delete your account and all cloud data? This cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                performAccountDeletion()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun performAccountDeletion() {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            Toast.makeText(requireContext(), "You are not logged in to cloud.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val uid = user.uid
+        val db = FirebaseFirestore.getInstance()
+        
+        Toast.makeText(requireContext(), "Deleting cloud data...", Toast.LENGTH_LONG).show()
+        
+        // Delete users document
+        db.collection("users").document(uid).delete()
+        
+        // Delete shops
+        db.collection("shops").whereEqualTo("ownerUid", uid).get().addOnSuccessListener { snaps ->
+            val batch = db.batch()
+            for (doc in snaps) {
+                batch.delete(doc.reference)
+            }
+            batch.commit().addOnCompleteListener {
+                // Now delete user
+                user.delete().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(requireContext(), "Account & Data Deleted.", Toast.LENGTH_LONG).show()
+                        val intent = Intent(requireContext(), com.shopkeeper.mobileshop.ui.auth.LockScreenActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        startActivity(intent)
+                    } else {
+                        val e = task.exception
+                        if (e is FirebaseAuthRecentLoginRequiredException) {
+                            Toast.makeText(requireContext(), "Please re-login first to delete account.", Toast.LENGTH_LONG).show()
+                            FirebaseAuth.getInstance().signOut()
+                            val intent = Intent(requireContext(), com.shopkeeper.mobileshop.ui.auth.LockScreenActivity::class.java)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to delete account.", Toast.LENGTH_SHORT).show()
+                            Log.e("DeleteAccount", "Error", e)
+                        }
+                    }
+                }
+            }
+        }.addOnFailureListener {
+            Toast.makeText(requireContext(), "Failed to access cloud data.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showThemePickerDialog() {
