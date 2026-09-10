@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">موبائل انونٹری ٹول کٹ</string>
-    <string name="app_tagline">آپ کی مکمل موبائل شاپ اور انونٹری کا ساتھی</string>
-    <string name="made_by">حسن اکبر کی طرف سے ❤ کے ساتھ تیار کیا گیا</string>
+    <string name="app_tagline">آپ کی مکمل موبائل دکان کا ساتھی</string>
+    <string name="made_by">❤ حسن اکبر کی طرف سے</string>
     <string name="version">ورژن 6.0</string>
 
     <string name="splash_loading">آپ کی دکان تیار ہو رہی ہے…</string>
 
-    <string name="lock_title">دکان تک رسائی اور سیکیورٹی</string>
-    <string name="lock_subtitle">جاری رکھنے کے لیے کردار منتخب کریں یا رسائی کلید درج کریں</string>
-    <string name="lock_hint">رسائی کلید درج کریں</string>
+    <string name="lock_title">دکان تک رسائی اور حفاظت</string>
+    <string name="lock_subtitle">جاری رکھنے کے لیے اپنی رسائی کی چابی درج کریں</string>
+    <string name="lock_hint">رسائی کی چابی درج کریں</string>
     <string name="lock_unlock">ٹول کٹ کھولیں</string>
     <string name="lock_fingerprint">بایومیٹرکس سے کھولیں</string>
-    <string name="lock_wrong">منتخب کردار کے لیے غلط کلید۔ براہ کرم اسناد چیک کریں۔</string>
-    <string name="lock_empty">براہ کرم رسائی کلید درج کریں</string>
+    <string name="lock_wrong">منتخب کردہ کردار کے لیے غلط چابی۔ براہ کرم تصدیق کریں۔</string>
+    <string name="lock_empty">براہ کرم اپنی رسائی کی چابی درج کریں</string>
     <string name="lock_locked_out">بہت زیادہ کوششیں۔ %1$d سیکنڈ میں دوبارہ کوشش کریں</string>
 
-    <string name="role_title">شاپ تک رسائی کا موڈ منتخب کریں</string>
-    <string name="role_shop">دکان کا مالک (ماسٹر)</string>
-    <string name="role_shop_desc">مکمل اسٹور کنٹرول، مالی تجزیات، انونٹری کے اخراجات اور ترتیبات</string>
-    <string name="role_seller">بیچنے والا / کیشیئر (کاؤنٹر)</string>
-    <string name="role_seller_desc">فوری POS سیلز، ریٹیل قیمت پر انونٹری، کسٹمر انوائسز اور تھرمل پرنٹس</string>
-    <string name="role_repair">ریپیئر ٹیکنیشن (ورکشاپ)</string>
-    <string name="role_repair_desc">ریپیئر انٹیک، تشخیص، کام کی ٹریکنگ، اسپیئر پارٹس اور تھرمل کلیم ٹیگز</string>
+    <string name="role_title">دکان تک رسائی کا موڈ منتخب کریں</string>
+    <string name="role_shop">دکان کا مالک</string>
+    <string name="role_shop_desc">مکمل کنٹرول، مالیاتی تجزیہ، انوینٹری لاگت اور ترتیبات</string>
+    <string name="role_seller">سیلر / کیشیئر</string>
+    <string name="role_seller_desc">فوری سیلز، انوینٹری، کسٹمر انوائس اور تھرمل پرنٹ</string>
+    <string name="role_repair">مرمت کا ٹیکنیشن</string>
+    <string name="role_repair_desc">مرمت کی انٹیک، تشخیص، کام کی نگرانی اور پرزے</string>
     <string name="role_remember">میرا لاگ ان موڈ یاد رکھیں</string>
-    <string name="role_continue">منتخب موڈ میں داخل ہوں</string>
+    <string name="role_continue">منتخب کردہ موڈ میں داخل ہوں</string>
 
     <string name="dev_name">حسن اکبر</string>
     <string name="dev_handle">@hassanakbarbhh</string>
     <string name="dev_phone">+923172377565</string>
-    <string name="dev_title">موبائل سولیوشنز انجینئر اور اینڈرائیڈ ڈیولپر</string>
-    <string name="about_tagline">15+ سال موبائل بزنس اسپیشلسٹ • 10+ سال ایپلیکیشن ڈیولپر</string>
-    <string name="about_love">یہ ٹول کٹ جدید موبائل شاپ کیپرز کے لیے بنائی گئی ہے — حسن اکبر کی طرف سے محبت کے ساتھ</string>
+    <string name="dev_title">موبائل سلوشنز انجینئر اور اینڈرائیڈ ڈویلپر</string>
+    <string name="about_tagline">15+ سال موبائل کاروبار • 10+ سال ڈیولپمنٹ</string>
+    <string name="about_love">یہ ٹول کٹ جدید موبائل دکانداروں کے لیے بنایا گیا ہے — حسن اکبر کی محبت سے</string>
 
     <string name="url_whatsapp">https://wa.me/923172377565</string>
     <string name="url_facebook">https://facebook.com/hassanakbarbhh</string>
@@ -39,4 +39,3 @@
     <string name="url_twitter">https://x.com/hassanakbarbhh</string>
     <string name="hassan_email">hassanakbarbhh@gmail.com</string>
 </resources>
-<!-- Block C complete -->
