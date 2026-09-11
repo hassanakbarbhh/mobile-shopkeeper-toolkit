@@ -85,7 +85,7 @@ class RepairsFragment : Fragment() {
     }
 
     private fun filterRepairs() {
-        val filtered = when (binding.chipGroupStatus.checkedChipId) {
+        val filtered = when ((_binding?.chipGroupStatus?.checkedChipId ?: -1)) {
             R.id.chipReceived -> allRepairs.filter { it.status == RepairStatus.RECEIVED }
             R.id.chipInRepair -> allRepairs.filter { it.status == RepairStatus.IN_REPAIR || it.status == RepairStatus.DIAGNOSING }
             R.id.chipCompleted -> allRepairs.filter { it.status == RepairStatus.COMPLETED }

@@ -61,8 +61,8 @@ class LockScreenActivity : AppCompatActivity() {
                     onUnlocked(currentRole)
                 }
             } catch (e: ApiException) {
-                // If Play Services is not available or local developer preview, offer email entry fallback
-                showGoogleAccountEntryDialog()
+                // Real Google Auth failed (likely missing SHA-1 or google-services.json mismatch)
+                Toast.makeText(this, "Google Sign-In failed (Code ${e.statusCode}). Please ensure SHA-1 is added to Firebase.", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
                 Toast.makeText(this, "Google Sign-In: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
@@ -214,40 +214,10 @@ class LockScreenActivity : AppCompatActivity() {
             val client = GoogleAuthManager.getGoogleSignInClient(this)
             googleSignInLauncher.launch(client.signInIntent)
         } catch (e: Exception) {
-            showGoogleAccountEntryDialog()
+             Toast.makeText(this, "Failed to launch Google Sign-In: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun showGoogleAccountEntryDialog() {
-        val input = EditText(this).apply {
-            hint = "Enter your Google / Gmail address"
-            inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-            setPadding(40, 30, 40, 30)
-        }
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Google Account Sign-In")
-            .setMessage("Enter your Gmail address to connect your account:")
-            .setView(input)
-            .setPositiveButton("Continue") { _, _ ->
-                val email = input.text.toString().trim()
-                if (email.contains("@")) {
-                    val user = UserAuthManager.signInWithGoogle(
-                        context = this,
-                        email = email,
-                        displayName = email.substringBefore("@").replace(".", " ").replaceFirstChar { it.uppercase() },
-                        photoUrl = null,
-                        role = currentRole
-                    )
-                    Toast.makeText(this, "Welcome, ${user.displayName}!", Toast.LENGTH_SHORT).show()
-                    onUnlocked(currentRole)
-                } else {
-                    Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
 
     private fun setupEmailAuth() {
         // Sign In Submit

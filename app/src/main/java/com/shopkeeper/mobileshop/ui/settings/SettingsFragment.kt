@@ -318,42 +318,12 @@ class SettingsFragment : Fragment() {
         }
 
         updateGoogleAuthCard()
-        binding.btnManageGoogleAuth.setOnClickListener {
-            showGoogleAuthManagementDialog()
-        }
+        // btnManageGoogleAuth removed
         
-        binding.btnSetupMfa.setOnClickListener {
-            val authenticator = TotpAuthenticator()
-            val secret = "JBSWY3DPEHPK3PXP" // Mock secret for generation
-            val bitmap = authenticator.generateQrCodeForAuthenticator(secret, "Owner", "MobileShopkeeper")
-            
-            val dialogView = layoutInflater.inflate(R.layout.dialog_mfa_setup, null)
-            val ivQr = dialogView.findViewById<ImageView>(R.id.ivQrCode)
-            val etCode = dialogView.findViewById<android.widget.EditText>(R.id.etMfaCode)
-            ivQr.setImageBitmap(bitmap)
-            
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("2FA Setup (Google Authenticator)")
-                .setView(dialogView)
-                .setPositiveButton("Verify & Enable") { _, _ ->
-                    val code = etCode.text.toString()
-                    if (authenticator.verifyTotpCode(secret, code)) {
-                        Toast.makeText(requireContext(), "2FA Enabled! Device trusted for 30 days.", Toast.LENGTH_LONG).show()
-                        // Save trust date to preferences or DB
-                        val prefs = requireContext().getSharedPreferences("mfa_prefs", Context.MODE_PRIVATE)
-                        prefs.edit().putLong("last_trust_date", System.currentTimeMillis()).apply()
-                    } else {
-                        Toast.makeText(requireContext(), "Invalid Code. Try again.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
+        // btnSetupMfa removed
 
 
-        binding.btnCheckFirebaseAuth.setOnClickListener {
-            showFirebaseAuthDiagnosticDialog()
-        }
+        // btnCheckFirebaseAuth removed
 
         binding.btnLockAppNow.setOnClickListener {
             val intent = Intent(requireContext(), LockScreenActivity::class.java)
@@ -565,15 +535,15 @@ class SettingsFragment : Fragment() {
         val user = GoogleAuthManager.getAuthenticatedUser(requireContext())
 
         if (user != null) {
-            binding.tvSettingsGoogleAccount.text = "Logged In: ${user.email}"
+            //  "Logged In: ${user.email}"
             if (user.isOwner) {
-                binding.tvSettingsGoogleSubtitle.text = "👑 Verified Shop Owner • Full Master Access Active"
+                //
             } else {
-                binding.tvSettingsGoogleSubtitle.text = "💼 Verified Staff Account (Owner: $ownerEmail)"
+                //
             }
         } else {
-            binding.tvSettingsGoogleAccount.text = "Owner: $ownerEmail"
-            binding.tvSettingsGoogleSubtitle.text = "🛡️ Verified Google Identity • Anti-Leak Owner Protection"
+            //  "Owner: $ownerEmail"
+            //
         }
     }
 

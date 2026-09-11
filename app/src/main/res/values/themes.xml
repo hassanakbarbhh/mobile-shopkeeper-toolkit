@@ -21,6 +21,7 @@
         <item name="shapeAppearanceMediumComponent">@style/Shape.MobileShop.Medium</item>
         <item name="materialButtonStyle">@style/Widget.MobileShop.Button</item>
         <item name="textInputStyle">@style/Widget.MobileShop.TextInput</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimations</item>
     </style>
 
     <style name="Theme.MobileShopkeeper.NoActionBar" parent="Theme.MobileShopkeeper" />
@@ -191,5 +192,12 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:gravity">center</item>
+    </style>
+
+    <style name="WindowAnimations">
+        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
     </style>
 </resources>

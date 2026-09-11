@@ -71,8 +71,8 @@ class SellersFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repository.allSellers.collectLatest { list ->
                 adapter.submitList(list)
-                binding.layoutEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
-                binding.tvStaffSummary.text = "Active staff members: ${list.count { it.isActive }} • Total registered sellers: ${list.size}"
+                _binding?.layoutEmpty?.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                _binding?.tvStaffSummary?.text = "Active staff members: ${list.count { it.isActive }} • Total registered sellers: ${list.size}"
             }
         }
     }

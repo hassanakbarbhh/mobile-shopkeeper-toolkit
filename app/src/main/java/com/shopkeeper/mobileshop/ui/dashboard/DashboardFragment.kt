@@ -86,7 +86,7 @@ class DashboardFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             db.saleDao().getTotalSalesAmount(startOfDay, endOfDay).collect { sales ->
-                binding.tvTodaySales.text = (sales ?: 0.0).money()
+                _binding?.tvTodaySales?.text = (sales ?: 0.0).money()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -107,41 +107,41 @@ class DashboardFragment : Fragment() {
                     }
                     totalProfit -= sale.discount // Deduct flat discount once
                 }
-                binding.tvTodayProfit.text = totalProfit.money()
+                _binding?.tvTodayProfit?.text = totalProfit.money()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             db.saleDao().getTotalSalesCount(startOfDay, endOfDay).collect { count ->
-                binding.tvSalesCount.text = "$count transactions today"
+                _binding?.tvSalesCount?.text = "$count transactions today"
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             repository.totalInventoryValue.collect { value ->
-                binding.tvInventoryValue.text = (value ?: 0.0).money()
+                _binding?.tvInventoryValue?.text = (value ?: 0.0).money()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             repository.totalProductCount.collect { count ->
-                binding.tvProductCount.text = "$count products in catalog"
+                _binding?.tvProductCount?.text = "$count products in catalog"
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             repository.totalPendingAmount.collect { dues ->
-                binding.tvPendingPayments.text = (dues ?: 0.0).money()
+                _binding?.tvPendingPayments?.text = (dues ?: 0.0).money()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             repository.activeRepairCount.collect { count ->
-                binding.tvActiveRepairs.text = "$count in shop"
+                _binding?.tvActiveRepairs?.text = "$count in shop"
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             repository.lowStockProducts.collect { lowStock ->
                 if (lowStock.isNotEmpty()) {
-                    binding.cardLowStock.visibility = View.VISIBLE
-                    binding.tvLowStockCount.text = "${lowStock.size} products are running low on stock!"
+                    _binding?.cardLowStock?.visibility = View.VISIBLE
+                    _binding?.tvLowStockCount?.text = "${lowStock.size} products are running low on stock!"
                 } else {
-                    binding.cardLowStock.visibility = View.GONE
+                    _binding?.cardLowStock?.visibility = View.GONE
                 }
             }
         }
@@ -159,11 +159,11 @@ class DashboardFragment : Fragment() {
                     }
                 }
                 if (deadStockCount > 0) {
-                    binding.cardDeadStock.visibility = View.VISIBLE
-                    binding.tvDeadStockCount.text = "$deadStockCount dead stock items"
-                    binding.tvDeadStockCapital.text = "Locked Capital: " + lockedCapital.money()
+                    _binding?.cardDeadStock?.visibility = View.VISIBLE
+                    _binding?.tvDeadStockCount?.text = "$deadStockCount dead stock items"
+                    _binding?.tvDeadStockCapital?.text = "Locked Capital: " + lockedCapital.money()
                 } else {
-                    binding.cardDeadStock.visibility = View.GONE
+                    _binding?.cardDeadStock?.visibility = View.GONE
                 }
             }
         }
