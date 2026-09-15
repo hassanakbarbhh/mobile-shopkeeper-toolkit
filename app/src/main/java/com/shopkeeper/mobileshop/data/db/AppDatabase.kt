@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
     entities = [
         Product::class, Customer::class, Sale::class, SaleItem::class,
         Repair::class, Payment::class, Supplier::class, Purchase::class,
-        PurchaseItem::class, Expense::class, Seller::class
+        PurchaseItem::class, Expense::class, Seller::class, CashClosing::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -33,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun purchaseDao(): PurchaseDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun sellerDao(): SellerDao
+    abstract fun cashClosingDao(): CashClosingDao
 
     companion object {
         @Volatile

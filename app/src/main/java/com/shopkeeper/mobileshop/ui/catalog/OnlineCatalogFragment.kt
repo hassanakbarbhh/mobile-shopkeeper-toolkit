@@ -41,6 +41,9 @@ class OnlineCatalogFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        setupBrandChips()
+        updateList()
         val db = AppDatabase.getDatabase(requireContext())
         repository = ShopRepository(db)
 

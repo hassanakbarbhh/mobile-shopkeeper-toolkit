@@ -46,7 +46,6 @@ import com.shopkeeper.mobileshop.utils.ThermalPrintHelper
 
 
 import com.shopkeeper.mobileshop.utils.GlobalExceptionHandler
-import com.shopkeeper.mobileshop.utils.TotpAuthenticator
 import android.widget.ImageView
 import com.shopkeeper.mobileshop.utils.ThemeManager
 import com.shopkeeper.mobileshop.utils.AppTheme
@@ -67,6 +66,9 @@ import com.shopkeeper.mobileshop.utils.DiagnosticStatus
 import com.shopkeeper.mobileshop.domain.CashClosingReconciler
 import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 import android.app.Activity
@@ -266,39 +268,36 @@ class SettingsFragment : Fragment() {
 
         // Thermal Receipt Testing
         binding.btnTestThermalPrint.setOnClickListener {
-            val dummySale = Sale(
-                id = 42,
-                customerName = "Ali Raza Khan",
-                totalAmount = 86600.0,
-                discount = 1000.0,
-                finalAmount = 85600.0,
-                paymentMethod = PaymentMethod.CASH,
-                sellerName = "Ahmed (Counter)",
-                saleDate = System.currentTimeMillis()
-            )
-            val dummyItems = listOf(
-                SaleItem(saleId = 42, productId = 1, productName = "Samsung Galaxy A54", quantity = 1, unitPrice = 85000.0, totalPrice = 85000.0, imei = "354892019283741"),
-                SaleItem(saleId = 42, productId = 2, productName = "Type-C Fast Cable", quantity = 2, unitPrice = 800.0, totalPrice = 1600.0)
-            )
-            ThermalPrintHelper.showSaleReceiptDialog(requireContext(), dummySale, dummyItems)
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val db = AppDatabase.getDatabase(requireContext())
+                val lastSale = db.saleDao().getAllSalesList().firstOrNull()
+                withContext(Dispatchers.Main) {
+                    if (lastSale != null) {
+                        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                            val items = db.saleDao().getSaleItems(lastSale.id)
+                            withContext(Dispatchers.Main) {
+                                ThermalPrintHelper.showSaleReceiptDialog(requireContext(), lastSale, items)
+                            }
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "No real sales found in database.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
         binding.btnTestRepairTag.setOnClickListener {
-            val dummyRepair = Repair(
-                id = 15,
-                customerName = "Usman Tariq",
-                customerPhone = "0312-9876543",
-                deviceBrand = "Apple",
-                deviceModel = "iPhone 13 Pro (Blue)",
-                imei = "352910293847561",
-                issueDescription = "Screen glass cracked & battery draining fast",
-                notes = "Passcode: 4892. Test cameras after screen replacement.",
-                estimatedCost = 14500.0,
-                actualCost = 5000.0,
-                status = RepairStatus.IN_REPAIR,
-                receivedDate = System.currentTimeMillis()
-            )
-            ThermalPrintHelper.showRepairTagDialog(requireContext(), dummyRepair)
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val db = AppDatabase.getDatabase(requireContext())
+                val lastRepair = db.repairDao().getAllRepairsList().firstOrNull()
+                withContext(Dispatchers.Main) {
+                    if (lastRepair != null) {
+                        ThermalPrintHelper.showRepairTagDialog(requireContext(), lastRepair)
+                    } else {
+                        Toast.makeText(requireContext(), "No real repairs found in database.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
         binding.btnCustomThermalPrint.setOnClickListener {
@@ -341,38 +340,67 @@ class SettingsFragment : Fragment() {
 
         
         binding.btnCashClosing.setOnClickListener {
-            // Basic mock dialog for Cash Closing
-            val dialogView = layoutInflater.inflate(R.layout.dialog_cash_closing, null)
-            val etOpening = dialogView.findViewById<android.widget.EditText>(R.id.etOpening)
-            val etCashIn = dialogView.findViewById<android.widget.EditText>(R.id.etCashIn)
-            val etCashOut = dialogView.findViewById<android.widget.EditText>(R.id.etCashOut)
-            val etCounted = dialogView.findViewById<android.widget.EditText>(R.id.etCounted)
-            val tvVariance = dialogView.findViewById<android.widget.TextView>(R.id.tvVariance)
-            
-            etCounted.doAfterTextChanged {
-                val opening = etOpening.text.toString().toDoubleOrNull() ?: 0.0
-                val inCash = etCashIn.text.toString().toDoubleOrNull() ?: 0.0
-                val outCash = etCashOut.text.toString().toDoubleOrNull() ?: 0.0
-                val counted = etCounted.text.toString().toDoubleOrNull() ?: 0.0
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val db = AppDatabase.getDatabase(requireContext())
+                val todayStart = System.currentTimeMillis() - (System.currentTimeMillis() % (24 * 60 * 60 * 1000))
+                val todaySales = db.saleDao().getAllSalesList().filter { it.saleDate >= todayStart }.sumOf { it.finalAmount }
                 
-                val reconciler = CashClosingReconciler()
-                val variance = reconciler.reconcile(opening, inCash, outCash, counted)
-                tvVariance.text = "Variance: " + variance.money()
-                if (variance < 0) {
-                    tvVariance.setTextColor(android.graphics.Color.RED)
-                } else {
-                    tvVariance.setTextColor(android.graphics.Color.GREEN)
+                withContext(Dispatchers.Main) {
+                    val dialogView = layoutInflater.inflate(R.layout.dialog_cash_closing, null)
+                    val etOpening = dialogView.findViewById<android.widget.EditText>(R.id.etOpening)
+                    val etCashIn = dialogView.findViewById<android.widget.EditText>(R.id.etCashIn)
+                    val etCashOut = dialogView.findViewById<android.widget.EditText>(R.id.etCashOut)
+                    val etCounted = dialogView.findViewById<android.widget.EditText>(R.id.etCounted)
+                    val tvVariance = dialogView.findViewById<android.widget.TextView>(R.id.tvVariance)
+                    
+                    etCashIn.setText(todaySales.toString())
+                    
+                    etCounted.doAfterTextChanged {
+                        val opening = etOpening.text.toString().toDoubleOrNull() ?: 0.0
+                        val inCash = etCashIn.text.toString().toDoubleOrNull() ?: 0.0
+                        val outCash = etCashOut.text.toString().toDoubleOrNull() ?: 0.0
+                        val counted = etCounted.text.toString().toDoubleOrNull() ?: 0.0
+                        
+                        val variance = counted - (opening + inCash - outCash)
+                        tvVariance.text = "Variance: " + variance.money()
+                        if (variance < 0) {
+                            tvVariance.setTextColor(android.graphics.Color.RED)
+                        } else {
+                            tvVariance.setTextColor(android.graphics.Color.GREEN)
+                        }
+                    }
+                    
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Daily Cash Closing")
+                        .setView(dialogView)
+                        .setPositiveButton("Sign-off") { _, _ ->
+                            val opening = etOpening.text.toString().toDoubleOrNull() ?: 0.0
+                            val inCash = etCashIn.text.toString().toDoubleOrNull() ?: 0.0
+                            val outCash = etCashOut.text.toString().toDoubleOrNull() ?: 0.0
+                            val counted = etCounted.text.toString().toDoubleOrNull() ?: 0.0
+                            val variance = counted - (opening + inCash - outCash)
+                            
+                            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                                db.cashClosingDao().insert(
+                                    com.shopkeeper.mobileshop.data.db.entity.CashClosing(
+                                        closingDate = System.currentTimeMillis(),
+                                        openingCash = opening,
+                                        cashIn = inCash,
+                                        cashOut = outCash,
+                                        countedCash = counted,
+                                        variance = variance,
+                                        signedBy = "Current User"
+                                    )
+                                )
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(requireContext(), "Signed off cash closing.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                 }
             }
-            
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Daily Cash Closing")
-                .setView(dialogView)
-                .setPositiveButton("Sign-off") { _, _ ->
-                    Toast.makeText(requireContext(), "Signed off cash closing.", Toast.LENGTH_SHORT).show()
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
         }
 
         binding.btnAbout.setOnClickListener {

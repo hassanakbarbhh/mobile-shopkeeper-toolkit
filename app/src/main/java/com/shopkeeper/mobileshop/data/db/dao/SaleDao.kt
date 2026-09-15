@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SaleDao {
+    @Query("SELECT * FROM sale_items")
+    suspend fun getAllSaleItemsList(): List<SaleItem>
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertSale(sale: Sale): Long
     @Update suspend fun update(sale: Sale)
     @Delete suspend fun delete(sale: Sale)
@@ -16,6 +18,9 @@ interface SaleDao {
 
     @Query("SELECT * FROM sales ORDER BY saleDate DESC")
     fun getAllSales(): Flow<List<Sale>>
+    
+    @Query("SELECT * FROM sales ORDER BY saleDate DESC")
+    suspend fun getAllSalesList(): List<Sale>
 
     @Query("SELECT * FROM sales WHERE sellerId = :sellerId ORDER BY saleDate DESC")
     fun getSalesBySeller(sellerId: Long): Flow<List<Sale>>

@@ -15,6 +15,9 @@ interface RepairDao {
     @Query("SELECT * FROM repairs ORDER BY receivedDate DESC")
     fun getAllRepairs(): Flow<List<Repair>>
 
+    @Query("SELECT * FROM repairs ORDER BY receivedDate DESC")
+    suspend fun getAllRepairsList(): List<Repair>
+
     @Query("SELECT * FROM repairs WHERE id = :id")
     suspend fun getRepairById(id: Long): Repair?
 
