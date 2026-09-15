@@ -68,6 +68,7 @@ android {
 
 secrets {
   propertiesFileName = ".env"
+  defaultPropertiesFileName = "secrets.defaults.properties"
   ignoreList.add("FIREBASE_APPCHECK_DEBUG_TOKEN")
 }
 

@@ -3,7 +3,7 @@ name: Build & Release Android APK
 on:
   push:
     branches: [ "main", "master" ]
-    tags: [ "v6.*" ]
+    tags: [ "v6.*", "v*" ]
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -46,6 +48,7 @@ jobs:
           echo "==> Preparing build environment..."
           touch .env
           touch .env.example
+          touch secrets.defaults.properties
 
           # 1. Guarantee debug.keystore is present for signing
           if [ ! -f "debug.keystore" ]; then
@@ -109,10 +112,10 @@ jobs:
 
           # Copy to release-friendly name
           mkdir -p release_output
-          cp "$APK_FILE" "release_output/MobileShopkeeper-v1.0.0-debug.apk"
-          sha256sum "release_output/MobileShopkeeper-v1.0.0-debug.apk" > "release_output/MobileShopkeeper-v1.0.0-debug.apk.sha256"
+          cp "$APK_FILE" "release_output/MobileShopkeeper-v6.0.0-debug.apk"
+          sha256sum "release_output/MobileShopkeeper-v6.0.0-debug.apk" > "release_output/MobileShopkeeper-v6.0.0-debug.apk.sha256"
 
-          echo "SHA-256 Checksum: $(cat release_output/MobileShopkeeper-v1.0.0-debug.apk.sha256)"
+          echo "SHA-256 Checksum: $(cat release_output/MobileShopkeeper-v6.0.0-debug.apk.sha256)"
 
       - name: Upload APK as Workflow Artifact
         uses: actions/upload-artifact@v4
@@ -122,21 +125,29 @@ jobs:
           retention-days: 30
 
       - name: "Verification Check 3 of 3: Bundle Release AAB (Play Store)"
-        if: startsWith(github.ref, 'refs/tags/v6.')
+        if: startsWith(github.ref, 'refs/tags/v6.') || startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "=========================================================="
           echo "==> [CHECK 3/3] Executing Bundle Release AAB..."
           echo "=========================================================="
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
-          export KEYSTORE_FILE="release.keystore"
-          export KEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}"
-          export KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
-          export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
+            export KEYSTORE_FILE="release.keystore"
+            export KEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}"
+            export KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
+            export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
+          else
+            echo "KEYSTORE_BASE64 not set; signing AAB with generated keystore..."
+            export KEYSTORE_FILE="debug.keystore"
+            export KEYSTORE_PASSWORD="android"
+            export KEY_ALIAS="androiddebugkey"
+            export KEY_PASSWORD="android"
+          fi
           gradle bundleRelease --no-daemon --stacktrace
           echo "==> [CHECK 3/3 PASSED] AAB assembly completed."
 
       - name: "Double-Check Verification: Validate AAB Output"
-        if: startsWith(github.ref, 'refs/tags/v6.')
+        if: startsWith(github.ref, 'refs/tags/v6.') || startsWith(github.ref, 'refs/tags/v')
         run: |
           AAB_FILE=$(find app/build/outputs/bundle/release/ -name "*.aab" | head -n 1)
           if [ -z "$AAB_FILE" ] || [ ! -f "$AAB_FILE" ]; then
@@ -148,7 +159,7 @@ jobs:
           sha256sum "release_output/MobileShopkeeper-v6.0.0-release.aab" > "release_output/MobileShopkeeper-v6.0.0-release.aab.sha256"
 
       - name: Upload AAB as Workflow Artifact
-        if: startsWith(github.ref, 'refs/tags/v6.')
+        if: startsWith(github.ref, 'refs/tags/v6.') || startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
           name: MobileShopkeeper-AAB-Release
@@ -156,15 +167,15 @@ jobs:
           retention-days: 30
           
       - name: Create GitHub Release with APK/AAB
-        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        if: (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && github.event_name != 'pull_request'
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v6.0.{0}', github.run_number) }}
           files: |
-            release_output/MobileShopkeeper-v1.0.0-debug.apk
-            release_output/MobileShopkeeper-v1.0.0-debug.apk.sha256
-            release_output/MobileShopkeeper-v6.0.0-release.aab
-            release_output/MobileShopkeeper-v6.0.0-release.aab.sha256
+            release_output/*
+          fail_on_unmatched_files: false
+          generate_release_notes: false
           name: "Mobile Shopkeeper POS Build #${{ github.run_number }}"
           body: |
             ### 📱 Mobile Shopkeeper Point of Sale - APK/AAB Release
@@ -172,9 +183,8 @@ jobs:
             **Verification:** Passed Twice-Checking Protocol (Check 1: Unit Tests & Code Integrity, Check 2: Full Assembly & Integrity Audit)
             
             #### 📦 Download & Install:
-            - **APK Binary:** `MobileShopkeeper-v1.0.0-debug.apk`
-            - **AAB Bundle:** `MobileShopkeeper-v6.0.0-release.aab`
+            - **APK Binary:** `MobileShopkeeper-v6.0.0-debug.apk`
             
-            ${{ github.event.inputs.release_note || 'Production-ready Android APK with modern auth, thermal printing, and multi-role POS.' }}
+            ${{ github.event.inputs.release_note || 'Production-ready Android APK with authentic Room database, thermal printing, and multi-role POS.' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
