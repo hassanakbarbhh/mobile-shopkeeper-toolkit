@@ -98,9 +98,14 @@ class MainActivity : AppCompatActivity() {
                     if (!isStartDest && navController.navigateUp()) {
                         // Navigated up
                     } else {
-                        isEnabled = false
-                        onBackPressedDispatcher.onBackPressed()
-                        isEnabled = true
+                        com.google.android.material.dialog.MaterialAlertDialogBuilder(this@MainActivity)
+                            .setTitle("Exit Application")
+                            .setMessage("Are you sure you want to exit?")
+                            .setPositiveButton("Yes") { _, _ ->
+                                finishAffinity()
+                            }
+                            .setNegativeButton("No", null)
+                            .show()
                     }
                 }
             }
