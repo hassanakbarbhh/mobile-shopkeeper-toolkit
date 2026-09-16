@@ -48,19 +48,30 @@ class LockScreenActivity : AppCompatActivity() {
                     val name = account.displayName ?: email.substringBefore("@")
                     val photoUrl = account.photoUrl?.toString()
 
-                    val user = UserAuthManager.signInWithGoogle(
+                    val shopName = binding.etShopName.text?.toString()?.trim().orEmpty()
+                    val shopNumber = binding.etShopNumber.text?.toString()?.trim().orEmpty()
+                    val shopAddress = binding.etShopAddress.text?.toString()?.trim().orEmpty()
+                    val shopCode = binding.etShopCode.text?.toString()?.trim().orEmpty()
+
+                    UserAuthManager.signInWithGoogle(
                         context = this,
+                        idToken = account.idToken,
                         email = email,
                         displayName = name,
                         photoUrl = photoUrl,
-                        role = currentRole
-                    )
-
-                    // Also link to Firebase if ID token present
-                    GoogleAuthManager.tryFirebaseAuth(account.idToken) { _ -> }
-
-                    Toast.makeText(this, "Signed in as ${user.displayName}", Toast.LENGTH_SHORT).show()
-                    onUnlocked(currentRole)
+                        role = currentRole,
+                        shopName = shopName,
+                        shopNumber = shopNumber,
+                        shopAddress = shopAddress,
+                        shopCode = shopCode
+                    ) { success, message, user ->
+                        if (success && user != null) {
+                            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                            onUnlocked(user.role)
+                        } else {
+                            showError(message)
+                        }
+                    }
                 }
             } catch (e: ApiException) {
                 // Real Google Auth failed (likely missing SHA-1 or google-services.json mismatch)
