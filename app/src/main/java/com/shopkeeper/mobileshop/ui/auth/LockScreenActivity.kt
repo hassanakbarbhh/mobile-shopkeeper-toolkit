@@ -66,6 +66,8 @@ class LockScreenActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this, "Google Sign-In: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Google Sign-In canceled or failed.", Toast.LENGTH_SHORT).show()
         }
     }
 

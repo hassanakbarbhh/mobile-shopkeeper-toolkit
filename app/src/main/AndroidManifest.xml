@@ -58,6 +58,16 @@
             android:name=".MainActivity"
             android:exported="false"
             android:theme="@style/Theme.MobileShopkeeper.NoActionBar" />
+            
+        <activity
+            android:name=".ui.auth.PendingApprovalActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MobileShopkeeper.NoActionBar" />
+            
+        <activity
+            android:name=".ui.auth.AccessControlActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MobileShopkeeper.NoActionBar" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
