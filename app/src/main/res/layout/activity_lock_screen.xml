@@ -6,730 +6,728 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/background_light">
+    android:background="@color/green_50">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="20dp">
+        android:orientation="vertical">
 
-        <Space android:layout_width="0dp" android:layout_height="8dp"/>
-
-        <!-- Top App Branding -->
+        <!-- Header Section with Curved Bottom -->
         <FrameLayout
-            android:id="@+id/badgeLock"
-            android:layout_width="68dp"
-            android:layout_height="68dp"
-            android:background="@drawable/bg_circle_green"
-            android:elevation="3dp">
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@color/green_900">
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_storefront"
-                app:tint="@color/white"
-                android:contentDescription="Shop Logo"/>
+                android:gravity="center">
+
+                <FrameLayout
+                    android:id="@+id/badgeLock"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:background="@drawable/bg_circle_green"
+                    android:backgroundTint="@color/green_600"
+                    android:elevation="4dp">
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_storefront"
+                        app:tint="@color/white"/>
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvLockTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.02"/>
+
+                <TextView
+                    android:id="@+id/tvLockSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Point of Sale &amp; Enterprise Management"
+                    android:textColor="@color/slate_400"
+                    android:textSize="13sp"/>
+            </LinearLayout>
         </FrameLayout>
 
-        <TextView
-            android:id="@+id/tvLockTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/app_name"
-            android:textColor="@color/green_900"
-            android:textSize="22sp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/tvLockSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:gravity="center"
-            android:text="Point of Sale &amp; Secure Shop Management"
-            android:textColor="@color/text_secondary"
-            android:textSize="12.5sp"/>
-
-        <!-- ACTIVE LOGGED-IN SESSION CARD (Shown if user is already signed in) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardActiveSession"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:visibility="gone"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="1.5dp"
-            app:strokeColor="@color/green_300"
-            app:cardBackgroundColor="@color/white"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="18dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_circle_green">
-
-                        <TextView
-                            android:id="@+id/tvSessionAvatar"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:text="A"/>
-                    </FrameLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="14dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tvSessionName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Admin User"
-                            android:textColor="@color/text_primary"
-                            android:textSize="15sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:id="@+id/tvSessionEmail"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="user@example.com"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp"/>
-
-                        <TextView
-                            android:id="@+id/tvSessionRoleBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:background="@drawable/bg_badge_green"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="2dp"
-                            android:text="👑 Shop Owner"
-                            android:textColor="@color/green_900"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSessionEnter"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="16dp"
-                    android:backgroundTint="@color/green_700"
-                    android:text="Enter Shop"
-                    android:textSize="14sp"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_storefront"
-                    app:iconGravity="textStart"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSessionSignOut"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="4dp"
-                    android:text="Switch Account / Sign Out"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- MAIN AUTHENTICATION CONTAINER (Shown when signing in or registering) -->
+        <!-- Main Form Content -->
         <LinearLayout
-            android:id="@+id/layoutAuthForms"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:layout_marginTop="-24dp">
 
-            <!-- 1. GOOGLE SIGN IN (UNIVERSAL 1-TAP AUTH) -->
+            <!-- Active Session Card -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardGoogleButton"
+                android:id="@+id/cardActiveSession"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="1dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/gray_200"
-                app:cardBackgroundColor="@color/white">
-
-                <LinearLayout
-                    android:id="@+id/btnGoogleSignIn"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_google"
-                        android:contentDescription="Google"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="Continue with Google"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- DIVIDER -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="16dp">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="@color/divider"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
-                    android:text="OR CONTINUE WITH EMAIL"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="@color/divider"/>
-            </LinearLayout>
-
-            <!-- TAB SWITCHER: SIGN IN vs SMS OTP vs CREATE ACCOUNT -->
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleAuthMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:singleSelection="true"
-                app:checkedButton="@id/btnTabSignIn">
-
-                <Button
-                    android:id="@+id/btnTabSignIn"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Sign In"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-                <Button
-                    android:id="@+id/btnTabOtp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="SMS OTP"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-                <Button
-                    android:id="@+id/btnTabSignUp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Register"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <!-- ROLE SELECTOR -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Select Role:"
-                android:textColor="@color/green_900"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleRoleMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:singleSelection="true"
-                app:checkedButton="@id/btnRoleOwner">
-
-                <Button
-                    android:id="@+id/btnRoleOwner"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="👑 Owner"
-                    android:textSize="11.5sp"/>
-
-                <Button
-                    android:id="@+id/btnRoleSeller"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="💼 Seller"
-                    android:textSize="11.5sp"/>
-
-                <Button
-                    android:id="@+id/btnRoleTech"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🔧 Repair"
-                    android:textSize="11.5sp"/>
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <TextView
-                android:id="@+id/tvRoleHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_badge_green"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="6dp"
-                android:gravity="center"
-                android:text="👑 Shop Owner: Full master access, profits, purchases &amp; settings"
-                android:textColor="@color/green_900"
-                android:textSize="11.5sp"/>
-
-            <!-- SIGN IN FORM -->
-            <LinearLayout
-                android:id="@+id/layoutSignInForm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:visibility="visible">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilLoginEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:startIconDrawable="@drawable/ic_email"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etLoginEmail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Email or Staff Username"
-                        android:inputType="textEmailAddress"
-                        android:imeOptions="actionNext"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilLoginPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:endIconMode="password_toggle"
-                    app:startIconDrawable="@drawable/ic_lock"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etLoginPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Password"
-                        android:inputType="textPassword"
-                        android:imeOptions="actionDone"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp">
-
-                    <CheckBox
-                        android:id="@+id/cbRemember"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Remember me"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_secondary"
-                        android:buttonTint="@color/green_700"
-                        android:checked="true"/>
-
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                    <TextView
-                        android:id="@+id/btnForgotPassword"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Forgot Password?"
-                        android:textColor="@color/green_700"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"/>
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLoginSubmit"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="10dp"
-                    android:backgroundTint="@color/green_900"
-                    android:text="Sign In as Shop Owner"
-                    android:textSize="14sp"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_lock"
-                    app:iconGravity="textStart"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFingerprint"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/lock_fingerprint"
-                    android:textColor="@color/green_700"
-                    app:icon="@drawable/ic_fingerprint"
-                    app:iconTint="@color/green_700"/>
-            </LinearLayout>
-
-            <!-- SIGN UP / CREATE ACCOUNT FORM -->
-            <LinearLayout
-                android:id="@+id/layoutSignUpForm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="16dp"
                 android:visibility="gone"
-                tools:visibility="visible">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilRegisterName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:startIconDrawable="@drawable/ic_person"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etRegisterName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Full Name"
-                        android:inputType="textPersonName"
-                        android:imeOptions="actionNext"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilRegisterEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:startIconDrawable="@drawable/ic_email"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etRegisterEmail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Email Address"
-                        android:inputType="textEmailAddress"
-                        android:imeOptions="actionNext"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilRegisterPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:endIconMode="password_toggle"
-                    app:startIconDrawable="@drawable/ic_lock"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etRegisterPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Create Password (min. 6 characters)"
-                        android:inputType="textPassword"
-                        android:imeOptions="actionNext"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilRegisterConfirm"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:endIconMode="password_toggle"
-                    app:startIconDrawable="@drawable/ic_lock"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etRegisterConfirm"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Confirm Password"
-                        android:inputType="textPassword"
-                        android:imeOptions="actionDone"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRegisterSubmit"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/green_900"
-                    android:text="Create Account &amp; Sign In"
-                    android:textSize="14sp"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_person"
-                    app:iconGravity="textStart"/>
-            </LinearLayout>
-
-            <!-- SMS OTP VERIFICATION FORM -->
-            <LinearLayout
-                android:id="@+id/layoutOtpForm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Enter mobile phone number (with country code):"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="6dp"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilPhoneNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MobileShop.TextInput"
-                    app:startIconDrawable="@drawable/ic_call"
-                    app:startIconTint="@color/green_700"
-                    app:boxStrokeWidth="1.5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPhoneNumber"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Phone (e.g., +923001234567)"
-                        android:inputType="phone"
-                        android:imeOptions="actionDone"
-                        android:maxLines="1"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSendOtp"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:backgroundTint="@color/green_800"
-                    android:text="Send 6-Digit SMS Code"
-                    android:textSize="13sp"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_email"
-                    app:iconGravity="textStart"/>
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white"
+                tools:visibility="gone">
 
                 <LinearLayout
-                    android:id="@+id/layoutOtpCodeInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="12dp"
-                    android:visibility="gone">
+                    android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/tvOtpCodePrompt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Enter the 6-digit code sent to your phone:"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:layout_marginBottom="4dp"/>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilOtpCode"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MobileShop.TextInput"
-                        app:startIconDrawable="@drawable/ic_lock"
-                        app:startIconTint="@color/green_700"
-                        app:boxStrokeWidth="1.5dp">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etOtpCode"
-                            android:layout_width="match_parent"
+                        <FrameLayout
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:background="@drawable/bg_circle_green"
+                            android:backgroundTint="@color/violet_100">
+                            <TextView
+                                android:id="@+id/tvSessionAvatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:textColor="@color/green_600"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                tools:text="A"/>
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:hint="6-Digit SMS Code"
-                            android:inputType="number"
-                            android:maxLength="6"
-                            android:gravity="center"
-                            android:textSize="18sp"
-                            android:letterSpacing="0.15"
-                            android:maxLines="1"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:layout_weight="1"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+                            
+                            <TextView
+                                android:id="@+id/tvSessionName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="Admin User"
+                                android:textColor="@color/green_900"
+                                android:textSize="16sp"
+                                android:textStyle="bold"/>
+                                
+                            <TextView
+                                android:id="@+id/tvSessionEmail"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="user@example.com"
+                                android:textColor="@color/green_500"
+                                android:textSize="13sp"/>
+                                
+                            <TextView
+                                android:id="@+id/tvSessionRoleBadge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:background="@drawable/bg_badge_green"
+                                android:backgroundTint="@color/green_600"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="3dp"
+                                tools:text="OWNER"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnVerifyOtp"
+                        android:id="@+id/btnSessionEnter"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="8dp"
-                        android:backgroundTint="@color/green_900"
-                        android:text="Verify Code &amp; Sign In"
-                        android:textSize="14sp"
-                        app:cornerRadius="12dp"
-                        app:icon="@drawable/ic_sync_done"
-                        app:iconGravity="textStart"/>
+                        android:layout_height="54dp"
+                        android:layout_marginTop="20dp"
+                        android:text="Continue to Dashboard"
+                        android:backgroundTint="@color/green_600"
+                        app:cornerRadius="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSessionSignOut"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Sign out"
+                        android:textColor="@color/green_500"/>
                 </LinearLayout>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/tvAuthError"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="6dp"
-                android:textColor="@color/error"
-                android:textSize="12sp"
-                android:visibility="gone"/>
-        </LinearLayout>
-
-        <!-- Modern Security & Privacy Badge -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/divider"
-            app:cardBackgroundColor="@color/white">
-
-            <LinearLayout
+            <!-- Main Auth Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/layoutAuthForms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="12dp">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_lock"
-                    app:tint="@color/green_700"
-                    android:contentDescription="Security"/>
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="10dp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="24dp">
 
+                    <!-- Role Selector -->
                     <TextView
+                        android:id="@+id/tvRoleHint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Anti-Leak &amp; Anti-Tamper Security"
-                        android:textColor="@color/green_900"
-                        android:textStyle="bold"
-                        android:textSize="12sp"/>
+                        android:text="Select Role"
+                        android:textColor="@color/green_500"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleRoleMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:selectionRequired="true"
+                        app:checkedButton="@+id/btnRoleOwner"
+                        android:layout_marginBottom="20dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRoleOwner"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Owner"
+                            android:textSize="12sp"
+                            android:paddingHorizontal="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRoleSeller"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Staff"
+                            android:textSize="12sp"
+                            android:paddingHorizontal="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRoleTech"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Tech"
+                            android:textSize="12sp"
+                            android:paddingHorizontal="4dp"/>
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <!-- Auth Mode Tabs -->
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleAuthMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:selectionRequired="true"
+                        app:checkedButton="@+id/btnTabSignIn"
+                        android:layout_marginBottom="24dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTabSignIn"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Login"
+                            android:textSize="12sp"
+                            android:paddingHorizontal="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTabOtp"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Phone"
+                            android:textSize="12sp"
+                            android:paddingHorizontal="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTabSignUp"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Register"
+                            android:textSize="12sp"
+                            android:paddingHorizontal="4dp"/>
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <!-- Sign In Form -->
+                    <LinearLayout
+                        android:id="@+id/layoutSignInForm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilLoginEmail"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Email Address"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_email"
+                            android:layout_marginBottom="16dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLoginEmail"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textEmailAddress"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilLoginPassword"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Password"
+                            app:passwordToggleEnabled="true"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_lock"
+                            android:layout_marginBottom="8dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLoginPassword"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="24dp">
+                            <CheckBox
+                                android:id="@+id/cbRemember"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Remember me"
+                                android:textSize="13sp"
+                                android:textColor="@color/slate_600"/>
+                            <Space
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"/>
+                            <TextView
+                                android:id="@+id/btnForgotPassword"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Forgot?"
+                                android:textColor="@color/green_600"
+                                android:textStyle="bold"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnLoginSubmit"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="54dp"
+                                android:text="Sign In"
+                                android:backgroundTint="@color/green_600"
+                                app:cornerRadius="12dp"/>
+                                
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnFingerprint"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="54dp"
+                                android:layout_height="54dp"
+                                android:layout_marginStart="12dp"
+                                app:icon="@drawable/ic_fingerprint"
+                                app:iconGravity="textStart"
+                                app:iconPadding="0dp"
+                                app:cornerRadius="12dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Sign Up Form -->
+                    <LinearLayout
+                        android:id="@+id/layoutSignUpForm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+                        
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilRegisterName"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Full Name"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_person"
+                            android:layout_marginBottom="12dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etRegisterName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPersonName"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilRegisterEmail"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Email Address"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_email"
+                            android:layout_marginBottom="12dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etRegisterEmail"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textEmailAddress"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilRegisterPassword"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Password"
+                            app:passwordToggleEnabled="true"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_lock"
+                            android:layout_marginBottom="12dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etRegisterPassword"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilRegisterConfirm"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Confirm Password"
+                            app:passwordToggleEnabled="true"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_lock"
+                            android:layout_marginBottom="24dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etRegisterConfirm"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <!-- Shop Owner Fields -->
+                        <LinearLayout
+                            android:id="@+id/layoutShopOwnerFields"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilShopName"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Shop Name"
+                                app:boxCornerRadiusTopStart="12dp"
+                                app:boxCornerRadiusTopEnd="12dp"
+                                app:boxCornerRadiusBottomStart="12dp"
+                                app:boxCornerRadiusBottomEnd="12dp"
+                                app:startIconDrawable="@drawable/ic_inventory"
+                                android:layout_marginBottom="12dp">
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etShopName"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text"
+                                    android:maxLines="1"/>
+                            </com.google.android.material.textfield.TextInputLayout>
+                        
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilShopNumber"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Shop Contact Number"
+                                app:boxCornerRadiusTopStart="12dp"
+                                app:boxCornerRadiusTopEnd="12dp"
+                                app:boxCornerRadiusBottomStart="12dp"
+                                app:boxCornerRadiusBottomEnd="12dp"
+                                app:startIconDrawable="@drawable/ic_call"
+                                android:layout_marginBottom="12dp">
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etShopNumber"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="phone"
+                                    android:maxLines="1"/>
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilShopAddress"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Shop Address"
+                                app:boxCornerRadiusTopStart="12dp"
+                                app:boxCornerRadiusTopEnd="12dp"
+                                app:boxCornerRadiusBottomStart="12dp"
+                                app:boxCornerRadiusBottomEnd="12dp"
+                                app:startIconDrawable="@drawable/ic_location"
+                                android:layout_marginBottom="12dp">
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etShopAddress"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="textPostalAddress"
+                                    android:maxLines="2"/>
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                        </LinearLayout>
+                        <!-- Seller Fields -->
+                        <LinearLayout
+                            android:id="@+id/layoutSellerFields"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilShopCode"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Shop Owner Link Code"
+                                app:boxCornerRadiusTopStart="12dp"
+                                app:boxCornerRadiusTopEnd="12dp"
+                                app:boxCornerRadiusBottomStart="12dp"
+                                app:boxCornerRadiusBottomEnd="12dp"
+                                app:startIconDrawable="@drawable/ic_lock"
+                                android:layout_marginBottom="12dp">
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etShopCode"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text"
+                                    android:maxLines="1"/>
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRegisterSubmit"
+                            android:layout_width="match_parent"
+                            android:layout_height="54dp"
+                            android:text="Create Account"
+                            android:backgroundTint="@color/green_600"
+                            app:cornerRadius="12dp"/>
+                    </LinearLayout>
+
+                    <!-- OTP Form -->
+                    <LinearLayout
+                        android:id="@+id/layoutOtpForm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+                        
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilPhoneNumber"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Phone (+923001234567)"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:startIconDrawable="@drawable/ic_call"
+                            android:layout_marginBottom="16dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etPhoneNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="phone"
+                                android:maxLines="1"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSendOtp"
+                            android:layout_width="match_parent"
+                            android:layout_height="54dp"
+                            android:text="Send SMS Code"
+                            android:backgroundTint="@color/slate_800"
+                            app:cornerRadius="12dp"/>
+
+                        <LinearLayout
+                            android:id="@+id/layoutOtpCodeInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="20dp"
+                            android:visibility="gone">
+                            
+                            <TextView
+                                android:id="@+id/tvOtpCodePrompt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Enter the 6-digit code sent to your phone"
+                                android:textColor="@color/green_500"
+                                android:textSize="12sp"
+                                android:layout_marginBottom="8dp"/>
+                                
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilOtpCode"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="6-Digit SMS Code"
+                                app:boxCornerRadiusTopStart="12dp"
+                                app:boxCornerRadiusTopEnd="12dp"
+                                app:boxCornerRadiusBottomStart="12dp"
+                                app:boxCornerRadiusBottomEnd="12dp"
+                                app:startIconDrawable="@drawable/ic_lock"
+                                android:layout_marginBottom="16dp">
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etOtpCode"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number"
+                                    android:maxLength="6"
+                                    android:gravity="center"
+                                    android:textSize="20sp"
+                                    android:letterSpacing="0.2"
+                                    android:maxLines="1"/>
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnVerifyOtp"
+                                android:layout_width="match_parent"
+                                android:layout_height="54dp"
+                                android:text="Verify &amp; Sign In"
+                                android:backgroundTint="@color/green_600"
+                                app:cornerRadius="12dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tvAuthError"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:text="Role-based permissions with Google Auth &amp; cryptographic local hashing."
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"/>
+                        android:layout_marginTop="16dp"
+                        android:gravity="center"
+                        android:textColor="@color/error"
+                        android:textSize="13sp"
+                        android:visibility="gone"/>
+
+                    <!-- Google Sign In -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="24dp">
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+                            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="@color/slate_200"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="OR CONTINUE WITH" android:textSize="11sp" android:textColor="@color/slate_400" android:layout_marginHorizontal="12dp"/>
+                            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="@color/slate_200"/>
+                        </LinearLayout>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardGoogleButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="54dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/slate_200"
+                            app:cardBackgroundColor="@color/white">
+                            
+                            <LinearLayout
+                                android:id="@+id/btnGoogleSignIn"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="horizontal"
+                                android:gravity="center"
+                                android:background="?attr/selectableItemBackground"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_google"
+                                    android:contentDescription="Google Logo"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="12dp"
+                                    android:text="Google"
+                                    android:textColor="@color/slate_700"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="12dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="@color/green_900"
-            android:textStyle="bold"
-            android:textSize="12sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="@string/made_by"
-            android:textColor="@color/text_secondary"
-            android:textSize="11sp"/>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -12,6 +12,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
+import com.google.android.material.button.MaterialButtonToggleGroup
+
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -185,26 +187,36 @@ class LockScreenActivity : AppCompatActivity() {
                 binding.toggleRoleMode.check(R.id.btnRoleOwner)
                 binding.tvRoleHint.text = "👑 Shop Owner: Full master access, profits, purchases & settings"
                 binding.btnLoginSubmit.text = "Sign In as Shop Owner"
+                binding.btnRegisterSubmit.text = "Register as Shop Owner"
+                binding.layoutShopOwnerFields.visibility = View.VISIBLE
+                binding.layoutSellerFields.visibility = View.GONE
             }
             AppMode.SELLER_STAFF -> {
                 binding.toggleRoleMode.check(R.id.btnRoleSeller)
                 binding.tvRoleHint.text = "💼 Seller / Staff: Fast counter checkout, sales & receipts"
                 binding.btnLoginSubmit.text = "Sign In as Seller / Staff"
+                binding.btnRegisterSubmit.text = "Register as Seller / Staff"
+                binding.layoutShopOwnerFields.visibility = View.GONE
+                binding.layoutSellerFields.visibility = View.VISIBLE
             }
             AppMode.REPAIR_TECH -> {
                 binding.toggleRoleMode.check(R.id.btnRoleTech)
                 binding.tvRoleHint.text = "🔧 Repair Technician: Intake jobs, diagnosis & parts tracking"
                 binding.btnLoginSubmit.text = "Sign In as Repair Tech"
+                binding.btnRegisterSubmit.text = "Register as Repair Tech"
+                binding.layoutShopOwnerFields.visibility = View.VISIBLE
+                binding.layoutSellerFields.visibility = View.GONE
             }
             AppMode.BASIC_USER -> {
                 binding.tvRoleHint.text = "Basic User"
                 binding.btnLoginSubmit.text = "Sign In"
+                binding.layoutShopOwnerFields.visibility = View.GONE
+                binding.layoutSellerFields.visibility = View.GONE
             }
             else -> {}
         }
         binding.tvAuthError.visibility = View.GONE
     }
-
     private fun setupGoogleAuth() {
         binding.btnGoogleSignIn.setOnClickListener {
             launchGoogleSignIn()
@@ -352,6 +364,11 @@ class LockScreenActivity : AppCompatActivity() {
         val email = binding.etRegisterEmail.text?.toString()?.trim().orEmpty()
         val pass = binding.etRegisterPassword.text?.toString()?.trim().orEmpty()
         val confirm = binding.etRegisterConfirm.text?.toString()?.trim().orEmpty()
+        
+        val shopName = binding.etShopName.text?.toString()?.trim().orEmpty()
+        val shopNumber = binding.etShopNumber.text?.toString()?.trim().orEmpty()
+        val shopAddress = binding.etShopAddress.text?.toString()?.trim().orEmpty()
+        val shopCode = binding.etShopCode.text?.toString()?.trim().orEmpty()
 
         if (name.isEmpty()) {
             showError("Please enter your full name.")
@@ -369,24 +386,35 @@ class LockScreenActivity : AppCompatActivity() {
             showError("Passwords do not match.")
             return
         }
+        
+        if ((currentRole == AppMode.SHOP_OWNER || currentRole == AppMode.REPAIR_TECH) && shopName.isEmpty()) {
+            showError("Please enter your Shop Name.")
+            return
+        }
+        if (currentRole == AppMode.SELLER_STAFF && shopCode.isEmpty()) {
+            showError("Please enter the Shop Owner Link Code.")
+            return
+        }
 
         UserAuthManager.signUp(
             context = this,
             name = name,
             email = email,
             password = pass,
-            role = currentRole
+            role = currentRole,
+            shopName = shopName, shopNumber = shopNumber, shopAddress = shopAddress,
+            shopCode = shopCode
         ) { success, message, user ->
             if (success && user != null) {
                 binding.tvAuthError.visibility = View.GONE
-                Toast.makeText(this, "Account created! Welcome, ${user.displayName}", Toast.LENGTH_SHORT).show()
-                onUnlocked(user.role)
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                // Force user back to login mode
+                binding.toggleAuthMode.check(R.id.btnTabSignIn)
             } else {
                 showError(message)
             }
         }
     }
-
     private fun showForgotPasswordDialog() {
         val input = EditText(this).apply {
             hint = "Enter your registered email"
@@ -402,7 +430,7 @@ class LockScreenActivity : AppCompatActivity() {
             .setPositiveButton("Send Reset Link") { _, _ ->
                 val email = input.text.toString().trim()
                 if (email.isNotEmpty()) {
-                    UserAuthManager.sendPasswordReset(email) { ok, msg ->
+                    UserAuthManager.sendPasswordReset(this, email) { ok, msg ->
                         Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
                     }
                 } else {

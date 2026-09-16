@@ -65,7 +65,7 @@ class AboutFragment : Fragment() {
             }
         }
 
-        binding.btnUploadPhoto.setOnClickListener { pickPhotoAction() }
+        // binding.btnUploadPhoto.setOnClickListener { pickPhotoAction() }
         binding.btnChangePhotoBadge.setOnClickListener { pickPhotoAction() }
         binding.cardProfilePhoto.setOnClickListener { pickPhotoAction() }
 

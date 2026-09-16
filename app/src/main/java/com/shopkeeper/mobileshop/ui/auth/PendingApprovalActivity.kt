@@ -36,7 +36,7 @@ class PendingApprovalActivity : AppCompatActivity() {
                     if (doc.exists() && doc.getBoolean("approved") == true) {
                         val roleStr = doc.getString("role") ?: "BASIC_USER"
                         // Map and save to local
-                        UserAuthManager.updateLocalRole(this, roleStr)
+                        val curUser = UserAuthManager.getCurrentUser(this); if (curUser != null) UserAuthManager.updateLocalRole(this, curUser, runCatching { com.shopkeeper.mobileshop.utils.AppMode.valueOf(roleStr) }.getOrDefault(com.shopkeeper.mobileshop.utils.AppMode.BASIC_USER))
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
                     } else {

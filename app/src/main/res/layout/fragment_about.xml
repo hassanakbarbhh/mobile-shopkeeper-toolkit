@@ -139,58 +139,7 @@
         </LinearLayout>
 
         <!-- Photo Instructions Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="4dp"
-            app:cardCornerRadius="14dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/divider"
-            app:cardBackgroundColor="@color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="📸 Personal Profile Picture"
-                        android:textColor="@color/green_900"
-                        android:textStyle="bold"
-                        android:textSize="15sp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUploadPhoto"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Choose Photo"
-                        android:textSize="12sp"
-                        app:icon="@drawable/ic_edit"
-                        app:iconSize="14dp"/>
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="How to bundle your picture in APK permanently:\n1. Tap 'Choose Photo' to select your photo right now from your gallery.\n2. Or copy your picture to 'res/drawable/img_hassan_profile.jpg' in project files."
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:lineSpacingExtra="3dp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <!-- Removed Profile Picture Instructions Card -->
 
         <!-- Connect with Developer -->
         <TextView
