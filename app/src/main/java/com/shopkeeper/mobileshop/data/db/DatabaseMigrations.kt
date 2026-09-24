@@ -16,7 +16,8 @@ object DatabaseMigrations {
             db.execSQL("ALTER TABLE products ADD COLUMN lastModifiedBy TEXT NOT NULL DEFAULT ''")
             db.execSQL("ALTER TABLE products ADD COLUMN lastModifiedDevice TEXT NOT NULL DEFAULT ''")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_products_cloudId ON products(cloudId)")
-            db.execSQL("UPDATE products SET cloudId = hex(randomblob(16)) WHERE cloudId = '' OR cloudId IS NULL")
+            // Prefer imei when available to retain cross-device stability; fallback to deterministic id tag
+            db.execSQL("UPDATE products SET cloudId = CASE WHEN imei IS NOT NULL AND length(trim(imei)) > 0 THEN 'prod_' || trim(imei) ELSE 'prod_legacy_' || id END WHERE cloudId = '' OR cloudId IS NULL")
 
             // 2. Customers table
             db.execSQL("ALTER TABLE customers ADD COLUMN cloudId TEXT NOT NULL DEFAULT ''")
@@ -29,7 +30,8 @@ object DatabaseMigrations {
             db.execSQL("ALTER TABLE customers ADD COLUMN lastModifiedDevice TEXT NOT NULL DEFAULT ''")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_customers_cloudId ON customers(cloudId)")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_customers_phone ON customers(phone)")
-            db.execSQL("UPDATE customers SET cloudId = hex(randomblob(16)) WHERE cloudId = '' OR cloudId IS NULL")
+            // Prefer cleaned phone number so legacy records match cloud documents seamlessly
+            db.execSQL("UPDATE customers SET cloudId = CASE WHEN phone IS NOT NULL AND length(trim(phone)) > 0 THEN 'cust_' || replace(replace(replace(trim(phone), ' ', ''), '-', ''), '+', '') ELSE 'cust_legacy_' || id END WHERE cloudId = '' OR cloudId IS NULL")
             db.execSQL("UPDATE customers SET updatedAt = createdAt WHERE updatedAt = 0")
 
             // 3. Sales table
@@ -42,7 +44,7 @@ object DatabaseMigrations {
             db.execSQL("ALTER TABLE sales ADD COLUMN lastModifiedBy TEXT NOT NULL DEFAULT ''")
             db.execSQL("ALTER TABLE sales ADD COLUMN lastModifiedDevice TEXT NOT NULL DEFAULT ''")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_sales_cloudId ON sales(cloudId)")
-            db.execSQL("UPDATE sales SET cloudId = hex(randomblob(16)) WHERE cloudId = '' OR cloudId IS NULL")
+            db.execSQL("UPDATE sales SET cloudId = 'sale_legacy_' || id || '_' || saleDate WHERE cloudId = '' OR cloudId IS NULL")
             db.execSQL("UPDATE sales SET updatedAt = saleDate WHERE updatedAt = 0")
 
             // 4. Repairs table
@@ -55,7 +57,7 @@ object DatabaseMigrations {
             db.execSQL("ALTER TABLE repairs ADD COLUMN lastModifiedBy TEXT NOT NULL DEFAULT ''")
             db.execSQL("ALTER TABLE repairs ADD COLUMN lastModifiedDevice TEXT NOT NULL DEFAULT ''")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_repairs_cloudId ON repairs(cloudId)")
-            db.execSQL("UPDATE repairs SET cloudId = hex(randomblob(16)) WHERE cloudId = '' OR cloudId IS NULL")
+            db.execSQL("UPDATE repairs SET cloudId = 'repair_legacy_' || id || '_' || receivedDate WHERE cloudId = '' OR cloudId IS NULL")
             db.execSQL("UPDATE repairs SET updatedAt = receivedDate WHERE updatedAt = 0")
 
             // 5. Expenses table

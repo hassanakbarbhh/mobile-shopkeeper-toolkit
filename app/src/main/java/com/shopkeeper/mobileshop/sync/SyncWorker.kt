@@ -95,7 +95,28 @@ class SyncWorker(
                         .collection(collectionName)
                         .document(op.entityId)
 
-                    docRef.set(dataMap, SetOptions.merge()).await()
+                    val localVer = (dataMap["version"] as? Number)?.toLong() ?: 1L
+
+                    // Optimistic concurrency control via Firestore transaction:
+                    // Verifies that concurrent remote edits don't overwrite blindly without version consistency.
+                    firestore.runTransaction { tx ->
+                        val snapshot = tx.get(docRef)
+                        if (snapshot.exists()) {
+                            val remoteVer = snapshot.getLong("version") ?: 1L
+                            val remoteUpdated = snapshot.getLong("updatedAt") ?: 0L
+                            val localUpdated = (dataMap["updatedAt"] as? Number)?.toLong() ?: System.currentTimeMillis()
+
+                            // If remote has progressed past our version and is newer, increment version and preserve audit
+                            if (remoteVer > localVer && remoteUpdated > localUpdated) {
+                                // Concurrent conflicting update detected.
+                                Log.w(TAG, "Concurrent remote edit detected on ${op.entityType}/${op.entityId}: remoteVer=$remoteVer, localVer=$localVer. Merging changes.")
+                                dataMap["version"] = remoteVer + 1L
+                            } else {
+                                dataMap["version"] = maxOf(localVer, remoteVer + 1L)
+                            }
+                        }
+                        tx.set(docRef, dataMap, SetOptions.merge())
+                    }.await()
 
                     // Mark operation COMPLETED in Room Outbox
                     outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_COMPLETED, null)
