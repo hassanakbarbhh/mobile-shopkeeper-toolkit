@@ -21,6 +21,9 @@ interface RepairDao {
     @Query("SELECT * FROM repairs WHERE id = :id")
     suspend fun getRepairById(id: Long): Repair?
 
+    @Query("SELECT * FROM repairs WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getRepairByCloudId(cloudId: String): Repair?
+
     @Query("SELECT * FROM repairs WHERE imei = :imei ORDER BY receivedDate DESC")
     suspend fun byImei(imei: String): List<Repair>
 

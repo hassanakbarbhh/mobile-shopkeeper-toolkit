@@ -79,6 +79,16 @@ class SyncWorker(
                     dataMap["deviceId"] = op.deviceId
                     dataMap["userId"] = op.userId
                     dataMap["shopId"] = op.shopId
+                    dataMap["lastModifiedBy"] = op.userId
+                    dataMap["lastModifiedDevice"] = op.deviceId
+                    if (!dataMap.containsKey("cloudId")) {
+                        dataMap["cloudId"] = op.entityId
+                    }
+
+                    if (op.operationType.startsWith("OP_DELETE") || op.operationType.contains("DELETE")) {
+                        dataMap["isDeleted"] = true
+                        dataMap["deletedAt"] = System.currentTimeMillis()
+                    }
 
                     val docRef = firestore.collection("shops")
                         .document(op.shopId)
@@ -89,6 +99,7 @@ class SyncWorker(
 
                     // Mark operation COMPLETED in Room Outbox
                     outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_COMPLETED, null)
+                    SyncPreferences.incrementUploadedCount(applicationContext, 1)
                     Log.d(TAG, "Successfully synced outbox event: ${op.eventId} -> shops/${op.shopId}/$collectionName/${op.entityId}")
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to upload outbox event: ${op.eventId}", e)

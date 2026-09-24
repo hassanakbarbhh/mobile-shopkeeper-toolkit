@@ -3,7 +3,13 @@ package com.shopkeeper.mobileshop.data.db.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "repairs", indices = [androidx.room.Index(value = ["status"])])
+@Entity(
+    tableName = "repairs",
+    indices = [
+        androidx.room.Index(value = ["status"]),
+        androidx.room.Index(value = ["cloudId"])
+    ]
+)
 data class Repair(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val customerId: Long? = null,
@@ -18,7 +24,15 @@ data class Repair(
     val status: RepairStatus = RepairStatus.RECEIVED,
     val receivedDate: Long = System.currentTimeMillis(),
     val deliveryDate: Long? = null,
-    val notes: String = ""
+    val notes: String = "",
+    val cloudId: String = java.util.UUID.randomUUID().toString(),
+    val shopId: String = "",
+    val version: Long = 1L,
+    val updatedAt: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null,
+    val lastModifiedBy: String = "",
+    val lastModifiedDevice: String = ""
 )
 
 enum class RepairStatus {

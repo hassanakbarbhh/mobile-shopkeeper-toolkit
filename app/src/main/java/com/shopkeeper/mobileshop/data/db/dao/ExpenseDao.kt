@@ -7,8 +7,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ExpenseDao {
     @Insert suspend fun insert(e: Expense): Long
+    @Update suspend fun update(e: Expense)
     @Delete suspend fun delete(e: Expense)
     @Query("DELETE FROM expenses WHERE title LIKE 'Shop Rent%' OR title LIKE 'Electricity Bill%' OR title LIKE 'Broadband Internet%'") suspend fun deleteDummyExpenses()
+
+    @Query("SELECT * FROM expenses WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getByCloudId(cloudId: String): Expense?
 
     @Query("SELECT * FROM expenses ORDER BY date DESC")
     fun getAll(): Flow<List<Expense>>

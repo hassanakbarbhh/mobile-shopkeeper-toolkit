@@ -15,4 +15,7 @@ interface SupplierDao {
 
     @Query("SELECT * FROM suppliers WHERE id = :id")
     suspend fun getById(id: Long): Supplier?
+
+    @Query("SELECT * FROM suppliers WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getByCloudId(cloudId: String): Supplier?
 }

@@ -24,6 +24,12 @@ interface OutboxDao {
     @Query("SELECT * FROM outbox_operations WHERE status IN ('PENDING', 'FAILED') ORDER BY createdAt ASC")
     suspend fun getPendingList(): List<OutboxOperation>
 
+    @Query("SELECT COUNT(*) > 0 FROM outbox_operations WHERE entityType = :entityType AND entityId = :entityId AND status IN ('PENDING', 'UPLOADING')")
+    suspend fun hasPendingMutation(entityType: String, entityId: String): Boolean
+
+    @Query("SELECT * FROM outbox_operations WHERE entityType = :entityType AND entityId = :entityId AND status IN ('PENDING', 'UPLOADING') ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getPendingForEntity(entityType: String, entityId: String): OutboxOperation?
+
     @Query("SELECT COUNT(*) FROM outbox_operations WHERE status = 'PENDING' OR status = 'FAILED'")
     fun getPendingCount(): Flow<Int>
 

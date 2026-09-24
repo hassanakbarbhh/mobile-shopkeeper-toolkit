@@ -7,6 +7,7 @@ object SyncPreferences {
     private const val KEY_LAST_SYNC_TIME = "sync_last_time"
     private const val KEY_LAST_SYNC_CURSOR = "sync_last_cursor"
     private const val KEY_DOWNLOADED_COUNT = "sync_downloaded_count"
+    private const val KEY_UPLOADED_COUNT = "sync_uploaded_count"
     private const val KEY_LAST_ERROR = "sync_last_error"
 
     fun getLastSyncTimestamp(context: Context): Long {
@@ -43,6 +44,19 @@ object SyncPreferences {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putInt(KEY_DOWNLOADED_COUNT, current + count)
+            .apply()
+    }
+
+    fun getUploadedCount(context: Context): Int {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getInt(KEY_UPLOADED_COUNT, 0)
+    }
+
+    fun incrementUploadedCount(context: Context, count: Int = 1) {
+        val current = getUploadedCount(context)
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(KEY_UPLOADED_COUNT, current + count)
             .apply()
     }
 

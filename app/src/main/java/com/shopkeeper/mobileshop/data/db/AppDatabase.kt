@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
         PurchaseItem::class, Expense::class, Seller::class, CashClosing::class,
         OutboxOperation::class, ImeiAsset::class, ImeiLifecycleEvent::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -63,6 +63,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
+                    .addMigrations(DatabaseMigrations.MIGRATION_7_8)
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {

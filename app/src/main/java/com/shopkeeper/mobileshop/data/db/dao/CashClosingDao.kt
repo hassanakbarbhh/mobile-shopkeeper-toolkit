@@ -1,9 +1,6 @@
 package com.shopkeeper.mobileshop.data.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.shopkeeper.mobileshop.data.db.entity.CashClosing
 import kotlinx.coroutines.flow.Flow
 
@@ -11,6 +8,12 @@ import kotlinx.coroutines.flow.Flow
 interface CashClosingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(closing: CashClosing): Long
+
+    @Update
+    suspend fun update(closing: CashClosing)
+
+    @Query("SELECT * FROM cash_closing_table WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getByCloudId(cloudId: String): CashClosing?
 
     @Query("SELECT * FROM cash_closing_table ORDER BY closingDate DESC")
     fun getAllClosings(): Flow<List<CashClosing>>

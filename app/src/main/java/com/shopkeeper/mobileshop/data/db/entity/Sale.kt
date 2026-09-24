@@ -6,7 +6,15 @@ import androidx.room.PrimaryKey
 
 import androidx.room.Index
 
-@Entity(tableName = "sales", indices = [Index(value = ["customerId"]), Index(value = ["saleDate"]), Index(value = ["paymentStatus"])])
+@Entity(
+    tableName = "sales",
+    indices = [
+        Index(value = ["customerId"]),
+        Index(value = ["saleDate"]),
+        Index(value = ["paymentStatus"]),
+        Index(value = ["cloudId"])
+    ]
+)
 data class Sale(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val customerId: Long? = null,
@@ -20,7 +28,15 @@ data class Sale(
     val sellerId: Long? = null,
     val sellerName: String = "Owner",
     val notes: String = "",
-    val saleDate: Long = System.currentTimeMillis()
+    val saleDate: Long = System.currentTimeMillis(),
+    val cloudId: String = java.util.UUID.randomUUID().toString(),
+    val shopId: String = "",
+    val version: Long = 1L,
+    val updatedAt: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null,
+    val lastModifiedBy: String = "",
+    val lastModifiedDevice: String = ""
 ) {
     @Ignore var items: List<SaleItem> = emptyList()
 }

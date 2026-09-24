@@ -9,7 +9,8 @@ import androidx.room.PrimaryKey
     indices = [
         Index(value = ["productId"]),
         Index(value = ["currentStatus"]),
-        Index(value = ["customerPhone"])
+        Index(value = ["customerPhone"]),
+        Index(value = ["cloudId"])
     ]
 )
 data class ImeiAsset(
@@ -36,7 +37,14 @@ data class ImeiAsset(
     val saleInvoiceId: Long = 0L,
     val repairHistoryCount: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val cloudId: String = imei,
+    val shopId: String = "",
+    val version: Long = 1L,
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null,
+    val lastModifiedBy: String = "",
+    val lastModifiedDevice: String = ""
 ) {
     companion object {
         const val STATUS_IN_STOCK = "IN_STOCK"

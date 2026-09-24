@@ -5,7 +5,14 @@ import androidx.room.PrimaryKey
 
 import androidx.room.Index
 
-@Entity(tableName = "products", indices = [Index(value = ["imei"], unique = true), Index(value = ["name"])])
+@Entity(
+    tableName = "products",
+    indices = [
+        Index(value = ["imei"], unique = true),
+        Index(value = ["name"]),
+        Index(value = ["cloudId"])
+    ]
+)
 data class Product(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
@@ -24,7 +31,14 @@ data class Product(
     val imageUrl: String = "",
     val notes: String = "",
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val cloudId: String = java.util.UUID.randomUUID().toString(),
+    val shopId: String = "",
+    val version: Long = 1L,
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null,
+    val lastModifiedBy: String = "",
+    val lastModifiedDevice: String = ""
 )
 
 enum class ProductCategory {

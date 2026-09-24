@@ -21,6 +21,12 @@ interface CustomerDao {
     @Query("SELECT * FROM customers WHERE id = :id")
     suspend fun getCustomerById(id: Long): Customer?
 
+    @Query("SELECT * FROM customers WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getByCloudId(cloudId: String): Customer?
+
+    @Query("SELECT * FROM customers WHERE phone = :phone LIMIT 1")
+    suspend fun getByPhone(phone: String): Customer?
+
     @Query("SELECT * FROM customers WHERE name LIKE :query OR phone LIKE :query")
     fun searchCustomers(query: String): Flow<List<Customer>>
 

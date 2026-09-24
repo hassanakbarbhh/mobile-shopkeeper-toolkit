@@ -7,6 +7,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PaymentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(payment: Payment): Long
+    @Update suspend fun update(payment: Payment)
+
+    @Query("SELECT * FROM payments WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getByCloudId(cloudId: String): Payment?
 
     @Query("SELECT * FROM payments ORDER BY paymentDate DESC")
     fun getAllPayments(): Flow<List<Payment>>

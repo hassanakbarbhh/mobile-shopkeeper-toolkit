@@ -34,6 +34,9 @@ interface SaleDao {
     @Query("SELECT * FROM sales WHERE id = :id")
     suspend fun getSaleById(id: Long): Sale?
 
+    @Query("SELECT * FROM sales WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getSaleByCloudId(cloudId: String): Sale?
+
     @Query("SELECT * FROM sale_items WHERE saleId = :saleId")
     suspend fun getSaleItems(saleId: Long): List<SaleItem>
 

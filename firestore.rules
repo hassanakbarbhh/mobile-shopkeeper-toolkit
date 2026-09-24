@@ -42,7 +42,35 @@ service cloud.firestore {
       allow update: if signed() && (resource.data.ownerUid == request.auth.uid || isAppOwner());
       allow delete: if isAppOwner();
 
-      // Sub-collections: sales, products, customers, repairs, purchases, payments, expenses, imei_assets, cash_closing
+      // Sales: Immutable financial records
+      match /sales/{saleId} {
+        allow read: if shopMember(shopId);
+        allow create: if shopMember(shopId) && request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
+        // Sales cannot be modified by staff once written; only owner can adjust or refund
+        allow update: if shopMember(shopId) && isAppOwner() && request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
+        allow delete: if shopMember(shopId) && isAppOwner();
+      }
+
+      // Products: Non-owners cannot alter purchase price (cost basis)
+      match /products/{productId} {
+        allow read: if shopMember(shopId);
+        allow create: if shopMember(shopId) && request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
+        allow update: if shopMember(shopId) && (
+          isAppOwner() ||
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['purchasePrice'])
+        ) && request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
+        allow delete: if shopMember(shopId) && isAppOwner();
+      }
+
+      // Cash Closing: Immutable shift logs once submitted
+      match /cash_closing/{closingId} {
+        allow read: if shopMember(shopId);
+        allow create: if shopMember(shopId) && request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
+        allow update: if shopMember(shopId) && isAppOwner() && request.resource.data.keys().hasAll(['createdAt', 'updatedAt']);
+        allow delete: if shopMember(shopId) && isAppOwner();
+      }
+
+      // Other sub-collections: customers, repairs, purchases, payments, expenses, imei_assets, suppliers
       match /{sub}/{docId} {
         allow read: if shopMember(shopId);
         allow create, update: if shopMember(shopId)
