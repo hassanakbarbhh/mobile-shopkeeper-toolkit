@@ -1,53 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp" app:cardCornerRadius="14dp" app:cardElevation="2dp">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="16dp">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:gravity="center_vertical">
-            <ImageView android:layout_width="28dp" android:layout_height="28dp"
-                android:src="@drawable/ic_repair" app:tint="@color/green_700" android:layout_marginEnd="10dp"/>
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:orientation="vertical">
-                <TextView android:id="@+id/tvDevice" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:textStyle="bold" android:textSize="16sp"/>
-                <TextView android:id="@+id/tvCustomer" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:textSize="12sp"
-                    android:textColor="@color/text_secondary"/>
-            </LinearLayout>
-            
-            <TextView android:id="@+id/tvWarranty" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold"
-                android:paddingHorizontal="6dp" android:paddingVertical="3dp"
-                android:layout_marginEnd="6dp"
-                android:background="#E0E0E0" android:textColor="#424242"/>
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#EDF2F7"
+    app:cardBackgroundColor="@color/white">
 
-            <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textSize="11sp" android:textStyle="bold"
-                android:paddingHorizontal="10dp" android:paddingVertical="5dp"/>
-        
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAdvanceStatus"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Top Row: Device icon, Device Model & Brand, and Status Badge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_pill_white_10"
+                android:backgroundTint="#EFF6FF">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_repair"
+                    app:tint="@color/blue_600"/>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvDevice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Samsung S23 Ultra"
+                    android:textStyle="bold"
+                    android:textSize="15.5sp"
+                    android:textColor="#0F172A"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+
+                <TextView
+                    android:id="@+id/tvCustomer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ali Khan • 0300-1234567"
+                    android:textSize="12sp"
+                    android:textColor="#64748B"
+                    android:layout_marginTop="1dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvWarranty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Advance"
-                android:textSize="12sp"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_marginStart="8dp"/>
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="3dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_pill_white_10"
+                android:backgroundTint="#F1F5F9"
+                android:textColor="#475569"
+                android:visibility="gone"/>
 
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IN REPAIR"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:background="@drawable/bg_badge_amber"
+                android:textColor="@color/amber_800"/>
         </LinearLayout>
-        <TextView android:id="@+id/tvIssue" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:textSize="13sp"
-            android:layout_marginTop="8dp" android:maxLines="2" android:ellipsize="end"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:layout_marginTop="8dp">
-            <TextView android:id="@+id/tvDate" android:layout_width="0dp" android:layout_weight="1"
-                android:layout_height="wrap_content" android:textSize="12sp"
-                android:textColor="@color/text_secondary"/>
-            <TextView android:id="@+id/tvCost" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textStyle="bold" android:textColor="@color/primary"/>
+
+        <!-- Issue Description Box -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_pill_white_10"
+            android:backgroundTint="#F8FAFC"
+            android:padding="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Issue: "
+                android:textSize="12.5sp"
+                android:textStyle="bold"
+                android:textColor="#475569"/>
+
+            <TextView
+                android:id="@+id/tvIssue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Display cracked, touch not responding on top half"
+                android:textSize="12.5sp"
+                android:textColor="#1E293B"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+        </LinearLayout>
+
+        <!-- Bottom Row: Date, Cost Estimate, and Advance Status Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Received: 24 Sep"
+                    android:textSize="11.5sp"
+                    android:textColor="#64748B"/>
+
+                <TextView
+                    android:id="@+id/tvCost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Est: ₹3,500"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="@color/green_700"
+                    android:layout_marginTop="1dp"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdvanceStatus"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Next Step →"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/green_800"
+                app:cornerRadius="10dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"/>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

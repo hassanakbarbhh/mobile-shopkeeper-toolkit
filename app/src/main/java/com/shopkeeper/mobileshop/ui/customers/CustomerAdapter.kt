@@ -34,6 +34,9 @@ class CustomerAdapter(
             binding.tvPhone.text = c.phone
             binding.tvInitials.text = c.name.take(1).uppercase()
             binding.root.setOnClickListener { onItemClick(c) }
+            binding.btnCall.setOnClickListener {
+                com.shopkeeper.mobileshop.utils.ExportManager.openDialer(binding.root.context, c.phone)
+            }
             
             val oldestSaleDate = pendingMap[c.id]
             if (oldestSaleDate != null) {

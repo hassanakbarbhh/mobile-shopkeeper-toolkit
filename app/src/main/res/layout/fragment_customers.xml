@@ -2,52 +2,62 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        
+        <!-- Call Today Overdue Alert Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCallToday"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="12dp"
-            app:cardCornerRadius="12dp"
-            app:cardBackgroundColor="#FFF3E0"
-            app:strokeColor="#FF9800"
+            android:layout_marginBottom="4dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="#FFF7ED"
+            app:strokeColor="#FDBA74"
             app:strokeWidth="1dp"
             android:visibility="gone">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🚨 Call Today (Top 3 Overdue)"
-                    android:textSize="14sp"
-                    android:textColor="#E65100"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp"/>
+                    android:text="🚨 Call Today (Top Overdue Balances)"
+                    android:textSize="13.5sp"
+                    android:textColor="#C2410C"
+                    android:textStyle="bold"/>
+
                 <TextView
                     android:id="@+id/tvCallTodayList"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#BF360C"/>
+                    android:textSize="13sp"
+                    android:textColor="#9A3412"
+                    android:layout_marginTop="6dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Search Bar & Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -55,57 +65,115 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
                 app:startIconDrawable="@drawable/ic_search">
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCustomerSearch"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search customers…"/>
+                    android:layout_height="50dp"
+                    android:hint="Search customers by name or phone..."
+                    android:textSize="14sp"
+                    android:inputType="textPersonName"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnImportCustomers"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
-                android:layout_height="52dp"
-                android:layout_marginStart="6dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
                 android:text="Import"
                 android:textSize="12sp"
-                android:textColor="@color/green_700"
+                android:textColor="@color/green_800"
                 app:icon="@drawable/ic_import"
-                app:iconTint="@color/green_700"
+                app:iconTint="@color/green_800"
                 app:iconSize="16dp"
-                app:strokeColor="@color/green_600"
-                app:cornerRadius="8dp"/>
+                app:cornerRadius="12dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExportCustomers"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
-                android:layout_height="52dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="6dp"
                 android:text="Export"
                 android:textSize="12sp"
-                android:textColor="@color/green_700"
+                android:textColor="@color/green_800"
                 app:icon="@drawable/ic_export"
-                app:iconTint="@color/green_700"
+                app:iconTint="@color/green_800"
                 app:iconSize="16dp"
-                app:strokeColor="@color/green_600"
-                app:cornerRadius="8dp"/>
+                app:cornerRadius="12dp"/>
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvCustomers"
-            android:layout_width="match_parent" android:layout_height="0dp"
-            android:layout_weight="1" android:paddingHorizontal="16dp"
-            android:clipToPadding="false"/>
+        <!-- Customer List & Empty State -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCustomers"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="84dp"
+                android:clipToPadding="false"/>
+
+            <LinearLayout
+                android:id="@+id/layoutEmptyCustomers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_customers"
+                    android:alpha="0.3"
+                    app:tint="@color/green_800"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No customers registered"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="#334155"
+                    android:layout_marginTop="16dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tap + Add Customer to create a customer ledger account."
+                    android:textSize="13sp"
+                    android:textColor="#64748B"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        app:backgroundTint="@color/green_700"
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabAddCustomer"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end" android:layout_margin="16dp"
-        app:srcCompat="@drawable/ic_add" app:tint="@color/white"
-        android:contentDescription="Add Customer"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="Add Customer"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/green_800"
+        app:elevation="4dp"
+        android:contentDescription="Add New Customer"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

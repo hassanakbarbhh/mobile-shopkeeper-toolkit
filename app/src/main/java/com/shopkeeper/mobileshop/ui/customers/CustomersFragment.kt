@@ -75,6 +75,8 @@ class CustomersFragment : Fragment() {
                 repository.searchCustomers(q).collectLatest { list ->
                     currentCustomers = list
                     adapter.submitList(list)
+                    binding.layoutEmptyCustomers.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                    binding.rvCustomers.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -83,6 +85,8 @@ class CustomersFragment : Fragment() {
             repository.allCustomers.collectLatest { list ->
                 currentCustomers = list
                 adapter.submitList(list)
+                binding.layoutEmptyCustomers.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                binding.rvCustomers.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
             }
         }
     }

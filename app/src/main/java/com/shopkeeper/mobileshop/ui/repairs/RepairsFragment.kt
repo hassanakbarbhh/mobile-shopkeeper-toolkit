@@ -93,6 +93,8 @@ class RepairsFragment : Fragment() {
             else -> allRepairs
         }
         adapter.submitList(filtered)
+        _binding?.layoutEmptyRepairs?.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+        _binding?.rvRepairs?.visibility = if (filtered.isEmpty()) View.GONE else View.VISIBLE
     }
 
     private fun showAddRepairDialog() {

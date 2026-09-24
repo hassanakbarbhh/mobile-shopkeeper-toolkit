@@ -71,6 +71,8 @@ class SalesListFragment : Fragment() {
                 currentSales = list
                 adapter.submitList(list)
                 binding.tvSalesCount.text = "${list.size} invoices recorded"
+                binding.layoutEmptySales.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                binding.rvSales.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
             }
         }
     }

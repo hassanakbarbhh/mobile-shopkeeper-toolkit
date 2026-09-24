@@ -2,11 +2,13 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#F8FAFC">
 
-    
+    <!-- Margin Warning Banner -->
     <TextView
         android:id="@+id/tvMarginWarning"
         android:layout_width="match_parent"
@@ -14,99 +16,197 @@
         android:background="#FFCDD2"
         android:textColor="#B71C1C"
         android:padding="8dp"
-        android:text="Warning: Profit margin is critically low (&lt; 3%)"
+        android:text="⚠️ Warning: Profit margin is critically low (&lt; 3%)"
         android:textStyle="bold"
+        android:textSize="12.5sp"
         android:gravity="center"
         android:visibility="gone"/>
 
+    <!-- Customer & Salesperson Selector Card -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="12dp">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="#EDF2F7"
+        app:cardBackgroundColor="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="14dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Customer"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <com.google.android.material.textfield.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/actvCustomer"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Type customer name"
-                    android:inputType="textPersonName"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1"
+                    android:text="Customer"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B"
+                    android:letterSpacing="0.04"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sold By (Seller / Staff Member)"
-                android:textStyle="bold"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="4dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sold By"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B"
+                    android:letterSpacing="0.04"/>
+            </LinearLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp">
 
-                <AutoCompleteTextView
-                    android:id="@+id/actvSeller"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Select Salesperson"
-                    android:inputType="none"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1.2"
+                    android:layout_marginEnd="8dp"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/actvCustomer"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:paddingVertical="0dp"
+                        android:hint="Walk-in Customer"
+                        android:textSize="13.5sp"
+                        android:inputType="textPersonName"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.8"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvSeller"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:paddingVertical="0dp"
+                        android:hint="Staff"
+                        android:textSize="13.5sp"
+                        android:inputType="none"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Product Search & Quick Barcode Trigger -->
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProductSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-        android:id="@+id/tilProductSearch"
+        app:boxCornerRadiusTopStart="14dp"
+        app:boxCornerRadiusTopEnd="14dp"
+        app:boxCornerRadiusBottomStart="14dp"
+        app:boxCornerRadiusBottomEnd="14dp"
         app:startIconDrawable="@drawable/ic_search"
         app:endIconMode="custom"
-        app:endIconDrawable="@drawable/ic_barcode">
+        app:endIconDrawable="@drawable/ic_barcode"
+        app:endIconContentDescription="Scan barcode">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etProductSearch"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Tap to add products..."
+            android:layout_height="50dp"
+            android:hint="Tap to search products &amp; phones..."
             android:focusable="false"
             android:clickable="true"
+            android:textSize="14sp"
             android:inputType="none"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCart"
+    <!-- Cart Items or Empty State Container -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp"
-        android:clipToPadding="false"/>
+        android:layout_weight="1">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="12dp"
+            android:clipToPadding="false"/>
+
+        <!-- Empty Cart Illustration -->
+        <LinearLayout
+            android:id="@+id/layoutEmptyCart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@drawable/ic_add_sale"
+                android:alpha="0.3"
+                app:tint="@color/green_800"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="POS Cart is Empty"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#334155"
+                android:layout_marginTop="12dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Search items above or scan product barcode\nto build customer invoice."
+                android:textSize="12.5sp"
+                android:textColor="#64748B"
+                android:gravity="center"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Sticky Retail Checkout Bottom Bar -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp">
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="#EDF2F7"
+        app:cardBackgroundColor="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -114,100 +214,134 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Subtotal, Discount & Tax Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Subtotal"/>
-                <TextView
-                    android:id="@+id/tvSubtotal"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Subtotal"
+                        android:textSize="11.5sp"
+                        android:textColor="#64748B"/>
+
+                    <TextView
+                        android:id="@+id/tvSubtotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₹0"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A"/>
+                </LinearLayout>
+
+                <!-- Discount Input -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="₹0"
-                    android:textStyle="bold"/>
-            </LinearLayout>
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_marginEnd="12dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Discount"/>
-                <EditText
-                    android:id="@+id/etDiscount"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:hint="0"
-                    android:gravity="end"/>
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Discount (Rs)"
+                        android:textSize="11.5sp"
+                        android:textColor="#64748B"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    <EditText
+                        android:id="@+id/etDiscount"
+                        android:layout_width="90dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_pill_white_10"
+                        android:backgroundTint="#F1F5F9"
+                        android:inputType="numberDecimal"
+                        android:hint="0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A"
+                        android:gravity="center"
+                        android:paddingHorizontal="6dp"/>
+                </LinearLayout>
+
+                <!-- Tax Input -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tax (GST)"/>
-                <EditText
-                    android:id="@+id/etTax"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:hint="0"
-                    android:gravity="end"/>
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tax (Rs)"
+                        android:textSize="11.5sp"
+                        android:textColor="#64748B"/>
+
+                    <EditText
+                        android:id="@+id/etTax"
+                        android:layout_width="80dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_pill_white_10"
+                        android:backgroundTint="#F1F5F9"
+                        android:inputType="numberDecimal"
+                        android:hint="0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A"
+                        android:gravity="center"
+                        android:paddingHorizontal="6dp"/>
+                </LinearLayout>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="?android:attr/listDivider"
-                android:layout_marginVertical="8dp"/>
+                android:background="#E2E8F0"
+                android:layout_marginVertical="10dp"/>
 
+            <!-- Grand Total Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Total"
-                    android:textSize="18sp"
-                    android:textStyle="bold"/>
+                    android:text="Net Payable"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"/>
+
                 <TextView
                     android:id="@+id/tvTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="₹0"
-                    android:textSize="20sp"
+                    android:textSize="24sp"
                     android:textStyle="bold"
-                    android:textColor="@color/primary"/>
+                    android:textColor="@color/green_800"/>
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Payment Method"
-                android:textStyle="bold"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp"/>
-
+            <!-- Payment Mode Chips -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupPayment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 app:singleSelection="true">
 
                 <com.google.android.material.chip.Chip
@@ -215,7 +349,7 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cash"
+                    android:text="💵 Cash"
                     android:checked="true"/>
 
                 <com.google.android.material.chip.Chip
@@ -223,31 +357,38 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Card"/>
+                    android:text="💳 Card"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipUpi"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="UPI"/>
+                    android:text="📲 UPI / Transfer"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipCredit"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Credit"/>
+                    android:text="📝 Udhaar (Credit)"/>
             </com.google.android.material.chip.ChipGroup>
 
+            <!-- Complete Sale CTA -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCompleteSale"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Complete Sale"
-                android:textSize="16sp"
-                app:cornerRadius="12dp"/>
+                android:layout_height="54dp"
+                android:layout_marginTop="12dp"
+                android:text="Complete Sale &amp; Print Bill"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/green_800"
+                app:cornerRadius="14dp"
+                app:icon="@drawable/ic_thermal_printer"
+                app:iconGravity="textStart"
+                app:iconSize="20dp"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

@@ -2,14 +2,17 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8FAFC">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- Search Bar & Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,54 +27,58 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
                 app:startIconDrawable="@drawable/ic_search">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSearch"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search phones &amp; stock..."
+                    android:layout_height="50dp"
+                    android:hint="Search phones, brands, IMEI..."
                     android:inputType="text"
+                    android:textSize="14sp"
                     android:imeOptions="actionSearch"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnImportInventory"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
-                android:layout_height="52dp"
-                android:layout_marginStart="6dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
                 android:text="Import"
                 android:textSize="12sp"
-                android:textColor="@color/green_700"
+                android:textColor="@color/green_800"
                 app:icon="@drawable/ic_import"
-                app:iconTint="@color/green_700"
+                app:iconTint="@color/green_800"
                 app:iconSize="16dp"
-                app:strokeColor="@color/green_600"
-                app:cornerRadius="8dp"/>
+                app:cornerRadius="12dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExportInventory"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
-                android:layout_height="52dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="6dp"
                 android:text="Export"
                 android:textSize="12sp"
-                android:textColor="@color/green_700"
+                android:textColor="@color/green_800"
                 app:icon="@drawable/ic_export"
-                app:iconTint="@color/green_700"
+                app:iconTint="@color/green_800"
                 app:iconSize="16dp"
-                app:strokeColor="@color/green_600"
-                app:cornerRadius="8dp"/>
+                app:cornerRadius="12dp"/>
         </LinearLayout>
 
+        <!-- Category Filter Chips -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="8dp">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupCategory"
@@ -84,7 +91,7 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All"
+                    android:text="All Products"
                     android:checked="true"/>
 
                 <com.google.android.material.chip.Chip
@@ -92,66 +99,88 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Smartphones"/>
+                    android:text="📱 Smartphones"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipAccessories"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Accessories"/>
+                    android:text="🎧 Accessories"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipLowStock"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Low Stock"/>
+                    android:text="⚠️ Low Stock"/>
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvProducts"
+        <!-- Product List & Empty State -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:padding="16dp"
-            android:paddingBottom="80dp"/>
+            android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/layoutEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvProducts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="84dp"/>
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_empty_inventory"
-                android:alpha="0.5"/>
-
-            <TextView
+            <LinearLayout
+                android:id="@+id/layoutEmpty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No products found"
-                android:textSize="18sp"
-                android:layout_marginTop="16dp"/>
-        </LinearLayout>
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_empty_inventory"
+                    android:alpha="0.35"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No products found"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="#334155"
+                    android:layout_marginTop="16dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tap + Add Product to stock your catalog."
+                    android:textSize="13sp"
+                    android:textColor="#64748B"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        app:backgroundTint="@color/green_700"
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabAddProduct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Add Product"
-        app:srcCompat="@drawable/ic_add"
-        app:tint="@color/white"/>
+        android:text="Add Product"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/green_800"
+        app:elevation="4dp"
+        android:contentDescription="Add Product"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -60,6 +60,13 @@ class RepairAdapter(
                 }
             }
 
+            binding.btnAdvanceStatus.setOnClickListener { onAdvanceClick(repair) }
+            if (repair.status == RepairStatus.DELIVERED || repair.status == RepairStatus.CANCELLED) {
+                binding.btnAdvanceStatus.visibility = android.view.View.GONE
+            } else {
+                binding.btnAdvanceStatus.visibility = android.view.View.VISIBLE
+            }
+
             binding.root.setOnClickListener { onItemClick(repair) }
         }
     }

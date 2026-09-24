@@ -99,18 +99,26 @@ class NewSaleFragment : Fragment() {
                         quantity = newQty,
                         totalPrice = unit * newQty
                     )
-                    cartAdapter.submitList(cartItems.toList())
-                    recalculateTotals()
+                    updateCartUi()
                 }
             },
             onRemove = { item ->
                 cartItems.removeAll { it.productId == item.productId }
-                cartAdapter.submitList(cartItems.toList())
-                recalculateTotals()
+                updateCartUi()
             }
         )
         binding.rvCart.layoutManager = LinearLayoutManager(requireContext())
         binding.rvCart.adapter = cartAdapter
+        updateCartUi()
+    }
+
+    private fun updateCartUi() {
+        cartAdapter.submitList(cartItems.toList())
+        val isEmpty = cartItems.isEmpty()
+        binding.layoutEmptyCart.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.rvCart.visibility = if (isEmpty) View.GONE else View.VISIBLE
+        binding.btnCompleteSale.isEnabled = !isEmpty
+        recalculateTotals()
     }
 
     // Register scanner launcher
@@ -149,8 +157,7 @@ class NewSaleFragment : Fragment() {
                 )
             )
         }
-        cartAdapter.submitList(cartItems.toList())
-        recalculateTotals()
+        updateCartUi()
     }
 
     private fun setupListeners() {
@@ -246,8 +253,7 @@ class NewSaleFragment : Fragment() {
                 )
             )
         }
-        cartAdapter.submitList(cartItems.toList())
-        recalculateTotals()
+        updateCartUi()
     }
 
     private fun completeSale() {
