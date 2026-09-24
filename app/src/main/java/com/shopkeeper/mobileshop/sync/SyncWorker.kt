@@ -4,10 +4,12 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.shopkeeper.mobileshop.data.db.AppDatabase
 import com.shopkeeper.mobileshop.data.db.entity.OutboxOperation
 import kotlinx.coroutines.tasks.await
+import org.json.JSONObject
 
 class SyncWorker(
     appContext: Context,
@@ -20,58 +22,96 @@ class SyncWorker(
     }
 
     override suspend fun doWork(): Result {
-        Log.d(TAG, "Starting Outbox Synchronization Work...")
+        Log.d(TAG, "Starting Bidirectional Cloud Firestore Synchronization...")
         val db = AppDatabase.getDatabase(applicationContext)
         val outboxDao = db.outboxDao()
 
         val pendingOperations = outboxDao.getPendingList()
-        if (pendingOperations.isEmpty()) {
-            Log.d(TAG, "Outbox is clear. Zero pending operations.")
-            return Result.success()
-        }
-
-        var anyFailure = false
-        val firebaseRef = try {
-            FirebaseDatabase.getInstance().reference
+        val shopId = ShopIdentityManager.getShopId(applicationContext)
+        val firestore = try {
+            FirebaseFirestore.getInstance()
         } catch (e: Exception) {
-            Log.e(TAG, "Firebase unavailable", e)
+            Log.e(TAG, "Cloud Firestore unavailable", e)
             null
         }
 
-        for (op in pendingOperations) {
-            try {
-                outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_UPLOADING, null)
+        var anyFailure = false
 
-                if (firebaseRef != null) {
-                    val path = "organizations/${op.shopId}/shops/${op.shopId}/${op.entityType.lowercase()}/${op.entityId}"
-                    
-                    // Construct sync payload
-                    val syncData = mapOf(
-                        "eventId" to op.eventId,
-                        "operation" to op.operationType,
-                        "entityType" to op.entityType,
-                        "entityId" to op.entityId,
-                        "payload" to op.payloadJson,
-                        "timestamp" to op.createdAt,
-                        "deviceId" to op.deviceId,
-                        "userId" to op.userId
-                    )
+        if (firestore != null) {
+            // 1. UPLOAD PHASE: Send local Room Outbox changes to Cloud Firestore
+            for (op in pendingOperations) {
+                try {
+                    outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_UPLOADING, null)
 
-                    firebaseRef.child(path).setValue(syncData).await()
+                    val collectionName = when (op.entityType.lowercase()) {
+                        "sale" -> "sales"
+                        "product" -> "products"
+                        "customer" -> "customers"
+                        "repair" -> "repairs"
+                        "payment" -> "payments"
+                        "purchase" -> "purchases"
+                        "expense" -> "expenses"
+                        "imeiasset", "imei" -> "imei_assets"
+                        "cashclosing" -> "cash_closing"
+                        else -> op.entityType.lowercase() + "s"
+                    }
+
+                    val dataMap = mutableMapOf<String, Any>()
                     
-                    // Mark Completed
+                    // Parse payload JSON
+                    runCatching {
+                        val json = JSONObject(op.payloadJson)
+                        val keys = json.keys()
+                        while (keys.hasNext()) {
+                            val key = keys.next()
+                            val value = json.get(key)
+                            dataMap[key] = value
+                        }
+                    }
+
+                    // Enforce required security audit keys
+                    dataMap["createdAt"] = op.createdAt
+                    dataMap["updatedAt"] = System.currentTimeMillis()
+                    dataMap["eventId"] = op.eventId
+                    dataMap["operationType"] = op.operationType
+                    dataMap["entityType"] = op.entityType
+                    dataMap["entityId"] = op.entityId
+                    dataMap["deviceId"] = op.deviceId
+                    dataMap["userId"] = op.userId
+                    dataMap["shopId"] = op.shopId
+
+                    val docRef = firestore.collection("shops")
+                        .document(op.shopId)
+                        .collection(collectionName)
+                        .document(op.entityId)
+
+                    docRef.set(dataMap, SetOptions.merge()).await()
+
+                    // Mark operation COMPLETED in Room Outbox
                     outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_COMPLETED, null)
-                    Log.d(TAG, "Successfully synced outbox event: ${op.eventId} (${op.operationType})")
-                } else {
-                    // Offline - keep as pending
-                    outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_PENDING, "Firebase client offline")
+                    Log.d(TAG, "Successfully synced outbox event: ${op.eventId} -> shops/${op.shopId}/$collectionName/${op.entityId}")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to upload outbox event: ${op.eventId}", e)
+                    outboxDao.incrementRetry(op.eventId, e.localizedMessage ?: "Sync error")
                     anyFailure = true
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync outbox event: ${op.eventId}", e)
-                outboxDao.incrementRetry(op.eventId, e.localizedMessage ?: "Sync error")
-                anyFailure = true
             }
+
+            // 2. DOWNLOAD PHASE: Inbound Synchronization from Cloud Firestore to Room
+            try {
+                val downloadedCount = InboundSyncEngine.syncDown(applicationContext, db, shopId)
+                Log.d(TAG, "Inbound sync completed. $downloadedCount records downloaded.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Inbound sync error", e)
+            }
+
+            SyncPreferences.setLastSyncTimestamp(applicationContext, System.currentTimeMillis())
+        } else {
+            // Firestore not ready or offline
+            for (op in pendingOperations) {
+                outboxDao.updateStatus(op.eventId, OutboxOperation.STATUS_PENDING, "Firestore client unavailable")
+            }
+            anyFailure = true
         }
 
         return if (anyFailure) Result.retry() else Result.success()

@@ -2,32 +2,47 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signed() { return request.auth != null; }
+    
+    // Role-based administrative authorization (no hardcoded personal emails)
     function isAppOwner() {
-      return signed() && request.auth.token.email == "hassanakbarbhh@gmail.com";
-    }
-    function shopMember(shopId) {
       return signed() && (
-        get(/databases/$(database)/documents/shops/$(shopId)).data.ownerUid == request.auth.uid ||
-        request.auth.uid in get(/databases/$(database)/documents/shops/$(shopId)).data.get('members', [])
+        request.auth.token.get('role', '') in ['APP_ADMIN', 'OWNER'] ||
+        request.auth.token.get('isAppOwner', false) == true ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAppOwner', false) == true) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') in ['APP_ADMIN', 'OWNER', 'SHOP_OWNER'])
       );
     }
+    
+    function shopMember(shopId) {
+      return signed() && (
+        isAppOwner() ||
+        (exists(/databases/$(database)/documents/shops/$(shopId)) &&
+         (get(/databases/$(database)/documents/shops/$(shopId)).data.ownerUid == request.auth.uid ||
+          request.auth.uid in get(/databases/$(database)/documents/shops/$(shopId)).data.get('members', [])))
+      );
+    }
+
     match /users/{userId} {
       allow read: if signed() && (request.auth.uid == userId || isAppOwner());
-      allow create: if signed() && request.auth.uid == userId
-                    && request.resource.data.role == 'BASIC_USER';
+      allow create: if signed() && request.auth.uid == userId;
       allow update: if signed() && (
         (request.auth.uid == userId && !request.resource.data.diff(resource.data)
             .affectedKeys().hasAny(['role','isAppOwner','approved']))
         || (isAppOwner() && request.resource.data.diff(resource.data)
             .affectedKeys().hasOnly(['role','approved','approvedBy','updatedAt']))
       );
-      allow delete: if false;
+      allow delete: if isAppOwner();
     }
+
     match /shops/{shopId} {
       allow read: if shopMember(shopId);
-      allow create: if signed() && request.resource.data.ownerUid == request.auth.uid;
-      allow update: if signed() && resource.data.ownerUid == request.auth.uid;
-      allow delete: if false;
+      allow create: if signed() && (request.resource.data.ownerUid == request.auth.uid || isAppOwner());
+      allow update: if signed() && (resource.data.ownerUid == request.auth.uid || isAppOwner());
+      allow delete: if isAppOwner();
+
+      // Sub-collections: sales, products, customers, repairs, purchases, payments, expenses, imei_assets, cash_closing
       match /{sub}/{docId} {
         allow read: if shopMember(shopId);
         allow create, update: if shopMember(shopId)
@@ -35,6 +50,7 @@ service cloud.firestore {
         allow delete: if shopMember(shopId) && isAppOwner();
       }
     }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

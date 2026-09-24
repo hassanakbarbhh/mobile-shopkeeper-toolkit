@@ -39,17 +39,31 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun imeiAssetDao(): ImeiAssetDao
 
     companion object {
+        const val DATABASE_NAME = "mobile_shop_database"
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        fun closeDatabase() {
+            try {
+                if (INSTANCE?.isOpen == true) {
+                    INSTANCE?.close()
+                }
+            } catch (e: Exception) {
+                // Ignore
+            } finally {
+                INSTANCE = null
+            }
+        }
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "mobile_shop_database"
+                    DATABASE_NAME
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigrationOnDowngrade()
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)

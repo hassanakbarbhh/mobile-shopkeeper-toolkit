@@ -9,10 +9,10 @@ import com.shopkeeper.mobileshop.data.db.AppDatabase
 import com.shopkeeper.mobileshop.data.db.entity.OutboxOperation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -36,7 +36,13 @@ object SyncEngine {
                     _syncState.value = SyncState.Pending(pendingCount = count)
                     scheduleSync(context.applicationContext)
                 } else {
-                    _syncState.value = SyncState.Synced(syncedItemsCount = 326)
+                    val completed = runCatching { outboxDao.getCompletedCount().first() }.getOrDefault(0)
+                    val downloaded = SyncPreferences.getDownloadedCount(context)
+                    val lastSync = SyncPreferences.getLastSyncTimestamp(context)
+                    _syncState.value = SyncState.Synced(
+                        lastSyncTimestamp = if (lastSync > 0L) lastSync else System.currentTimeMillis(),
+                        syncedItemsCount = completed + downloaded
+                    )
                 }
             }
         }
@@ -62,8 +68,19 @@ object SyncEngine {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val db = AppDatabase.getDatabase(appContext)
-                db.outboxDao().insert(operation)
-                Log.d(TAG, "Enqueued Outbox event: ${operation.operationType} (${operation.entityId})")
+                // Stamp real runtime identity if operation has default placeholders
+                val stampedOp = if (operation.shopId == "SHOP_DEFAULT" || operation.deviceId == "DEVICE_DEFAULT") {
+                    operation.copy(
+                        deviceId = ShopIdentityManager.getDeviceId(appContext),
+                        shopId = ShopIdentityManager.getShopId(appContext),
+                        userId = if (operation.userId == "USER_DEFAULT") ShopIdentityManager.getUserId(appContext) else operation.userId
+                    )
+                } else {
+                    operation
+                }
+
+                db.outboxDao().insert(stampedOp)
+                Log.d(TAG, "Enqueued Outbox event: ${stampedOp.operationType} (${stampedOp.entityId}) [shop=${stampedOp.shopId}, dev=${stampedOp.deviceId}]")
                 scheduleSync(appContext)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to enqueue operation", e)
@@ -73,7 +90,7 @@ object SyncEngine {
 
     fun triggerSyncNow(context: Context) {
         val appContext = context.applicationContext
-        _syncState.value = SyncState.Pending(message = "Synchronizing Outbox with cloud...", pendingCount = 1)
+        _syncState.value = SyncState.Pending(message = "Synchronizing with Cloud Firestore...", pendingCount = 1)
         scheduleSync(appContext, forceExpedited = true)
     }
 

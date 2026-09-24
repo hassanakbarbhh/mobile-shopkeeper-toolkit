@@ -14,6 +14,7 @@ import com.shopkeeper.mobileshop.data.db.entity.OutboxOperation
 import com.shopkeeper.mobileshop.databinding.FragmentSyncCenterBinding
 import com.shopkeeper.mobileshop.databinding.ItemOutboxOperationBinding
 import com.shopkeeper.mobileshop.sync.SyncEngine
+import com.shopkeeper.mobileshop.sync.SyncPreferences
 import com.shopkeeper.mobileshop.sync.SyncState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -96,13 +97,25 @@ class SyncCenterFragment : Fragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             outboxDao.getCompletedCount().collectLatest { count ->
-                _binding?.tvCountUploaded?.text = (326 + count).toString()
+                _binding?.tvCountUploaded?.text = count.toString()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             outboxDao.getFailedCount().collectLatest { count ->
                 _binding?.tvCountFailed?.text = count.toString()
             }
+        }
+
+        // Real Downloaded Count & Last Sync Timestamp
+        val downloaded = SyncPreferences.getDownloadedCount(requireContext())
+        _binding?.tvCountDownloaded?.text = downloaded.toString()
+
+        val lastSync = SyncPreferences.getLastSyncTimestamp(requireContext())
+        if (lastSync > 0) {
+            val dateFmt = SimpleDateFormat("h:mm:ss a, d MMM yyyy", Locale.getDefault())
+            _binding?.tvLastSyncTime?.text = "Last successful sync: " + dateFmt.format(Date(lastSync))
+        } else {
+            _binding?.tvLastSyncTime?.text = "Last sync: Ready to synchronize"
         }
     }
 

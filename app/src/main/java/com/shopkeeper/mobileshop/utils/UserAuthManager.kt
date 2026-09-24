@@ -124,16 +124,36 @@ object UserAuthManager {
                         
                         // Add to Firestore
                         fbUser?.let {
+                            val generatedShopCode = if (role == AppMode.SHOP_OWNER) java.util.UUID.randomUUID().toString().substring(0, 8).uppercase() else shopCode
+                            val shopId = "SHOP_$generatedShopCode"
+                            
                             val userDoc = hashMapOf<String, Any>(
                                 "email" to cleanEmail,
                                 "displayName" to cleanName,
                                 "role" to role.name,
                                 "approved" to (role == AppMode.SHOP_OWNER), // Owner is auto-approved, seller needs approval
                                 "shopName" to shopName, "shopNumber" to shopNumber, "shopAddress" to shopAddress,
-                                "shopCode" to (if (role == AppMode.SHOP_OWNER) java.util.UUID.randomUUID().toString().substring(0, 8).uppercase() else shopCode),
+                                "shopCode" to generatedShopCode,
+                                "shopId" to shopId,
+                                "createdAt" to System.currentTimeMillis(),
                                 "updatedAt" to System.currentTimeMillis()
                             )
                             FirebaseFirestore.getInstance().collection("users").document(it.uid).set(userDoc)
+
+                            // If owner, establish the shop document matching firestore.rules
+                            if (role == AppMode.SHOP_OWNER || role == AppMode.OWNER) {
+                                val shopDoc = hashMapOf<String, Any>(
+                                    "ownerUid" to it.uid,
+                                    "shopName" to (if (shopName.isNotBlank()) shopName else "Mobile Hub"),
+                                    "shopNumber" to shopNumber,
+                                    "shopAddress" to shopAddress,
+                                    "shopCode" to generatedShopCode,
+                                    "members" to listOf(it.uid),
+                                    "createdAt" to System.currentTimeMillis(),
+                                    "updatedAt" to System.currentTimeMillis()
+                                )
+                                FirebaseFirestore.getInstance().collection("shops").document(shopId).set(shopDoc)
+                            }
                         }
 
                         existing.add(newUser)
@@ -213,6 +233,10 @@ object UserAuthManager {
                                             authProvider = "firebase_email",
                                             isVerified = true
                                         )
+                                        val userShopId = doc.getString("shopId")
+                                            ?: doc.getString("shopCode")?.let { "SHOP_$it" }
+                                            ?: "SHOP_MAIN"
+                                        com.shopkeeper.mobileshop.sync.ShopIdentityManager.setShopId(context, userShopId)
                                         saveSession(context, user)
                                         LoginRateLimiter.reset(context)
                                         onResult(true, "Login Successful", user)
