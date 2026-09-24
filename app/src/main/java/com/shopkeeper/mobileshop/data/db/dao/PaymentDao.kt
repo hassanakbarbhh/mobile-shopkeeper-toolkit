@@ -16,4 +16,7 @@ interface PaymentDao {
 
     @Query("SELECT SUM(amount) FROM payments WHERE saleId = :saleId AND paymentType = 'RECEIVED'")
     suspend fun receivedForSale(saleId: Long): Double?
+
+    @Query("SELECT SUM(amount) FROM payments WHERE paymentDate BETWEEN :start AND :end")
+    fun sumInRange(start: Long, end: Long): Flow<Double?>
 }

@@ -9,9 +9,21 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_cash_closing"
+        android:icon="@drawable/ic_reports"
+        android:title="Cash Closing"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_sync_center"
+        android:icon="@drawable/ic_warning"
+        android:title="Sync Center"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_lock_app"
         android:icon="@drawable/ic_lock"
         android:title="Lock App / Switch Role"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
 
 </menu>

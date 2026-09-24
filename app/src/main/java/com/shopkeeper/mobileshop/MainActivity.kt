@@ -197,6 +197,14 @@ class MainActivity : AppCompatActivity() {
                 navController.navigate(R.id.navigation_new_sale)
                 true
             }
+            R.id.action_cash_closing -> {
+                navController.navigate(R.id.navigation_cash_closing)
+                true
+            }
+            R.id.action_sync_center -> {
+                navController.navigate(R.id.navigation_sync_center)
+                true
+            }
             R.id.action_lock_app -> {
                 val intent = Intent(this, LockScreenActivity::class.java)
                 startActivity(intent)

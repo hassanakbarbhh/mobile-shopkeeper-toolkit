@@ -95,4 +95,16 @@
         android:label="About Hassan"
         tools:layout="@layout/fragment_about"/>
 
+    <fragment
+        android:id="@+id/navigation_sync_center"
+        android:name="com.shopkeeper.mobileshop.ui.sync.SyncCenterFragment"
+        android:label="Cloud Sync Center"
+        tools:layout="@layout/fragment_sync_center"/>
+
+    <fragment
+        android:id="@+id/navigation_cash_closing"
+        android:name="com.shopkeeper.mobileshop.ui.cash.CashClosingFragment"
+        android:label="Daily Cash Closing"
+        tools:layout="@layout/fragment_cash_closing"/>
+
 </navigation>

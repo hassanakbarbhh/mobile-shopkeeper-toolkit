@@ -1,52 +1,327 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="16dp">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:gravity="center_vertical">
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                style="@style/Widget.MobileShop.TextInput" app:startIconDrawable="@drawable/ic_imei">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etImei" android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:hint="Enter / scan IMEI (15 digits)"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F8FAFC">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Search Bar with Scan Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#EDF2F7"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_imei"
+                    app:tint="#64748B"/>
+
+                <EditText
+                    android:id="@+id/etImei"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:background="@null"
+                    android:hint="Search IMEI (15 digits)..."
+                    android:textColor="#0F172A"
+                    android:textColorHint="#94A3B8"
+                    android:textSize="14sp"
                     android:inputType="number"/>
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnTrace"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginStart="8dp" android:text="Trace"
-                android:backgroundTint="@color/green_800"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTrace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:text="Trace"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="@color/green_800"
+                    android:textColor="@color/white"
+                    app:cornerRadius="12dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Demo / Suggested Chips -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Try Sample:"
+                android:textColor="#64748B"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chipSampleImei"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="356789123456789 (S24)"
+                android:textSize="11sp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="16dp"/>
         </LinearLayout>
-        <TextView android:id="@+id/tvEmpty" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:gravity="center"
-            android:layout_marginTop="60dp"
-            android:text="Trace any phone's full history:\nBought from → In stock → Sold to → Service jobs"
-            android:textColor="@color/text_secondary"/>
-        <com.google.android.material.card.MaterialCardView android:id="@+id/cardProduct"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" app:cardCornerRadius="14dp" android:visibility="gone">
-            <TextView android:id="@+id/tvProduct" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:padding="16dp" android:textSize="14sp"/>
-        </com.google.android.material.card.MaterialCardView>
-        <com.google.android.material.card.MaterialCardView android:id="@+id/cardBought"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" app:cardCornerRadius="14dp" android:visibility="gone">
-            <TextView android:id="@+id/tvBought" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:padding="16dp" android:textSize="14sp"/>
-        </com.google.android.material.card.MaterialCardView>
-        <com.google.android.material.card.MaterialCardView android:id="@+id/cardSold"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" app:cardCornerRadius="14dp" android:visibility="gone">
-            <TextView android:id="@+id/tvSold" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:padding="16dp" android:textSize="14sp"/>
-        </com.google.android.material.card.MaterialCardView>
-        <com.google.android.material.card.MaterialCardView android:id="@+id/cardService"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" app:cardCornerRadius="14dp" android:visibility="gone">
-            <TextView android:id="@+id/tvService" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:padding="16dp" android:textSize="14sp"/>
-        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Empty State Container -->
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingVertical="40dp">
+
+            <FrameLayout
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/bg_circle_blue"
+                android:backgroundTint="#EFF6FF">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_imei"
+                    app:tint="#2563EB"/>
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trace Any Handset's Full Lifecycle"
+                android:textColor="#0F172A"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="14dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Supplier Purchase → Stock Check → Transfers → Customer Sale → Warranty → Service Repairs"
+                android:textColor="#64748B"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:paddingHorizontal="24dp"/>
+        </LinearLayout>
+
+        <!-- Result Container -->
+        <LinearLayout
+            android:id="@+id/layoutResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Handset Identity Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#EDF2F7"
+                app:cardBackgroundColor="@color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Top Row: IMEI + Copy + Status Badge -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvResultImei"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="356789123456789"
+                            android:textColor="#0F172A"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:fontFamily="monospace"/>
+
+                        <ImageButton
+                            android:id="@+id/btnCopyImei"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="?android:attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_copy"
+                            app:tint="#64748B"
+                            android:contentDescription="Copy IMEI"/>
+
+                        <TextView
+                            android:id="@+id/tvStatusBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="SOLD"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="#065F46"
+                            android:background="@drawable/bg_badge_green"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"/>
+                    </LinearLayout>
+
+                    <!-- Device Name & Specs -->
+                    <TextView
+                        android:id="@+id/tvDeviceTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Samsung Galaxy S24, 256GB - Phantom Black"
+                        android:textColor="#334155"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+
+                    <!-- Tags Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="10dp">
+
+                        <TextView
+                            android:id="@+id/tvPtaBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PTA Approved"
+                            android:textSize="10.5sp"
+                            android:textStyle="bold"
+                            android:textColor="#1E40AF"
+                            android:background="@drawable/bg_pill_white_10"
+                            android:backgroundTint="#EFF6FF"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="3dp"
+                            android:layout_marginEnd="6dp"/>
+
+                        <TextView
+                            android:id="@+id/tvBranchBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Main Branch"
+                            android:textSize="10.5sp"
+                            android:textColor="#475569"
+                            android:background="@drawable/bg_pill_white_10"
+                            android:backgroundTint="#F1F5F9"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="3dp"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F1F5F9"
+                        android:layout_marginVertical="14dp"/>
+
+                    <!-- Quick Customer & Invoice Links -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnViewInvoice"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="38dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:text="View Invoice"
+                            android:textSize="12sp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnViewCustomer"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="38dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:text="Customer Info"
+                            android:textSize="12sp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Lifecycle Timeline Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#EDF2F7"
+                app:cardBackgroundColor="@color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LIFECYCLE &amp; AUDIT TIMELINE"
+                        android:textColor="#64748B"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Timeline Events Container -->
+                    <LinearLayout
+                        android:id="@+id/layoutTimelineContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

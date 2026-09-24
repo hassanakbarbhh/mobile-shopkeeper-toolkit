@@ -16,9 +16,10 @@ import kotlinx.coroutines.launch
     entities = [
         Product::class, Customer::class, Sale::class, SaleItem::class,
         Repair::class, Payment::class, Supplier::class, Purchase::class,
-        PurchaseItem::class, Expense::class, Seller::class, CashClosing::class
+        PurchaseItem::class, Expense::class, Seller::class, CashClosing::class,
+        OutboxOperation::class, ImeiAsset::class, ImeiLifecycleEvent::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -34,6 +35,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun sellerDao(): SellerDao
     abstract fun cashClosingDao(): CashClosingDao
+    abstract fun outboxDao(): OutboxDao
+    abstract fun imeiAssetDao(): ImeiAssetDao
 
     companion object {
         @Volatile
@@ -133,6 +136,86 @@ abstract class AppDatabase : RoomDatabase() {
                 isActive = true
             )
             listOf(s1, s2).forEach { db.sellerDao().insert(it) }
+
+            // Seed flagship IMEI 356789123456789 lifecycle as seen in product design poster
+            val sampleImei = "356789123456789"
+            val handset = ImeiAsset(
+                imei = sampleImei,
+                serialNumber = "R58M30XYZ89",
+                productId = 1L,
+                productName = "Samsung Galaxy S24",
+                brand = "Samsung",
+                model = "Galaxy S24",
+                storage = "256GB",
+                color = "Phantom Black",
+                supplierName = "ABC Mobile",
+                purchasePrice = 160000.0,
+                sellingPrice = 185000.0,
+                currentStatus = ImeiAsset.STATUS_SOLD,
+                currentBranch = "Main Branch",
+                ptaStatus = "Approved",
+                warrantyExpiryDate = System.currentTimeMillis() + (365L * 24 * 3600 * 1000),
+                customerId = 1L,
+                customerName = "Muhammad Ali",
+                customerPhone = "0300-1234567",
+                saleInvoiceId = 2891L,
+                repairHistoryCount = 1
+            )
+            db.imeiAssetDao().insertAsset(handset)
+
+            val now = System.currentTimeMillis()
+            val dayMs = 24L * 3600 * 1000
+            val events = listOf(
+                ImeiLifecycleEvent(
+                    imei = sampleImei,
+                    eventType = ImeiLifecycleEvent.EVENT_PURCHASED,
+                    timestamp = now - (40 * dayMs),
+                    title = "Purchased from Supplier",
+                    details = "Purchased from ABC Mobile Wholesale at Rs 160,000",
+                    referenceId = "PO-4481"
+                ),
+                ImeiLifecycleEvent(
+                    imei = sampleImei,
+                    eventType = ImeiLifecycleEvent.EVENT_IN_STOCK,
+                    timestamp = now - (38 * dayMs),
+                    title = "Received In Stock",
+                    details = "Verified PTA Status: Approved, Battery Health: 100%",
+                    referenceId = "STK-902"
+                ),
+                ImeiLifecycleEvent(
+                    imei = sampleImei,
+                    eventType = ImeiLifecycleEvent.EVENT_TRANSFERRED,
+                    timestamp = now - (34 * dayMs),
+                    title = "Transferred to Display",
+                    details = "Transferred to Counter 1 - Main Branch",
+                    referenceId = "TR-102"
+                ),
+                ImeiLifecycleEvent(
+                    imei = sampleImei,
+                    eventType = ImeiLifecycleEvent.EVENT_SOLD,
+                    timestamp = now - (30 * dayMs),
+                    title = "Sold to Customer",
+                    details = "Sold to Muhammad Ali for Rs 185,000. Invoice #INV-002891",
+                    referenceId = "INV-002891"
+                ),
+                ImeiLifecycleEvent(
+                    imei = sampleImei,
+                    eventType = ImeiLifecycleEvent.EVENT_WARRANTY,
+                    timestamp = now - (30 * dayMs),
+                    title = "Official Warranty Activated",
+                    details = "1 Year Brand Warranty active till August 2025",
+                    referenceId = "WAR-S24"
+                ),
+                ImeiLifecycleEvent(
+                    imei = sampleImei,
+                    eventType = ImeiLifecycleEvent.EVENT_REPAIR,
+                    timestamp = now - (10 * dayMs),
+                    title = "Repair Inspection: Screen Glass",
+                    details = "Replaced outer protective glass. Ticket #R-1042 completed",
+                    referenceId = "R-1042"
+                )
+            )
+            events.forEach { db.imeiAssetDao().insertLifecycleEvent(it) }
         }
     }
 }

@@ -14,6 +14,9 @@ import com.shopkeeper.mobileshop.databinding.FragmentDashboardBinding
 import com.shopkeeper.mobileshop.databinding.ItemDashboardRecentSaleBinding
 import com.shopkeeper.mobileshop.domain.DeadStockDetector
 import com.shopkeeper.mobileshop.domain.NetProfitEngine
+import com.shopkeeper.mobileshop.sync.QueueBasedSyncManager
+import com.shopkeeper.mobileshop.sync.SyncEngine
+import com.shopkeeper.mobileshop.sync.SyncState
 import com.shopkeeper.mobileshop.utils.AppMode
 import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.ShopProfile
@@ -75,6 +78,34 @@ class DashboardFragment : Fragment() {
             AppMode.SELLER_STAFF -> "💼 Seller / Staff Mode"
             AppMode.REPAIR_TECH -> "🔧 Repair Tech Mode"
             else -> "👤 ${mode.name.replace('_', ' ')}"
+        }
+
+        // Initialize Outbox Sync Engine
+        QueueBasedSyncManager.initialize(requireContext())
+
+        // Sync Pill Click -> Opens Sync Center
+        binding.tvSyncStatus.setOnClickListener {
+            findNavController().navigate(R.id.navigation_sync_center)
+        }
+
+        // Live observation of Sync State
+        viewLifecycleOwner.lifecycleScope.launch {
+            SyncEngine.syncState.collectLatest { state ->
+                when (state) {
+                    is SyncState.Synced -> {
+                        binding.tvSyncStatus.text = "🟢 Synced"
+                    }
+                    is SyncState.Pending -> {
+                        binding.tvSyncStatus.text = "🔵 Syncing (${state.pendingCount})"
+                    }
+                    is SyncState.Offline -> {
+                        binding.tvSyncStatus.text = "🟠 Offline (${state.pendingCount})"
+                    }
+                    is SyncState.Error -> {
+                        binding.tvSyncStatus.text = "🔴 Error (${state.pendingCount})"
+                    }
+                }
+            }
         }
 
         // Quick New Sale inside hero card

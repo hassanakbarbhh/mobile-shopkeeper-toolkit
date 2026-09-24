@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F8FAFC">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Date Header Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#EDF2F7"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_circle_green"
+                    android:backgroundTint="#ECFDF5">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_reports"
+                        app:tint="@color/green_700"/>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Daily Cash Register"
+                        android:textColor="#64748B"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvClosingDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Today, 24 Sep 2026"
+                        android:textColor="#0F172A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp"/>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnChangeDate"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Change"
+                    android:textSize="12sp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Cash Breakdown Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#EDF2F7"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CASH MOVEMENT BREAKDOWN"
+                    android:textColor="#64748B"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06"/>
+
+                <!-- 1. Opening Cash -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="16dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Opening Cash"
+                        android:textColor="#334155"
+                        android:textSize="14sp"/>
+
+                    <EditText
+                        android:id="@+id/etOpeningCash"
+                        android:layout_width="120dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_pill_white_10"
+                        android:backgroundTint="#F1F5F9"
+                        android:gravity="end|center_vertical"
+                        android:paddingHorizontal="10dp"
+                        android:inputType="numberDecimal"
+                        android:text="0"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- 2. Cash Sales (+) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cash Sales"
+                        android:textColor="#334155"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/tvCashSales"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ Rs 0"
+                        android:textColor="#059669"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- 3. Cash Expenses (-) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cash Expenses"
+                        android:textColor="#334155"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/tvCashExpenses"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- Rs 0"
+                        android:textColor="#DC2626"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- 4. Customer Payments / Khata (+) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Customer Payments (Khata)"
+                        android:textColor="#334155"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/tvCustomerPayments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ Rs 0"
+                        android:textColor="#059669"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- 5. Supplier Payments (-) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Supplier Payments"
+                        android:textColor="#334155"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/tvSupplierPayments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- Rs 0"
+                        android:textColor="#DC2626"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E2E8F0"
+                    android:layout_marginVertical="16dp"/>
+
+                <!-- Expected Cash -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Expected Cash in Drawer"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvExpectedCash"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rs 0"
+                        android:textColor="#0F172A"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Counted Cash & Variance Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="#CBD5E1"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PHYSICAL CASH COUNT"
+                    android:textColor="#64748B"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Actual Counted Cash (Rs)"
+                    app:startIconDrawable="@drawable/ic_sales">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etActualCash"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Variance Indicator -->
+                <LinearLayout
+                    android:id="@+id/layoutVariance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/bg_pill_white_10"
+                    android:backgroundTint="#F1F5F9"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cash Difference / Variance:"
+                        android:textColor="#334155"
+                        android:textSize="13.5sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvDifference"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rs 0 (Balanced)"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#059669"/>
+                </LinearLayout>
+
+                <!-- Note Field -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Closing Note (Optional)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etClosingNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:textSize="13sp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Close Register Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCloseRegister"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Close Register &amp; Save"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            android:backgroundTint="@color/green_800"
+            android:textColor="@color/white"
+            android:layout_marginBottom="24dp"/>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

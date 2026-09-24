@@ -16,4 +16,7 @@ interface PurchaseDao {
 
     @Query("SELECT * FROM purchase_items WHERE imei = :imei")
     suspend fun itemsByImei(imei: String): List<PurchaseItem>
+
+    @Query("SELECT SUM(paidAmount) FROM purchases WHERE purchaseDate BETWEEN :start AND :end")
+    fun sumPaidInRange(start: Long, end: Long): Flow<Double?>
 }
