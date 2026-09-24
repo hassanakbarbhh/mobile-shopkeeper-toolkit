@@ -19,6 +19,7 @@ class ShopRepository(private val db: AppDatabase) {
 
     val allCustomers: Flow<List<Customer>> = db.customerDao().getAllCustomers()
     fun searchCustomers(q: String) = db.customerDao().searchCustomers("%$q%")
+    suspend fun getCustomer(id: Long) = db.customerDao().getCustomerById(id)
     suspend fun insertCustomer(c: Customer) = db.customerDao().insert(c)
     suspend fun updateCustomer(c: Customer) = db.customerDao().update(c)
     suspend fun deleteCustomer(c: Customer) = db.customerDao().delete(c)

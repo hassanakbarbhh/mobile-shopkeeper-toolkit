@@ -20,6 +20,7 @@ import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogProductBinding
 import com.shopkeeper.mobileshop.databinding.FragmentInventoryBinding
 import com.shopkeeper.mobileshop.utils.ExportManager
+import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -105,9 +106,11 @@ class InventoryFragment : Fragment() {
         }
 
         when (binding.chipGroupCategory.checkedChipId) {
+            R.id.chipInStock -> filtered = filtered.filter { it.quantity > 0 }
+            R.id.chipLowStock -> filtered = filtered.filter { it.quantity in 1..3 }
+            R.id.chipOutOfStock -> filtered = filtered.filter { it.quantity <= 0 }
             R.id.chipSmartphones -> filtered = filtered.filter { it.category == ProductCategory.SMARTPHONE }
             R.id.chipAccessories -> filtered = filtered.filter { it.category != ProductCategory.SMARTPHONE }
-            R.id.chipLowStock -> filtered = filtered.filter { it.quantity <= 3 }
         }
 
         adapter.submitList(filtered)
@@ -192,13 +195,22 @@ class InventoryFragment : Fragment() {
     }
 
     private fun showProductOptions(product: Product) {
-        val options = arrayOf("Edit", "Delete")
+        val options = mutableListOf("🛒 Sell at POS", "✏️ Edit Details", "📦 Adjust Stock Quantity")
+        if (product.imei.isNotBlank()) {
+            options.add("🔍 View IMEI (${product.imei})")
+        }
+        options.add("🗑️ Delete Product")
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(product.name)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showAddEditDialog(product)
-                    1 -> {
+            .setItems(options.toTypedArray()) { _, which ->
+                when (options[which]) {
+                    "🛒 Sell at POS" -> {
+                        findNavController().navigate(R.id.navigation_new_sale)
+                    }
+                    "✏️ Edit Details" -> showAddEditDialog(product)
+                    "📦 Adjust Stock Quantity" -> showAdjustStockDialog(product)
+                    "🗑️ Delete Product" -> {
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle("Delete Product?")
                             .setMessage("Are you sure you want to delete ${product.name}?")
@@ -210,8 +222,39 @@ class InventoryFragment : Fragment() {
                             .setNegativeButton("Cancel", null)
                             .show()
                     }
+                    else -> {
+                        findNavController().navigate(R.id.navigation_imei)
+                    }
                 }
             }
+            .show()
+    }
+
+    private fun showAdjustStockDialog(product: Product) {
+        val input = android.widget.EditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText(product.quantity.toString())
+            setSelection(text.length)
+        }
+        val container = android.widget.FrameLayout(requireContext()).apply {
+            val pad = (20 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad / 2, pad, 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Adjust Stock: ${product.name}")
+            .setMessage("Current stock: ${product.quantity} units. Enter new quantity:")
+            .setView(container)
+            .setPositiveButton("Update") { _, _ ->
+                val newQty = input.text.toString().toIntOrNull()
+                if (newQty != null && newQty >= 0) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        repository.updateProduct(product.copy(quantity = newQty, updatedAt = System.currentTimeMillis()))
+                        Toast.makeText(requireContext(), "Stock updated to $newQty units", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 

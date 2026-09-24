@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Header: Ticket Number & Current Status Badge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTicketNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Repair #1024"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"/>
+
+                <TextView
+                    android:id="@+id/tvRepairDevice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Samsung Galaxy S23 Ultra"
+                    android:textSize="14sp"
+                    android:textColor="#475569"
+                    android:layout_marginTop="2dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDetailStatusBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_amber"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="5dp"
+                android:text="IN REPAIR"
+                android:textColor="#92400E"
+                android:textSize="11.5sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Device & Customer Info Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#EDF2F7"
+            app:cardBackgroundColor="#F8FAFC">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="Customer:"
+                        android:textSize="12.5sp"
+                        android:textColor="#64748B"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailCustomerName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Ali Khan"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#1E293B"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="Phone:"
+                        android:textSize="12.5sp"
+                        android:textColor="#64748B"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailCustomerPhone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="+92 300 1234567"
+                        android:textSize="13sp"
+                        android:textColor="#1E293B"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="IMEI / SN:"
+                        android:textSize="12.5sp"
+                        android:textColor="#64748B"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailImei"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="356291048291048"
+                        android:textSize="13sp"
+                        android:textColor="#1E293B"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Issue Description Container -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reported Fault / Issue"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_marginTop="16dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#FED7AA"
+            app:cardBackgroundColor="#FFF7ED">
+
+            <TextView
+                android:id="@+id/tvDetailIssue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="Display glass broken, touch unresponsive near top speaker."
+                android:textSize="13sp"
+                android:textColor="#9A3412"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Timeline Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Workshop Pipeline Progression"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_marginTop="16dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#EDF2F7"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:id="@+id/layoutTimeline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:id="@+id/tvTimelineStep1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✓ 1. Intake Received"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#15803D"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvTimelineStep2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✓ 2. Diagnosing &amp; Parts Check"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#15803D"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvTimelineStep3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="● 3. Bench Repair in Progress"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#D97706"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvTimelineStep4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="○ 4. Tested &amp; Ready for Pickup"
+                    android:textSize="12.5sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvTimelineStep5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="○ 5. Delivered to Customer"
+                    android:textSize="12.5sp"
+                    android:textColor="#94A3B8"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Cost Breakdown Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#BBF7D0"
+            app:cardBackgroundColor="#F0FDF4">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Estimated Service Bill"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:textColor="#166534"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailCost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₹15,000"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#15803D"
+                        android:layout_marginTop="2dp"/>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAdvanceStatus"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Next Step →"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#166534"
+                    android:backgroundTint="#BBF7D0"
+                    app:cornerRadius="10dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Action Buttons: Print Tag, Call, WhatsApp -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="14dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRepairCall"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="5dp"
+                android:text="Call"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/green_800"
+                app:icon="@drawable/ic_call"
+                app:iconTint="@color/green_800"
+                app:iconSize="16dp"
+                app:cornerRadius="12dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRepairWhatsApp"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="3dp"
+                android:text="WhatsApp"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/green_800"
+                app:icon="@drawable/ic_whatsapp"
+                app:iconTint="@color/green_800"
+                app:iconSize="16dp"
+                app:cornerRadius="12dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRepairPrintTag"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:text="Tag"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/green_800"
+                app:icon="@drawable/ic_print"
+                app:iconTint="@color/green_800"
+                app:iconSize="16dp"
+                app:cornerRadius="12dp"/>
+        </LinearLayout>
+
+        <!-- Bottom Actions Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRepairChangeStatus"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Jump Status"
+                android:textColor="@color/green_800"
+                android:textSize="12sp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRepairClose"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Close"
+                android:textColor="#64748B"
+                android:textSize="12sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

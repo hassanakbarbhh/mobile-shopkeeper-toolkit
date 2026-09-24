@@ -45,7 +45,34 @@ class DuesFragment : Fragment() {
         val db = AppDatabase.getDatabase(requireContext())
         repository = ShopRepository(db)
 
-        adapter = DueAdapter { sale -> showReceiveDialog(sale) }
+        adapter = DueAdapter(
+            onItemClick = { sale -> showReceiveDialog(sale) },
+            onCallClick = { sale ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val custId = sale.customerId
+                    val customer = if (custId != null) repository.getCustomer(custId) else null
+                    val phone = customer?.phone
+                    if (!phone.isNullOrBlank()) {
+                        com.shopkeeper.mobileshop.utils.ExportManager.openDialer(requireContext(), phone)
+                    } else {
+                        Toast.makeText(requireContext(), "No phone number available for ${sale.customerName}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            onWhatsAppClick = { sale ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val custId = sale.customerId
+                    val customer = if (custId != null) repository.getCustomer(custId) else null
+                    val phone = customer?.phone
+                    if (!phone.isNullOrBlank()) {
+                        val msg = "Assalam-o-Alaikum ${sale.customerName}, reminder regarding pending balance of ${sale.finalAmount.money()} on invoice #${sale.invoiceNumber}."
+                        com.shopkeeper.mobileshop.utils.ExportManager.shareWhatsApp(requireContext(), phone, msg)
+                    } else {
+                        Toast.makeText(requireContext(), "No phone number available for ${sale.customerName}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
         binding.rvDues.layoutManager = LinearLayoutManager(requireContext())
         binding.rvDues.adapter = adapter
 

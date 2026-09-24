@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Top Action Bar -->
+        <!-- Top Header & Today's Summary Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,47 +28,118 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical">
+                android:paddingVertical="12dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Sales &amp; Invoices"
-                        android:textColor="#0F172A"
-                        android:textSize="15.5sp"
-                        android:textStyle="bold"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvSalesCount"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sales &amp; Invoices"
+                            android:textColor="#0F172A"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvTodaySalesSummary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today: ₹0 (0 invoices)"
+                            android:textColor="@color/green_800"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnExportSales"
+                        style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0 invoices recorded"
-                        android:textColor="#64748B"
+                        android:layout_height="44dp"
+                        android:text="Export"
                         android:textSize="12sp"
-                        android:layout_marginTop="1dp"/>
+                        android:textColor="@color/green_800"
+                        app:icon="@drawable/ic_export"
+                        app:iconTint="@color/green_800"
+                        app:iconSize="16dp"
+                        app:cornerRadius="10dp"/>
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExportSales"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="44dp"
-                    android:text="Export CSV"
-                    android:textSize="12sp"
-                    android:textColor="@color/green_800"
-                    app:icon="@drawable/ic_export"
-                    app:iconTint="@color/green_800"
-                    app:iconSize="16dp"
-                    app:cornerRadius="10dp"/>
+                <!-- Search Input Field -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilSearchSales"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxStrokeColor="@color/green_700"
+                    app:startIconDrawable="@drawable/ic_search"
+                    app:startIconTint="#64748B"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etSearchSales"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:hint="Search invoice #, customer or IMEI"
+                        android:textSize="13.5sp"
+                        android:paddingVertical="8dp"
+                        android:inputType="text"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Filter Chips Row -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:layout_marginTop="8dp">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupSalesFilter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:selectionRequired="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipAllSales"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="All Invoices"
+                            android:checked="true"/>
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipPaidSales"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Paid Invoices"/>
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipCreditSales"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Credit / Due (Udhaar)"/>
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -99,25 +170,25 @@
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
                     android:src="@drawable/ic_sales"
-                    android:alpha="0.3"
-                    app:tint="@color/green_800"/>
+                    app:tint="#94A3B8"
+                    android:contentDescription="No Invoices"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No sales invoices found"
-                    android:textSize="17sp"
+                    android:text="No sales records found"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="#334155"
-                    android:layout_marginTop="16dp"/>
+                    android:layout_marginTop="12dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tap + New Sale to bill a customer."
+                    android:text="New billing invoices will appear here"
                     android:textSize="13sp"
                     android:textColor="#64748B"
                     android:layout_marginTop="4dp"/>
@@ -125,19 +196,15 @@
         </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabNewSale"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:text="New Sale"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        app:icon="@drawable/ic_add"
-        app:iconTint="@color/white"
-        app:backgroundTint="@color/green_800"
-        app:elevation="4dp"
+        app:backgroundTint="@color/green_700"
+        app:tint="@color/white"
+        app:srcCompat="@drawable/ic_add_sale"
         android:contentDescription="New Sale"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

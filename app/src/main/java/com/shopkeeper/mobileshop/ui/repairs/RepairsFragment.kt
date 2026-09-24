@@ -15,8 +15,10 @@ import com.shopkeeper.mobileshop.data.db.entity.Repair
 import com.shopkeeper.mobileshop.data.db.entity.RepairStatus
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogRepairBinding
+import com.shopkeeper.mobileshop.databinding.DialogRepairDetailsBinding
 import com.shopkeeper.mobileshop.databinding.FragmentRepairsBinding
 import com.shopkeeper.mobileshop.utils.ExportManager
+import com.shopkeeper.mobileshop.utils.money
 import kotlinx.coroutines.flow.collectLatest
 
 import com.shopkeeper.mobileshop.domain.WarrantyExpirationTracker
@@ -148,62 +150,121 @@ class RepairsFragment : Fragment() {
     }
 
     private fun showRepairActions(repair: Repair) {
-        val options = arrayOf(
-            "Update Status (${repair.status.name})",
-            "🖨️ Print Thermal Claim & Phone Tag",
-            "WhatsApp Status Update",
-            "Call Customer",
-            "Delete Repair Ticket"
-        )
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${repair.deviceBrand} ${repair.deviceModel} • ${repair.customerName}")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showUpdateStatusDialog(repair)
-                    1 -> com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showRepairTagDialog(requireContext(), repair)
-                    2 -> {
-                        if (repair.customerPhone.isNotBlank()) {
-                            val msg = "Assalam-o-Alaikum ${repair.customerName}, your ${repair.deviceBrand} ${repair.deviceModel} repair status is currently: ${repair.status.name.replace('_', ' ')}. Est: Rs.${repair.estimatedCost}. Mobile Shop."
-                            ExportManager.shareWhatsApp(requireContext(), repair.customerPhone, msg)
-                        } else {
-                            Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    3 -> {
-                        if (repair.customerPhone.isNotBlank()) {
-                            ExportManager.openDialer(requireContext(), repair.customerPhone)
-                        } else {
-                            Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    4 -> {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Delete Repair Ticket #${repair.id}?")
-                            .setMessage("Are you sure you want to permanently delete this repair ticket for ${repair.customerName}?")
-                            .setPositiveButton("Delete") { _, _ ->
-                                viewLifecycleOwner.lifecycleScope.launch {
-                                    repository.deleteRepair(repair)
-                                    Toast.makeText(requireContext(), "Repair ticket #${repair.id} deleted", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .setNegativeButton("Cancel", null)
-                            .show()
-                    }
-                }
-            }
-            .setNegativeButton("Close", null)
-            .show()
+        showRepairDetailsDialog(repair)
     }
 
-    private fun showUpdateStatusDialog(repair: Repair) {
+    private fun showRepairDetailsDialog(repair: Repair) {
+        val dBinding = DialogRepairDetailsBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dBinding.root)
+            .create()
+
+        var current = repair
+
+        fun renderState() {
+            dBinding.tvTicketNumber.text = "Repair Ticket #${current.id}"
+            dBinding.tvRepairDevice.text = "${current.deviceBrand} ${current.deviceModel}"
+            dBinding.tvDetailCustomerName.text = if (current.customerName.isNotBlank()) current.customerName else "Walk-in Customer"
+            dBinding.tvDetailCustomerPhone.text = if (current.customerPhone.isNotBlank()) current.customerPhone else "No phone"
+            dBinding.tvDetailImei.text = if (current.imei.isNotBlank()) current.imei else "Not provided"
+            dBinding.tvDetailIssue.text = current.issueDescription
+            dBinding.tvDetailCost.text = current.estimatedCost.money()
+            dBinding.tvDetailStatusBadge.text = current.status.name.replace('_', ' ')
+
+            val router = RepairStatusStateRouter()
+            val next = router.getNextStatus(current.status)
+
+            if (current.status == RepairStatus.DELIVERED || current.status == RepairStatus.CANCELLED) {
+                dBinding.btnAdvanceStatus.visibility = View.GONE
+            } else {
+                dBinding.btnAdvanceStatus.visibility = View.VISIBLE
+                dBinding.btnAdvanceStatus.text = "Next: ${next.name.replace('_', ' ')} →"
+            }
+
+            val s = current.status
+            val isStep1 = true
+            val isStep2 = s == RepairStatus.DIAGNOSING || s == RepairStatus.WAITING_PARTS || s == RepairStatus.IN_REPAIR || s == RepairStatus.COMPLETED || s == RepairStatus.DELIVERED
+            val isStep3 = s == RepairStatus.IN_REPAIR || s == RepairStatus.COMPLETED || s == RepairStatus.DELIVERED
+            val isStep4 = s == RepairStatus.COMPLETED || s == RepairStatus.DELIVERED
+            val isStep5 = s == RepairStatus.DELIVERED
+
+            dBinding.tvTimelineStep1.text = if (isStep1) "✓ 1. Intake Received" else "○ 1. Intake Received"
+            dBinding.tvTimelineStep1.setTextColor(if (isStep1) android.graphics.Color.parseColor("#15803D") else android.graphics.Color.parseColor("#94A3B8"))
+
+            dBinding.tvTimelineStep2.text = if (isStep2) "✓ 2. Diagnosing & Parts Check" else "○ 2. Diagnosing & Parts Check"
+            dBinding.tvTimelineStep2.setTextColor(if (isStep2) android.graphics.Color.parseColor("#15803D") else android.graphics.Color.parseColor("#94A3B8"))
+
+            dBinding.tvTimelineStep3.text = if (isStep3) "✓ 3. Bench Repair in Progress" else "○ 3. Bench Repair in Progress"
+            dBinding.tvTimelineStep3.setTextColor(if (isStep3) android.graphics.Color.parseColor("#15803D") else android.graphics.Color.parseColor("#94A3B8"))
+
+            dBinding.tvTimelineStep4.text = if (isStep4) "✓ 4. Tested & Ready for Pickup" else "○ 4. Tested & Ready for Pickup"
+            dBinding.tvTimelineStep4.setTextColor(if (isStep4) android.graphics.Color.parseColor("#15803D") else android.graphics.Color.parseColor("#94A3B8"))
+
+            dBinding.tvTimelineStep5.text = if (isStep5) "✓ 5. Delivered to Customer" else "○ 5. Delivered to Customer"
+            dBinding.tvTimelineStep5.setTextColor(if (isStep5) android.graphics.Color.parseColor("#15803D") else android.graphics.Color.parseColor("#94A3B8"))
+        }
+
+        renderState()
+
+        dBinding.btnAdvanceStatus.setOnClickListener {
+            val router = RepairStatusStateRouter()
+            val nextStatus = router.getNextStatus(current.status)
+            if (nextStatus != current.status) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val updated = current.copy(status = nextStatus)
+                    repository.updateRepair(updated)
+                    current = updated
+                    renderState()
+                    Toast.makeText(requireContext(), "Advanced to ${nextStatus.name}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        dBinding.btnRepairCall.setOnClickListener {
+            if (current.customerPhone.isNotBlank()) {
+                ExportManager.openDialer(requireContext(), current.customerPhone)
+            } else {
+                Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dBinding.btnRepairWhatsApp.setOnClickListener {
+            if (current.customerPhone.isNotBlank()) {
+                val msg = "Assalam-o-Alaikum ${current.customerName}, your ${current.deviceBrand} ${current.deviceModel} repair status is currently: ${current.status.name.replace('_', ' ')}. Est: ${current.estimatedCost.money()}."
+                ExportManager.shareWhatsApp(requireContext(), current.customerPhone, msg)
+            } else {
+                Toast.makeText(requireContext(), "No phone recorded", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dBinding.btnRepairPrintTag.setOnClickListener {
+            com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showRepairTagDialog(requireContext(), current)
+        }
+
+        dBinding.btnRepairChangeStatus.setOnClickListener {
+            showUpdateStatusDialog(current) { updated ->
+                current = updated
+                renderState()
+            }
+        }
+
+        dBinding.btnRepairClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showUpdateStatusDialog(repair: Repair, onUpdated: (Repair) -> Unit) {
         val statuses = RepairStatus.values().map { it.name.replace('_', ' ') }.toTypedArray()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Change Repair Status")
             .setItems(statuses) { _, which ->
                 val newStatus = RepairStatus.values()[which]
                 viewLifecycleOwner.lifecycleScope.launch {
-                    repository.updateRepair(repair.copy(status = newStatus))
+                    val updated = repair.copy(status = newStatus)
+                    repository.updateRepair(updated)
+                    onUpdated(updated)
                     Toast.makeText(requireContext(), "Status updated to ${newStatus.name}", Toast.LENGTH_SHORT).show()
                 }
             }

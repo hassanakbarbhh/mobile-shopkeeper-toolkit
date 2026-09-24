@@ -39,6 +39,7 @@ data class Sale(
     val lastModifiedDevice: String = ""
 ) {
     @Ignore var items: List<SaleItem> = emptyList()
+    val invoiceNumber: String get() = id.toString()
 }
 
 enum class PaymentMethod { CASH, CARD, UPI, BANK_TRANSFER, CREDIT, OTHER }
