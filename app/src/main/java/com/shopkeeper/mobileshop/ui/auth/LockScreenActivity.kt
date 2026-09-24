@@ -53,6 +53,7 @@ class LockScreenActivity : AppCompatActivity() {
                     val shopAddress = binding.etShopAddress.text?.toString()?.trim().orEmpty()
                     val shopCode = binding.etShopCode.text?.toString()?.trim().orEmpty()
 
+                    setLoading(true, "Authenticating with Google & verifying role...")
                     UserAuthManager.signInWithGoogle(
                         context = this,
                         idToken = account.idToken,
@@ -65,22 +66,35 @@ class LockScreenActivity : AppCompatActivity() {
                         shopAddress = shopAddress,
                         shopCode = shopCode
                     ) { success, message, user ->
+                        setLoading(false)
                         if (success && user != null) {
                             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                             onUnlocked(user.role)
                         } else {
+                            if (message.contains("Sign Up tab", ignoreCase = true)) {
+                                binding.toggleAuthMode.check(R.id.btnTabSignUp)
+                            }
                             showError(message)
                         }
                     }
+                } else {
+                    setLoading(false)
+                    showError("Could not retrieve Google account details. Please try again.")
                 }
             } catch (e: ApiException) {
-                // Real Google Auth failed (likely missing SHA-1 or google-services.json mismatch)
-                Toast.makeText(this, "Google Sign-In failed (Code ${e.statusCode}). Please ensure SHA-1 is added to Firebase.", Toast.LENGTH_LONG).show()
+                setLoading(false)
+                val msg = if (e.statusCode == 12500) {
+                    "Google Sign-In configuration error (Code 12500). Please check SHA-1 in Firebase Console."
+                } else {
+                    "Google Sign-In canceled or encountered an issue (Code ${e.statusCode})."
+                }
+                showError(msg)
             } catch (e: Exception) {
-                Toast.makeText(this, "Google Sign-In: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                setLoading(false)
+                showError("Google Sign-In failed: ${e.localizedMessage}")
             }
         } else {
-            Toast.makeText(this, "Google Sign-In canceled or failed.", Toast.LENGTH_SHORT).show()
+            setLoading(false)
         }
     }
 
@@ -236,10 +250,12 @@ class LockScreenActivity : AppCompatActivity() {
 
     private fun launchGoogleSignIn() {
         try {
+            setLoading(true, "Launching Google Sign-In...")
             val client = GoogleAuthManager.getGoogleSignInClient(this)
             googleSignInLauncher.launch(client.signInIntent)
         } catch (e: Exception) {
-             Toast.makeText(this, "Failed to launch Google Sign-In: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            setLoading(false)
+            showError("Failed to launch Google Sign-In: ${e.localizedMessage}")
         }
     }
 
@@ -279,6 +295,7 @@ class LockScreenActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            setLoading(true, "Sending SMS verification code...")
             binding.btnSendOtp.isEnabled = false
             binding.btnSendOtp.text = "Sending OTP..."
             binding.tvAuthError.visibility = View.GONE
@@ -288,6 +305,7 @@ class LockScreenActivity : AppCompatActivity() {
                 phoneNumber = rawPhone,
                 callback = object : com.shopkeeper.mobileshop.security.PhoneAuthHelper.OtpCallback {
                     override fun onOtpSent(verificationId: String) {
+                        setLoading(false)
                         phoneVerificationId = verificationId
                         binding.btnSendOtp.isEnabled = true
                         binding.btnSendOtp.text = "Resend Code"
@@ -297,12 +315,14 @@ class LockScreenActivity : AppCompatActivity() {
                     }
 
                     override fun onAutoVerified(user: com.google.firebase.auth.FirebaseUser) {
+                        setLoading(false)
                         val session = UserAuthManager.signInWithPhoneUser(this@LockScreenActivity, user, currentRole)
                         Toast.makeText(this@LockScreenActivity, "Auto-verified: Welcome ${session.displayName}!", Toast.LENGTH_SHORT).show()
                         onUnlocked(currentRole)
                     }
 
                     override fun onError(message: String) {
+                        setLoading(false)
                         binding.btnSendOtp.isEnabled = true
                         binding.btnSendOtp.text = "Send 6-Digit SMS Code"
                         showError(message)
@@ -324,6 +344,7 @@ class LockScreenActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            setLoading(true, "Verifying OTP code...")
             binding.btnVerifyOtp.isEnabled = false
             binding.btnVerifyOtp.text = "Verifying..."
 
@@ -332,11 +353,13 @@ class LockScreenActivity : AppCompatActivity() {
                 verificationId = vId,
                 code = code,
                 onSuccess = { fbUser ->
+                    setLoading(false)
                     val user = UserAuthManager.signInWithPhoneUser(this, fbUser, currentRole)
                     Toast.makeText(this, "Phone verified successfully! Welcome, ${user.displayName}", Toast.LENGTH_SHORT).show()
                     onUnlocked(currentRole)
                 },
                 onError = { err ->
+                    setLoading(false)
                     binding.btnVerifyOtp.isEnabled = true
                     binding.btnVerifyOtp.text = "Verify Code & Sign In"
                     showError(err)
@@ -349,19 +372,30 @@ class LockScreenActivity : AppCompatActivity() {
         val emailOrId = binding.etLoginEmail.text?.toString()?.trim().orEmpty()
         val pass = binding.etLoginPassword.text?.toString()?.trim().orEmpty()
 
+        if (emailOrId.isEmpty()) {
+            showError("Please enter your registered email address.")
+            return
+        }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailOrId).matches()) {
+            showError("Please enter a valid email address (e.g. name@example.com).")
+            return
+        }
         if (pass.isEmpty()) {
             showError("Please enter your password.")
             return
         }
 
+        setLoading(true, "Signing in as ${currentRole.name.replace('_', ' ')}...")
         UserAuthManager.signIn(
             context = this,
             emailOrIdentifier = emailOrId,
             password = pass,
             selectedRole = currentRole
         ) { success, message, user ->
+            setLoading(false)
             if (success && user != null) {
                 binding.tvAuthError.visibility = View.GONE
+                binding.btnResendVerification.visibility = View.GONE
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                 onUnlocked(user.role)
             } else {
@@ -385,7 +419,7 @@ class LockScreenActivity : AppCompatActivity() {
             showError("Please enter your full name.")
             return
         }
-        if (email.isEmpty() || !email.contains("@")) {
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             showError("Please enter a valid email address.")
             return
         }
@@ -407,25 +441,37 @@ class LockScreenActivity : AppCompatActivity() {
             return
         }
 
+        setLoading(true, "Creating account & generating verification...")
         UserAuthManager.signUp(
             context = this,
             name = name,
             email = email,
             password = pass,
             role = currentRole,
-            shopName = shopName, shopNumber = shopNumber, shopAddress = shopAddress,
+            shopName = shopName,
+            shopNumber = shopNumber,
+            shopAddress = shopAddress,
             shopCode = shopCode
         ) { success, message, user ->
+            setLoading(false)
             if (success && user != null) {
                 binding.tvAuthError.visibility = View.GONE
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                // Force user back to login mode
-                binding.toggleAuthMode.check(R.id.btnTabSignIn)
+                binding.btnResendVerification.visibility = View.GONE
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Account Created")
+                    .setMessage(message)
+                    .setPositiveButton("Sign In Now") { _, _ ->
+                        binding.toggleAuthMode.check(R.id.btnTabSignIn)
+                        binding.etLoginEmail.setText(email)
+                        binding.etLoginPassword.setText(pass)
+                    }
+                    .show()
             } else {
                 showError(message)
             }
         }
     }
+
     private fun showForgotPasswordDialog() {
         val input = EditText(this).apply {
             hint = "Enter your registered email"
@@ -441,7 +487,9 @@ class LockScreenActivity : AppCompatActivity() {
             .setPositiveButton("Send Reset Link") { _, _ ->
                 val email = input.text.toString().trim()
                 if (email.isNotEmpty()) {
+                    setLoading(true, "Sending password reset email...")
                     UserAuthManager.sendPasswordReset(this, email) { ok, msg ->
+                        setLoading(false)
                         Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
                     }
                 } else {
@@ -452,7 +500,25 @@ class LockScreenActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun setLoading(loading: Boolean, text: String = "Authenticating...") {
+        if (loading) {
+            binding.layoutAuthLoading.visibility = View.VISIBLE
+            binding.tvAuthLoadingText.text = text
+            binding.tvAuthError.visibility = View.GONE
+            binding.btnResendVerification.visibility = View.GONE
+            binding.btnLoginSubmit.isEnabled = false
+            binding.btnRegisterSubmit.isEnabled = false
+            binding.cardGoogleButton.isEnabled = false
+        } else {
+            binding.layoutAuthLoading.visibility = View.GONE
+            binding.btnLoginSubmit.isEnabled = true
+            binding.btnRegisterSubmit.isEnabled = true
+            binding.cardGoogleButton.isEnabled = true
+        }
+    }
+
     private fun showError(message: String) {
+        setLoading(false)
         binding.tvAuthError.text = message
         binding.tvAuthError.visibility = View.VISIBLE
         val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
@@ -460,6 +526,30 @@ class LockScreenActivity : AppCompatActivity() {
             isSignUpMode -> binding.layoutSignUpForm.startAnimation(shake)
             isOtpMode -> binding.layoutOtpForm.startAnimation(shake)
             else -> binding.layoutSignInForm.startAnimation(shake)
+        }
+
+        // Email verification resend trigger
+        if (message.contains("verify your email", ignoreCase = true) || message.contains("verification", ignoreCase = true)) {
+            binding.btnResendVerification.visibility = View.VISIBLE
+            binding.btnResendVerification.setOnClickListener {
+                val email = binding.etLoginEmail.text?.toString()?.trim().orEmpty()
+                val pass = binding.etLoginPassword.text?.toString()?.trim().orEmpty()
+                if (email.isEmpty() || pass.isEmpty()) {
+                    Toast.makeText(this, "Please fill in your email and password above to resend verification link.", Toast.LENGTH_LONG).show()
+                } else {
+                    setLoading(true, "Resending verification email...")
+                    UserAuthManager.resendVerificationEmail(email, pass) { ok, resMsg ->
+                        setLoading(false)
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle(if (ok) "Verification Link Sent" else "Request Failed")
+                            .setMessage(resMsg)
+                            .setPositiveButton("OK", null)
+                            .show()
+                    }
+                }
+            }
+        } else {
+            binding.btnResendVerification.visibility = View.GONE
         }
     }
 

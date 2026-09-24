@@ -11,17 +11,20 @@ import com.shopkeeper.mobileshop.R
 import com.shopkeeper.mobileshop.data.db.AppDatabase
 import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.FragmentDashboardBinding
+import com.shopkeeper.mobileshop.databinding.ItemDashboardRecentSaleBinding
+import com.shopkeeper.mobileshop.domain.DeadStockDetector
+import com.shopkeeper.mobileshop.domain.NetProfitEngine
 import com.shopkeeper.mobileshop.utils.AppMode
 import com.shopkeeper.mobileshop.utils.AppPreferences
 import com.shopkeeper.mobileshop.utils.ShopProfile
+import com.shopkeeper.mobileshop.utils.UserAuthManager
 import com.shopkeeper.mobileshop.utils.money
-import kotlinx.coroutines.flow.first
-
-import com.shopkeeper.mobileshop.domain.NetProfitEngine
-import com.shopkeeper.mobileshop.domain.DeadStockDetector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
@@ -46,10 +49,40 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupUI() {
-        val mode = AppPreferences.getMode(requireContext()) ?: AppMode.SHOP_OWNER
-        binding.tvModeBadge.text = if (mode == AppMode.SHOP_OWNER) "🏪 Shop Owner Mode" else "🔧 Repair Tech Mode"
+        val user = UserAuthManager.getCurrentUser(requireContext())
+        val mode = AppPreferences.getMode(requireContext()) ?: user?.role ?: AppMode.SHOP_OWNER
+
+        // Dynamic time-based greeting
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val greetingPrefix = when {
+            hour < 12 -> "Good morning"
+            hour < 17 -> "Good afternoon"
+            else -> "Good evening"
+        }
+        val displayName = user?.displayName?.substringBefore("@") ?: "Partner"
+        binding.tvGreeting.text = "$greetingPrefix, $displayName"
+
+        // Formatted Date
+        val dateFmt = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
+        binding.tvDashboardDate.text = dateFmt.format(Date())
+
+        // Shop Name
         binding.tvShopName.text = ShopProfile.name(requireContext())
 
+        // Role Badge
+        binding.tvModeBadge.text = when (mode) {
+            AppMode.OWNER, AppMode.SHOP_OWNER -> "👑 Shop Owner (Master)"
+            AppMode.SELLER_STAFF -> "💼 Seller / Staff Mode"
+            AppMode.REPAIR_TECH -> "🔧 Repair Tech Mode"
+            else -> "👤 ${mode.name.replace('_', ' ')}"
+        }
+
+        // Quick New Sale inside hero card
+        binding.btnQuickSale.setOnClickListener {
+            findNavController().navigate(R.id.navigation_new_sale)
+        }
+
+        // Navigation Card Clicks
         binding.cardNewSale.setOnClickListener {
             findNavController().navigate(R.id.navigation_new_sale)
         }
@@ -65,11 +98,39 @@ class DashboardFragment : Fragment() {
         binding.cardReports.setOnClickListener {
             findNavController().navigate(R.id.navigation_reports)
         }
+        binding.cardImeiTracker.setOnClickListener {
+            findNavController().navigate(R.id.navigation_imei)
+        }
+        binding.cardOnlineCatalog.setOnClickListener {
+            findNavController().navigate(R.id.navigation_online_catalog)
+        }
         binding.cardSettings.setOnClickListener {
             findNavController().navigate(R.id.navigation_settings)
         }
+
+        // Performance Stat Cards Clicks
+        binding.cardInventoryStats.setOnClickListener {
+            findNavController().navigate(R.id.navigation_inventory)
+        }
+        binding.cardDuesStats.setOnClickListener {
+            findNavController().navigate(R.id.navigation_dues)
+        }
+        binding.cardRepairStats.setOnClickListener {
+            findNavController().navigate(R.id.navigation_repairs)
+        }
+        binding.cardPurchases.setOnClickListener {
+            findNavController().navigate(R.id.navigation_purchases)
+        }
+
+        // Action Buttons
         binding.btnViewLowStock.setOnClickListener {
             findNavController().navigate(R.id.navigation_inventory)
+        }
+        binding.btnViewDeadStock.setOnClickListener {
+            findNavController().navigate(R.id.navigation_inventory)
+        }
+        binding.btnViewAllSales.setOnClickListener {
+            findNavController().navigate(R.id.navigation_sales)
         }
     }
 
@@ -83,71 +144,85 @@ class DashboardFragment : Fragment() {
         val startOfDay = calendar.timeInMillis
         val endOfDay = System.currentTimeMillis()
         val db = AppDatabase.getDatabase(requireContext())
-        
+
+        // 1. Today's Total Gross Sales
         viewLifecycleOwner.lifecycleScope.launch {
-            db.saleDao().getTotalSalesAmount(startOfDay, endOfDay).collect { sales ->
+            db.saleDao().getTotalSalesAmount(startOfDay, endOfDay).collectLatest { sales ->
                 _binding?.tvTodaySales?.text = (sales ?: 0.0).money()
             }
         }
+
+        // 2. Today's Net Profit & Recent Invoices
         viewLifecycleOwner.lifecycleScope.launch {
-            db.saleDao().getSalesByDateRange(startOfDay, endOfDay).collect { sales ->
+            db.saleDao().getSalesByDateRange(startOfDay, endOfDay).collectLatest { sales ->
                 var totalProfit = 0.0
                 val profitEngine = NetProfitEngine()
                 for (sale in sales) {
                     val items = repository.getSaleItems(sale.id)
                     for (item in items) {
-                        // Assuming purchasePrice is available. If not, it falls back to 0.0
-                        // Since SaleItem doesn't store purchasePrice, we must join it or fetch product.
-                        // Actually, this is a dashboard async block.
                         val product = repository.getProduct(item.productId)
                         val purchasePrice = product?.purchasePrice ?: 0.0
-                        val tax = 0.0 // Simplified for now
-                        val discount = (sale.discount / sales.size) // Pro-rated discount if item-level discount is needed
                         totalProfit += profitEngine.calculateNetProfit(item.totalPrice, purchasePrice * item.quantity, 0.0, 0.0)
                     }
-                    totalProfit -= sale.discount // Deduct flat discount once
+                    totalProfit -= sale.discount
                 }
                 _binding?.tvTodayProfit?.text = totalProfit.money()
+
+                // Populate Recent Sales Feed
+                renderRecentSales(sales)
             }
         }
+
+        // 3. Transactions Volume Count
         viewLifecycleOwner.lifecycleScope.launch {
-            db.saleDao().getTotalSalesCount(startOfDay, endOfDay).collect { count ->
+            db.saleDao().getTotalSalesCount(startOfDay, endOfDay).collectLatest { count ->
                 _binding?.tvSalesCount?.text = "$count transactions today"
             }
         }
+
+        // 4. Inventory Capital
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.totalInventoryValue.collect { value ->
+            repository.totalInventoryValue.collectLatest { value ->
                 _binding?.tvInventoryValue?.text = (value ?: 0.0).money()
             }
         }
+
+        // 5. Total Products Count
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.totalProductCount.collect { count ->
+            repository.totalProductCount.collectLatest { count ->
                 _binding?.tvProductCount?.text = "$count products in catalog"
             }
         }
+
+        // 6. Pending Khata Dues
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.totalPendingAmount.collect { dues ->
+            repository.totalPendingAmount.collectLatest { dues ->
                 _binding?.tvPendingPayments?.text = (dues ?: 0.0).money()
             }
         }
+
+        // 7. Active Repair Jobs
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.activeRepairCount.collect { count ->
-                _binding?.tvActiveRepairs?.text = "$count in shop"
+            repository.activeRepairCount.collectLatest { count ->
+                _binding?.tvActiveRepairs?.text = "$count active jobs"
             }
         }
+
+        // 8. Low Stock Alert
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.lowStockProducts.collect { lowStock ->
+            repository.lowStockProducts.collectLatest { lowStock ->
                 if (lowStock.isNotEmpty()) {
                     _binding?.cardLowStock?.visibility = View.VISIBLE
-                    _binding?.tvLowStockCount?.text = "${lowStock.size} products are running low on stock!"
+                    _binding?.tvLowStockCount?.text = "${lowStock.size} products below threshold"
                 } else {
                     _binding?.cardLowStock?.visibility = View.GONE
                 }
             }
         }
-        
+
+        // 9. Dead Stock Detector
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.allProducts.collect { products ->
+            repository.allProducts.collectLatest { products ->
                 val deadStockDetector = DeadStockDetector()
                 var deadStockCount = 0
                 var lockedCapital = 0.0
@@ -160,7 +235,7 @@ class DashboardFragment : Fragment() {
                 }
                 if (deadStockCount > 0) {
                     _binding?.cardDeadStock?.visibility = View.VISIBLE
-                    _binding?.tvDeadStockCount?.text = "$deadStockCount dead stock items"
+                    _binding?.tvDeadStockCount?.text = "$deadStockCount slow-moving items detected"
                     _binding?.tvDeadStockCapital?.text = "Locked Capital: " + lockedCapital.money()
                 } else {
                     _binding?.cardDeadStock?.visibility = View.GONE
@@ -168,9 +243,56 @@ class DashboardFragment : Fragment() {
             }
         }
     }
+
+    private fun renderRecentSales(sales: List<com.shopkeeper.mobileshop.data.db.entity.Sale>) {
+        val container = _binding?.layoutRecentSales ?: return
+        val emptyView = _binding?.layoutEmptySales ?: return
+        container.removeAllViews()
+
+        if (sales.isEmpty()) {
+            emptyView.visibility = View.VISIBLE
+            container.visibility = View.GONE
+            return
+        }
+
+        emptyView.visibility = View.GONE
+        container.visibility = View.VISIBLE
+
+        val timeFmt = SimpleDateFormat("h:mm a", Locale.getDefault())
+        val recentList = sales.sortedByDescending { it.saleDate }.take(4)
+
+        for (sale in recentList) {
+            val itemBinding = ItemDashboardRecentSaleBinding.inflate(layoutInflater, container, false)
+            itemBinding.tvRecentCustomerName.text = if (sale.customerName.isNotBlank()) sale.customerName else "Walk-in Customer"
+            itemBinding.tvRecentSaleTime.text = "${timeFmt.format(Date(sale.saleDate))} • ${sale.paymentMethod}"
+            itemBinding.tvRecentSaleAmount.text = sale.finalAmount.money()
+            itemBinding.tvRecentSaleStatus.text = sale.paymentStatus.name
+            
+            when (sale.paymentStatus) {
+                com.shopkeeper.mobileshop.data.db.entity.PaymentStatus.PAID -> {
+                    itemBinding.tvRecentSaleStatus.setTextColor(android.graphics.Color.parseColor("#065F46"))
+                    itemBinding.tvRecentSaleStatus.setBackgroundResource(R.drawable.bg_badge_green)
+                }
+                com.shopkeeper.mobileshop.data.db.entity.PaymentStatus.PENDING -> {
+                    itemBinding.tvRecentSaleStatus.setTextColor(android.graphics.Color.parseColor("#991B1B"))
+                    itemBinding.tvRecentSaleStatus.setBackgroundResource(R.drawable.bg_badge_red)
+                }
+                com.shopkeeper.mobileshop.data.db.entity.PaymentStatus.PARTIAL -> {
+                    itemBinding.tvRecentSaleStatus.setTextColor(android.graphics.Color.parseColor("#92400E"))
+                    itemBinding.tvRecentSaleStatus.setBackgroundResource(R.drawable.bg_badge_amber)
+                }
+            }
+
+            itemBinding.root.setOnClickListener {
+                findNavController().navigate(R.id.navigation_sales)
+            }
+
+            container.addView(itemBinding.root)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
-// Block B: UI Wiring complete

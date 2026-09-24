@@ -663,14 +663,50 @@
                         </LinearLayout>
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/layoutAuthLoading"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="14dp"
+                        android:visibility="gone">
+                        <ProgressBar
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:indeterminate="true"
+                            android:indeterminateTint="@color/green_700"/>
+                        <TextView
+                            android:id="@+id/tvAuthLoadingText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="Authenticating..."
+                            android:textColor="@color/green_800"
+                            android:textSize="13sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
                     <TextView
                         android:id="@+id/tvAuthError"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="14dp"
                         android:gravity="center"
                         android:textColor="@color/error"
                         android:textSize="13sp"
+                        android:visibility="gone"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnResendVerification"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="6dp"
+                        android:text="Resend Verification Link"
+                        android:textSize="12sp"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:textColor="@color/green_700"
                         android:visibility="gone"/>
 
                     <!-- Google Sign In -->

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_new_sale"
+        android:icon="@drawable/ic_add_sale"
+        android:title="New Sale"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_lock_app"
+        android:icon="@drawable/ic_lock"
+        android:title="Lock App / Switch Role"
+        app:showAsAction="ifRoom"/>
+
+</menu>

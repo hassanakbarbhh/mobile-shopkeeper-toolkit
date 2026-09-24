@@ -189,8 +189,8 @@ object UserAuthManager {
                     val fbUser = task.result?.user
                     if (fbUser != null) {
                         if (!fbUser.isEmailVerified) {
-                            onResult(false, "Please verify your email address first. A link was sent to $cleanInput.", null)
                             FirebaseAuth.getInstance().signOut()
+                            onResult(false, "Please verify your email address first. A verification link was sent to $cleanInput.", null)
                             return@addOnCompleteListener
                         }
                         
@@ -203,8 +203,8 @@ object UserAuthManager {
                                     val actualRole = runCatching { AppMode.valueOf(roleStr) }.getOrDefault(selectedRole)
 
                                     if (actualRole == AppMode.SELLER_STAFF && !isApproved) {
-                                        onResult(false, "Your account is pending approval from the shop owner.", null)
                                         FirebaseAuth.getInstance().signOut()
+                                        onResult(false, "Your account is pending approval from the shop owner.", null)
                                     } else {
                                         val user = UserAccount(
                                             email = cleanInput,
@@ -218,18 +218,66 @@ object UserAuthManager {
                                         onResult(true, "Login Successful", user)
                                     }
                                 } else {
-                                    onResult(false, "User profile not found.", null)
+                                    // Graceful self-healing profile initialization
+                                    val isApproved = (selectedRole == AppMode.SHOP_OWNER)
+                                    val userDoc = hashMapOf<String, Any>(
+                                        "email" to cleanInput,
+                                        "displayName" to cleanInput.substringBefore("@"),
+                                        "role" to selectedRole.name,
+                                        "approved" to isApproved,
+                                        "updatedAt" to System.currentTimeMillis()
+                                    )
+                                    FirebaseFirestore.getInstance().collection("users").document(fbUser.uid).set(userDoc)
+                                        .addOnCompleteListener {
+                                            if (selectedRole == AppMode.SELLER_STAFF && !isApproved) {
+                                                FirebaseAuth.getInstance().signOut()
+                                                onResult(false, "Your account is pending approval from the shop owner.", null)
+                                            } else {
+                                                val user = UserAccount(
+                                                    email = cleanInput,
+                                                    displayName = cleanInput.substringBefore("@"),
+                                                    role = selectedRole,
+                                                    authProvider = "firebase_email",
+                                                    isVerified = true
+                                                )
+                                                saveSession(context, user)
+                                                LoginRateLimiter.reset(context)
+                                                onResult(true, "Login Successful", user)
+                                            }
+                                        }
                                 }
                             }
                             .addOnFailureListener {
-                                onResult(false, "Failed to verify account status.", null)
+                                // Fallback to local session if network error occurs but user was previously saved
+                                val local = getAllAccounts(context).find { it.email == cleanInput }
+                                if (local != null) {
+                                    saveSession(context, local)
+                                    LoginRateLimiter.reset(context)
+                                    onResult(true, "Signed in (Offline Cache)", local)
+                                } else {
+                                    onResult(false, "Failed to verify account status. Please check your network connection.", null)
+                                }
                             }
                     } else {
-                        onResult(false, "Login failed. Try again.", null)
+                        onResult(false, "Login failed. Please try again.", null)
                     }
                 } else {
                     LoginRateLimiter.recordFailure(context)
-                    onResult(false, task.exception?.localizedMessage ?: "Invalid credentials.", null)
+                    val exc = task.exception
+                    val friendlyMsg = when {
+                        exc is com.google.firebase.auth.FirebaseAuthInvalidUserException ->
+                            "No registered account found with this email. Please switch to Sign Up or verify your email."
+                        exc is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException ->
+                            "Incorrect email or password. Please verify and try again."
+                        exc is com.google.firebase.FirebaseTooManyRequestsException ->
+                            "Too many failed attempts. Account temporarily locked for security. Please try again shortly."
+                        exc is com.google.firebase.FirebaseNetworkException ->
+                            "Network connection error. Please check your internet connection."
+                        exc?.message?.contains("badly formatted", ignoreCase = true) == true ->
+                            "Please enter a valid email address format (e.g. name@example.com)."
+                        else -> exc?.localizedMessage ?: "Invalid credentials. Please try again."
+                    }
+                    onResult(false, friendlyMsg, null)
                 }
             }
     }
@@ -438,6 +486,37 @@ object UserAuthManager {
                     onResult(true, "Password reset link sent to $email.")
                 } else {
                     onResult(false, task.exception?.localizedMessage ?: "Failed to send reset email.")
+                }
+            }
+    }
+
+    fun resendVerificationEmail(email: String, password: String, onResult: (Boolean, String) -> Unit) {
+        val cleanEmail = SecuritySanitizer.sanitize(email).lowercase()
+        val cleanPass = password.trim()
+        if (cleanEmail.isEmpty() || cleanPass.isEmpty()) {
+            onResult(false, "Please enter your email and password to request a verification email.")
+            return
+        }
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(cleanEmail, cleanPass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = task.result?.user
+                    if (user != null) {
+                        user.sendEmailVerification()
+                            .addOnCompleteListener { sendTask ->
+                                FirebaseAuth.getInstance().signOut()
+                                if (sendTask.isSuccessful) {
+                                    onResult(true, "A fresh verification link has been sent to $cleanEmail. Please check your inbox and spam folder.")
+                                } else {
+                                    onResult(false, sendTask.exception?.localizedMessage ?: "Failed to send verification link.")
+                                }
+                            }
+                    } else {
+                        FirebaseAuth.getInstance().signOut()
+                        onResult(false, "Unable to find user account.")
+                    }
+                } else {
+                    onResult(false, task.exception?.localizedMessage ?: "Authentication failed. Could not resend verification email.")
                 }
             }
     }
