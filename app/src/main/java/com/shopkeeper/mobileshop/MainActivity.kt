@@ -63,6 +63,31 @@ class MainActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
 
+        // Setup Modern Material 3 Bottom Navigation
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_more -> {
+                    binding.drawerLayout.openDrawer(GravityCompat.START)
+                    true
+                }
+                else -> {
+                    if (navController.currentDestination?.id != item.itemId) {
+                        navController.navigate(item.itemId)
+                    }
+                    true
+                }
+            }
+        }
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.navigation_dashboard -> binding.bottomNavigation.menu.findItem(R.id.navigation_dashboard)?.isChecked = true
+                R.id.navigation_inventory -> binding.bottomNavigation.menu.findItem(R.id.navigation_inventory)?.isChecked = true
+                R.id.navigation_new_sale -> binding.bottomNavigation.menu.findItem(R.id.navigation_new_sale)?.isChecked = true
+                R.id.navigation_customers -> binding.bottomNavigation.menu.findItem(R.id.navigation_customers)?.isChecked = true
+            }
+        }
+
         val activeMode = AppPreferences.getActiveMode(this)
         configureDrawerForRole(activeMode)
 

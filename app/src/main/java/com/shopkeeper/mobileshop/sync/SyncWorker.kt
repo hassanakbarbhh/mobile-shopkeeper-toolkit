@@ -97,8 +97,8 @@ class SyncWorker(
 
                     val localVer = (dataMap["version"] as? Number)?.toLong() ?: 1L
 
-                    // Optimistic concurrency control via Firestore transaction:
-                    // Verifies that concurrent remote edits don't overwrite blindly without version consistency.
+                    // Optimistic concurrency control & entity-specific conflict resolution via Firestore transaction:
+                    // Verifies that concurrent remote edits don't overwrite blindly without version consistency and semantic checks.
                     firestore.runTransaction { tx ->
                         val snapshot = tx.get(docRef)
                         if (snapshot.exists()) {
@@ -106,13 +106,69 @@ class SyncWorker(
                             val remoteUpdated = snapshot.getLong("updatedAt") ?: 0L
                             val localUpdated = (dataMap["updatedAt"] as? Number)?.toLong() ?: System.currentTimeMillis()
 
-                            // If remote has progressed past our version and is newer, increment version and preserve audit
+                            // Advance version deterministically
                             if (remoteVer > localVer && remoteUpdated > localUpdated) {
-                                // Concurrent conflicting update detected.
-                                Log.w(TAG, "Concurrent remote edit detected on ${op.entityType}/${op.entityId}: remoteVer=$remoteVer, localVer=$localVer. Merging changes.")
+                                Log.w(TAG, "Concurrent remote edit detected on ${op.entityType}/${op.entityId}: remoteVer=$remoteVer, localVer=$localVer. Merging changes semantically.")
                                 dataMap["version"] = remoteVer + 1L
                             } else {
                                 dataMap["version"] = maxOf(localVer, remoteVer + 1L)
+                            }
+
+                            // Entity-Specific Semantic Rules:
+                            when (op.entityType) {
+                                "Sale", "CashClosing" -> {
+                                    // Financial and cash shift logs are strictly immutable once written; preserve original financials
+                                    val originalFinalAmount = snapshot.getDouble("finalAmount") ?: snapshot.getDouble("totalAmount")
+                                    if (originalFinalAmount != null && originalFinalAmount > 0.0) {
+                                        dataMap["finalAmount"] = originalFinalAmount
+                                        snapshot.getDouble("totalAmount")?.let { dataMap["totalAmount"] = it }
+                                    }
+                                }
+                                "ImeiAsset" -> {
+                                    // State machine: Once an IMEI is SOLD, it cannot regress to IN_STOCK without explicit return
+                                    val remoteStatus = snapshot.getString("currentStatus") ?: ""
+                                    val localStatus = dataMap["currentStatus"]?.toString() ?: ""
+                                    if (remoteStatus.equals("SOLD", ignoreCase = true) && !localStatus.equals("SOLD", ignoreCase = true)) {
+                                        // Keep remote SOLD status
+                                        dataMap["currentStatus"] = "SOLD"
+                                        snapshot.getString("customerName")?.let { dataMap["customerName"] = it }
+                                    }
+                                }
+                                "Repair" -> {
+                                    // State machine progression: Prevent regression from DELIVERED or READY_FOR_DELIVERY
+                                    val remoteStatus = snapshot.getString("status") ?: ""
+                                    val localStatus = dataMap["status"]?.toString() ?: ""
+                                    val stages = listOf("RECEIVED", "DIAGNOSING", "WAITING_FOR_PARTS", "REPAIRING", "READY_FOR_DELIVERY", "DELIVERED")
+                                    val remoteStageIndex = stages.indexOf(remoteStatus.uppercase())
+                                    val localStageIndex = stages.indexOf(localStatus.uppercase())
+                                    if (remoteStageIndex > localStageIndex && localStageIndex >= 0) {
+                                        dataMap["status"] = remoteStatus
+                                    }
+                                }
+                                "Product" -> {
+                                    // Controlled merge: If remote was updated newer, preserve non-empty remote descriptions or attributes
+                                    if (remoteUpdated > localUpdated) {
+                                        val remoteBrand = snapshot.getString("brand")
+                                        if (!remoteBrand.isNullOrBlank() && (dataMap["brand"]?.toString().isNullOrBlank())) {
+                                            dataMap["brand"] = remoteBrand
+                                        }
+                                        val remoteStorage = snapshot.getString("storage")
+                                        if (!remoteStorage.isNullOrBlank() && (dataMap["storage"]?.toString().isNullOrBlank())) {
+                                            dataMap["storage"] = remoteStorage
+                                        }
+                                    }
+                                }
+                                "Customer" -> {
+                                    // Merge non-empty fields
+                                    val remotePhone = snapshot.getString("phone")
+                                    if (!remotePhone.isNullOrBlank() && dataMap["phone"]?.toString().isNullOrBlank()) {
+                                        dataMap["phone"] = remotePhone
+                                    }
+                                    val remoteAddress = snapshot.getString("address")
+                                    if (!remoteAddress.isNullOrBlank() && dataMap["address"]?.toString().isNullOrBlank()) {
+                                        dataMap["address"] = remoteAddress
+                                    }
+                                }
                             }
                         }
                         tx.set(docRef, dataMap, SetOptions.merge())

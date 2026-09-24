@@ -117,6 +117,12 @@ class SyncCenterFragment : Fragment() {
         } else {
             _binding?.tvLastSyncTime?.text = "Last sync: Ready to synchronize"
         }
+
+        val deviceName = "${android.os.Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${android.os.Build.MODEL}"
+        val user = com.shopkeeper.mobileshop.utils.UserAuthManager.getCurrentUser(requireContext())
+        val userEmail = user?.email ?: "shop_node_01"
+        _binding?.tvThisDeviceName?.text = "$deviceName (Current Device)"
+        _binding?.tvThisDeviceId?.text = "Node: $userEmail • Full Read/Write Access"
     }
 
     private fun observeOutboxLog(outboxDao: com.shopkeeper.mobileshop.data.db.dao.OutboxDao) {

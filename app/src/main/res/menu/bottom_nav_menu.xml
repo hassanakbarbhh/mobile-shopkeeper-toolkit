@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/navigation_inventory"
+        android:icon="@drawable/ic_inventory"
+        android:title="Stock" />
+
+    <item
+        android:id="@+id/navigation_new_sale"
+        android:icon="@drawable/ic_add_sale"
+        android:title="POS Sale" />
+
+    <item
+        android:id="@+id/navigation_customers"
+        android:icon="@drawable/ic_customers"
+        android:title="Customers" />
+
+    <item
+        android:id="@+id/navigation_more"
+        android:icon="@drawable/ic_menu_more"
+        android:title="More" />
+</menu>

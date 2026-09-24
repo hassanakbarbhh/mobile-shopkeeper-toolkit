@@ -1,10 +1,12 @@
 package com.shopkeeper.mobileshop.ui.customers
 
 import android.os.Bundle
+import com.shopkeeper.mobileshop.R
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -86,15 +88,16 @@ class CustomersFragment : Fragment() {
     }
 
     private fun showCustomerOptionsDialog(customer: Customer) {
-        val options = arrayOf("Call Customer", "WhatsApp Message", "Edit Information", "Delete Customer Record")
+        val options = arrayOf("View Udhaar / Due Invoices", "Call Customer", "WhatsApp Message", "Edit Information", "Delete Customer Record")
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(customer.name)
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> ExportManager.openDialer(requireContext(), customer.phone)
-                    1 -> ExportManager.shareWhatsApp(requireContext(), customer.phone, "Assalam-o-Alaikum ${customer.name}, greeting from our Mobile Shop.")
-                    2 -> showAddCustomerDialog(customer)
-                    3 -> confirmDeleteCustomer(customer)
+                    0 -> findNavController().navigate(R.id.navigation_dues)
+                    1 -> ExportManager.openDialer(requireContext(), customer.phone)
+                    2 -> ExportManager.shareWhatsApp(requireContext(), customer.phone, "Assalam-o-Alaikum ${customer.name}, greeting from our Mobile Shop.")
+                    3 -> showAddCustomerDialog(customer)
+                    4 -> confirmDeleteCustomer(customer)
                 }
             }
             .setNegativeButton("Close", null)

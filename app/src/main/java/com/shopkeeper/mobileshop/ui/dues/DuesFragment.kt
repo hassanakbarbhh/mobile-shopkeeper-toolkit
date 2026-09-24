@@ -54,8 +54,15 @@ class DuesFragment : Fragment() {
                 adapter.submitList(list)
                 binding.tvNoDues.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
                 
+                val totalOutstanding = list.sumOf { it.finalAmount }
+                binding.tvTotalOutstanding.text = totalOutstanding.money()
+
                 val analyzer = UdhaarAgingAnalyzer()
                 val criticals = list.filter { analyzer.getAgingCategory(it.saleDate).contains("Critical") }
+                val overdue = criticals.sumOf { it.finalAmount }
+                binding.tvOverdueAmount.text = overdue.money()
+                binding.tvDueSoonAmount.text = (totalOutstanding - overdue).coerceAtLeast(0.0).money()
+
                 if (criticals.isNotEmpty()) {
                     binding.cardCallToday.visibility = View.VISIBLE
                     val top3 = criticals.take(3)

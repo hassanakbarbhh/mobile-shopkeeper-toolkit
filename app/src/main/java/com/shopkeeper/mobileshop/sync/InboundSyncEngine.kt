@@ -222,11 +222,11 @@ object InboundSyncEngine {
                     } else {
                         val updated = existing.copy(
                             cloudId = cloudId,
-                            name = doc.getString("name") ?: existing.name,
+                            name = doc.getString("name")?.takeIf { it.isNotBlank() } ?: existing.name,
                             phone = phone.ifBlank { existing.phone },
-                            email = doc.getString("email") ?: existing.email,
-                            address = doc.getString("address") ?: existing.address,
-                            notes = doc.getString("notes") ?: existing.notes,
+                            email = doc.getString("email")?.takeIf { it.isNotBlank() } ?: existing.email,
+                            address = doc.getString("address")?.takeIf { it.isNotBlank() } ?: existing.address,
+                            notes = doc.getString("notes")?.takeIf { it.isNotBlank() } ?: existing.notes,
                             version = remoteVersion,
                             updatedAt = remoteUpdatedAt,
                             isDeleted = false,
@@ -298,6 +298,13 @@ object InboundSyncEngine {
                             updatedAt = remoteUpdatedAt
                         ))
                     } else {
+                        val rawStatus = doc.getString("currentStatus") ?: existing.currentStatus
+                        // State machine: If locally SOLD, prevent accidental reversion to IN_STOCK unless remote has strictly higher version and explicit return
+                        val resolvedStatus = if (existing.currentStatus == ImeiAsset.STATUS_SOLD && rawStatus == ImeiAsset.STATUS_IN_STOCK && remoteVersion <= existing.version) {
+                            ImeiAsset.STATUS_SOLD
+                        } else {
+                            rawStatus
+                        }
                         val updated = existing.copy(
                             cloudId = imei,
                             brand = doc.getString("brand") ?: existing.brand,
@@ -310,7 +317,7 @@ object InboundSyncEngine {
                             warrantyExpiryDate = doc.getLong("warrantyExpiryDate") ?: existing.warrantyExpiryDate,
                             supplierName = doc.getString("supplierName") ?: existing.supplierName,
                             currentBranch = doc.getString("currentBranch") ?: existing.currentBranch,
-                            currentStatus = doc.getString("currentStatus") ?: existing.currentStatus,
+                            currentStatus = resolvedStatus,
                             customerName = doc.getString("customerName") ?: existing.customerName,
                             customerPhone = doc.getString("customerPhone") ?: existing.customerPhone,
                             version = remoteVersion,
@@ -394,10 +401,18 @@ object InboundSyncEngine {
                         ))
                     } else {
                         val statusStr = doc.getString("status") ?: existing.status.name
-                        val status = runCatching { RepairStatus.valueOf(statusStr) }.getOrDefault(existing.status)
+                        val incomingStatus = runCatching { RepairStatus.valueOf(statusStr) }.getOrDefault(existing.status)
+                        // Repair state machine: Do not regress from DELIVERED or COMPLETED unless remote has strictly higher version
+                        val finalRepairStatus = if ((existing.status == RepairStatus.DELIVERED || existing.status == RepairStatus.COMPLETED)
+                            && (incomingStatus == RepairStatus.RECEIVED || incomingStatus == RepairStatus.DIAGNOSING)
+                            && remoteVersion <= existing.version) {
+                            existing.status
+                        } else {
+                            incomingStatus
+                        }
                         val updated = existing.copy(
                             cloudId = cloudId,
-                            status = status,
+                            status = finalRepairStatus,
                             actualCost = doc.getDouble("actualCost") ?: existing.actualCost,
                             notes = doc.getString("notes") ?: existing.notes,
                             estimatedCost = doc.getDouble("estimatedCost") ?: existing.estimatedCost,
