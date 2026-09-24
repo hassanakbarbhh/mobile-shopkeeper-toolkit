@@ -13,7 +13,10 @@ data class Purchase(
     val paymentStatus: PaymentStatus = PaymentStatus.PAID,
     val notes: String = "",
     val purchaseDate: Long = System.currentTimeMillis()
-)
+) {
+    @androidx.room.Ignore var items: List<PurchaseItem> = emptyList()
+    val orderNumber: String get() = id.toString()
+}
 
 @Entity(tableName = "purchase_items")
 data class PurchaseItem(

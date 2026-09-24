@@ -59,6 +59,8 @@ class ShopRepository(private val db: AppDatabase) {
     suspend fun deleteSupplier(s: Supplier) = db.supplierDao().delete(s)
 
     val allPurchases: Flow<List<Purchase>> = db.purchaseDao().getAll()
+    suspend fun getPurchaseItems(purchaseId: Long) = db.purchaseDao().getItemsForPurchase(purchaseId)
+    suspend fun updatePurchase(p: Purchase) = db.purchaseDao().update(p)
     suspend fun insertPurchase(p: Purchase, items: List<PurchaseItem>): Long {
         val id = db.purchaseDao().insert(p)
         db.purchaseDao().insertItems(items.map { it.copy(purchaseId = id) })

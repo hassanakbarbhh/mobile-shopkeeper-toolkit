@@ -615,4 +615,10 @@ class LockScreenActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        // Prevent bypassing lock screen via back press
+        finishAffinity()
+    }
 }
