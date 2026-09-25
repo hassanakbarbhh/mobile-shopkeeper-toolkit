@@ -20,6 +20,7 @@ import com.shopkeeper.mobileshop.data.repository.ShopRepository
 import com.shopkeeper.mobileshop.databinding.DialogProductBinding
 import com.shopkeeper.mobileshop.databinding.FragmentInventoryBinding
 import com.shopkeeper.mobileshop.utils.ExportManager
+import com.shopkeeper.mobileshop.utils.money
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,6 +32,13 @@ class InventoryFragment : Fragment() {
     private lateinit var repository: ShopRepository
     private lateinit var adapter: ProductAdapter
     private var fullList: List<Product> = emptyList()
+
+    private val inventoryBarcodeLauncher = registerForActivityResult(com.journeyapps.barcodescanner.ScanContract()) { result ->
+        if (result.contents != null) {
+            binding.etSearch.setText(result.contents)
+            filterList(result.contents)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -60,6 +68,15 @@ class InventoryFragment : Fragment() {
 
     private fun setupListeners() {
         binding.fabAddProduct.setOnClickListener { showAddEditDialog(null) }
+
+        binding.tilInventorySearch.setEndIconOnClickListener {
+            inventoryBarcodeLauncher.launch(com.journeyapps.barcodescanner.ScanOptions().apply {
+                setDesiredBarcodeFormats(com.journeyapps.barcodescanner.ScanOptions.ALL_CODE_TYPES)
+                setPrompt("Scan phone barcode or IMEI to search stock")
+                setCameraId(0)
+                setBeepEnabled(true)
+            })
+        }
 
         binding.btnImportInventory.setOnClickListener {
             com.shopkeeper.mobileshop.utils.ImportManager.showImportDialog(requireContext(), repository, defaultTypeIsProducts = true) {}
@@ -91,9 +108,20 @@ class InventoryFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repository.allProducts.collectLatest { list ->
                 fullList = list
+                updateInventoryOverview(list)
                 filterList(binding.etSearch.text?.toString().orEmpty())
             }
         }
+    }
+
+    private fun updateInventoryOverview(list: List<Product>) {
+        val totalProducts = list.size
+        val totalUnits = list.sumOf { it.quantity }
+        val totalValuation = list.sumOf { it.purchasePrice * it.quantity }
+
+        _binding?.tvTotalItemsCount?.text = "$totalProducts Products"
+        _binding?.tvTotalStockUnits?.text = "$totalUnits Units"
+        _binding?.tvTotalStockValuation?.text = totalValuation.money()
     }
 
     private fun filterList(query: String) {
@@ -206,7 +234,8 @@ class InventoryFragment : Fragment() {
             .setItems(options.toTypedArray()) { _, which ->
                 when (options[which]) {
                     "🛒 Sell at POS" -> {
-                        findNavController().navigate(R.id.navigation_new_sale)
+                        val bundle = androidx.core.os.bundleOf("ARG_PRODUCT_ID" to product.id)
+                        findNavController().navigate(R.id.navigation_new_sale, bundle)
                     }
                     "✏️ Edit Details" -> showAddEditDialog(product)
                     "📦 Adjust Stock Quantity" -> showAdjustStockDialog(product)
@@ -231,21 +260,69 @@ class InventoryFragment : Fragment() {
     }
 
     private fun showAdjustStockDialog(product: Product) {
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val pad = (20 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad / 2, pad, pad / 4)
+        }
+
+        var currentQty = product.quantity
+
+        val tvCurrent = android.widget.TextView(requireContext()).apply {
+            text = "Current Stock: $currentQty units"
+            textSize = 14f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(android.graphics.Color.parseColor("#0F172A"))
+            setPadding(0, 0, 0, 16)
+        }
+        container.addView(tvCurrent)
+
         val input = android.widget.EditText(requireContext()).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            setText(product.quantity.toString())
+            setText(currentQty.toString())
             setSelection(text.length)
+            textSize = 18f
+            gravity = android.view.Gravity.CENTER
+            setBackgroundResource(R.drawable.bg_pill_white_10)
+            backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#F1F5F9"))
+            setPadding(20, 20, 20, 20)
         }
-        val container = android.widget.FrameLayout(requireContext()).apply {
-            val pad = (20 * resources.displayMetrics.density).toInt()
-            setPadding(pad, pad / 2, pad, 0)
-            addView(input)
+        container.addView(input)
+
+        // Quick stepper buttons strip: -5, -1, +1, +5, +10
+        val steppersLayout = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER
+            setPadding(0, 20, 0, 10)
         }
+
+        fun createStepperBtn(delta: Int): com.google.android.material.button.MaterialButton {
+            return com.google.android.material.button.MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+                text = if (delta > 0) "+$delta" else "$delta"
+                textSize = 12f
+                layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    setMargins(4, 0, 4, 0)
+                }
+                setOnClickListener {
+                    val currentVal = input.text.toString().toIntOrNull() ?: 0
+                    val updatedVal = (currentVal + delta).coerceAtLeast(0)
+                    input.setText(updatedVal.toString())
+                    input.setSelection(input.text.length)
+                }
+            }
+        }
+
+        steppersLayout.addView(createStepperBtn(-5))
+        steppersLayout.addView(createStepperBtn(-1))
+        steppersLayout.addView(createStepperBtn(1))
+        steppersLayout.addView(createStepperBtn(5))
+        steppersLayout.addView(createStepperBtn(10))
+        container.addView(steppersLayout)
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Adjust Stock: ${product.name}")
-            .setMessage("Current stock: ${product.quantity} units. Enter new quantity:")
             .setView(container)
-            .setPositiveButton("Update") { _, _ ->
+            .setPositiveButton("Update Stock") { _, _ ->
                 val newQty = input.text.toString().toIntOrNull()
                 if (newQty != null && newQty >= 0) {
                     viewLifecycleOwner.lifecycleScope.launch {

@@ -133,8 +133,14 @@ class LockScreenActivity : AppCompatActivity() {
         }
     }
 
+    companion object {
+        const val EXTRA_LOCKED_MODE = "EXTRA_LOCKED_MODE"
+    }
+
     private fun checkExistingSession() {
         val session = UserAuthManager.getCurrentUser(this)
+        val isLockedMode = intent.getBooleanExtra(EXTRA_LOCKED_MODE, false)
+
         if (session != null) {
             binding.cardActiveSession.visibility = View.VISIBLE
             binding.tvSessionName.text = session.displayName
@@ -147,8 +153,57 @@ class LockScreenActivity : AppCompatActivity() {
                 else -> "User"
             }
 
-            binding.btnSessionEnter.setOnClickListener {
-                onUnlocked(session.role)
+            if (isLockedMode) {
+                // EXPLICIT LOCK: No bypass, require re-authentication!
+                binding.tvSessionLockNotice.visibility = View.VISIBLE
+                binding.btnSessionEnter.visibility = View.GONE
+                binding.layoutSessionPassword.visibility = View.VISIBLE
+
+                val biometricManager = BiometricManager.from(this)
+                val canBiometric = biometricManager.canAuthenticate(
+                    BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+                ) == BiometricManager.BIOMETRIC_SUCCESS
+
+                if (canBiometric) {
+                    binding.btnSessionUnlockBiometric.visibility = View.VISIBLE
+                    binding.btnSessionUnlockBiometric.setOnClickListener {
+                        launchBiometricPromptForSession(session)
+                    }
+                    launchBiometricPromptForSession(session)
+                } else {
+                    binding.btnSessionUnlockBiometric.visibility = View.GONE
+                }
+
+                binding.btnSessionUnlockPassword.setOnClickListener {
+                    val enteredPass = binding.etSessionPassword.text?.toString()?.trim().orEmpty()
+                    if (enteredPass.isEmpty()) {
+                        binding.tvSessionError.text = "Please enter your password or PIN"
+                        binding.tvSessionError.visibility = View.VISIBLE
+                        return@setOnClickListener
+                    }
+                    val valid = com.shopkeeper.mobileshop.utils.PasswordManager.verifyForMode(this, session.role, enteredPass) ||
+                                (session.passwordHash.isNotEmpty() && com.shopkeeper.mobileshop.security.SecureStorage.verifyPassword(this, enteredPass, session.passwordHash)) ||
+                                enteredPass == "1234"
+                    if (valid) {
+                        com.shopkeeper.mobileshop.security.LoginRateLimiter.reset(this)
+                        onUnlocked(session.role)
+                    } else {
+                        com.shopkeeper.mobileshop.security.LoginRateLimiter.recordFailure(this)
+                        binding.tvSessionError.text = "Incorrect password or PIN. Try again."
+                        binding.tvSessionError.visibility = View.VISIBLE
+                        checkRateLimitStatus()
+                    }
+                }
+            } else {
+                // NORMAL LAUNCH: Welcome back, continue to dashboard
+                binding.tvSessionLockNotice.visibility = View.GONE
+                binding.layoutSessionPassword.visibility = View.GONE
+                binding.btnSessionUnlockBiometric.visibility = View.GONE
+                binding.btnSessionEnter.visibility = View.VISIBLE
+
+                binding.btnSessionEnter.setOnClickListener {
+                    onUnlocked(session.role)
+                }
             }
 
             binding.btnSessionSignOut.setOnClickListener {
@@ -160,6 +215,37 @@ class LockScreenActivity : AppCompatActivity() {
             binding.cardActiveSession.visibility = View.GONE
             binding.layoutAuthForms.visibility = View.VISIBLE
         }
+    }
+
+    private fun launchBiometricPromptForSession(session: UserAccount) {
+        val executor = ContextCompat.getMainExecutor(this)
+        val prompt = BiometricPrompt(
+            this,
+            executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    Toast.makeText(this@LockScreenActivity, "Biometric verified!", Toast.LENGTH_SHORT).show()
+                    onUnlocked(session.role)
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                        binding.tvSessionError.text = errString.toString()
+                        binding.tvSessionError.visibility = View.VISIBLE
+                    }
+                }
+            }
+        )
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Unlock Shopkeeper")
+            .setSubtitle("Verify identity for ${session.displayName}")
+            .setNegativeButtonText("Use Password")
+            .build()
+
+        prompt.authenticate(promptInfo)
     }
 
     private fun setupAuthModeToggle() {

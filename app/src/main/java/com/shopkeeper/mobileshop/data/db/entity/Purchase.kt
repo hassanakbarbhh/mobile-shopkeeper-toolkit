@@ -15,7 +15,7 @@ data class Purchase(
     val purchaseDate: Long = System.currentTimeMillis()
 ) {
     @androidx.room.Ignore var items: List<PurchaseItem> = emptyList()
-    val orderNumber: String get() = id.toString()
+    val orderNumber: String get() = String.format(java.util.Locale.US, "PO-%05d", id)
 }
 
 @Entity(tableName = "purchase_items")

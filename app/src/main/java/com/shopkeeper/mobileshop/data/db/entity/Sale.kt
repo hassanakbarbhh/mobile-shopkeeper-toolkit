@@ -39,7 +39,7 @@ data class Sale(
     val lastModifiedDevice: String = ""
 ) {
     @Ignore var items: List<SaleItem> = emptyList()
-    val invoiceNumber: String get() = id.toString()
+    val invoiceNumber: String get() = String.format(java.util.Locale.US, "INV-%05d", id)
 }
 
 enum class PaymentMethod { CASH, CARD, UPI, BANK_TRANSFER, CREDIT, OTHER }

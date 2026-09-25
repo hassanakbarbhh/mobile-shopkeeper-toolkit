@@ -84,7 +84,7 @@
                     app:boxCornerRadiusBottomStart="10dp"
                     app:boxCornerRadiusBottomEnd="10dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/actvCustomer"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
@@ -373,6 +373,59 @@
                     android:layout_height="wrap_content"
                     android:text="📝 Udhaar (Credit)"/>
             </com.google.android.material.chip.ChipGroup>
+
+            <!-- Credit & Partial Payment Breakdown -->
+            <LinearLayout
+                android:id="@+id/layoutCreditDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:background="@drawable/bg_pill_white_10"
+                android:backgroundTint="#FEF3C7"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cash Paid Now (Rs)"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#92400E"/>
+
+                    <EditText
+                        android:id="@+id/etPaidNow"
+                        android:layout_width="120dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/bg_pill_white_10"
+                        android:backgroundTint="@color/white"
+                        android:inputType="numberDecimal"
+                        android:hint="0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A"
+                        android:gravity="center"
+                        android:paddingHorizontal="8dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvRemainingDue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Remaining Balance (Udhaar): Rs. 0"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#B45309"/>
+            </LinearLayout>
 
             <!-- Complete Sale CTA -->
             <com.google.android.material.button.MaterialButton

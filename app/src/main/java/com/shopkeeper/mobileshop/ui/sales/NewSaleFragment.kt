@@ -39,6 +39,8 @@ class NewSaleFragment : Fragment() {
     private var availableSellers: List<Seller> = emptyList()
     private var selectedSellerId: Long? = null
     private var selectedSellerName: String = "Owner"
+    private var selectedCustomerId: Long? = null
+    private var availableCustomers: List<Customer> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -55,6 +57,37 @@ class NewSaleFragment : Fragment() {
         setupCart()
         setupListeners()
         setupSellerSelector()
+        setupCustomerSelector()
+
+        // Handle item passed from Inventory "Sell at POS"
+        val initialProdId = arguments?.getLong("ARG_PRODUCT_ID", 0L) ?: 0L
+        if (initialProdId > 0L) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val prod = repository.getProduct(initialProdId)
+                if (prod != null) {
+                    addToCart(prod)
+                }
+            }
+        }
+    }
+
+    private fun setupCustomerSelector() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repository.allCustomers.collect { list ->
+                availableCustomers = list
+                val names = list.map { "${it.name} (${it.phone})" }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+                binding.actvCustomer.setAdapter(adapter)
+
+                binding.actvCustomer.setOnItemClickListener { _, _, position, _ ->
+                    if (position in list.indices) {
+                        val c = list[position]
+                        selectedCustomerId = c.id
+                        binding.actvCustomer.setText(c.name, false)
+                    }
+                }
+            }
+        }
     }
 
     private fun setupSellerSelector() {
@@ -175,6 +208,22 @@ class NewSaleFragment : Fragment() {
         binding.etDiscount.doAfterTextChanged { recalculateTotals() }
         binding.etTax.doAfterTextChanged { recalculateTotals() }
 
+        binding.chipGroupPayment.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.contains(R.id.chipCredit)) {
+                binding.layoutCreditDetails.visibility = View.VISIBLE
+                if (binding.etPaidNow.text.isNullOrBlank()) {
+                    binding.etPaidNow.setText("0")
+                }
+            } else {
+                binding.layoutCreditDetails.visibility = View.GONE
+            }
+            recalculateTotals()
+        }
+
+        binding.etPaidNow.doAfterTextChanged {
+            recalculateTotals()
+        }
+
         binding.btnCompleteSale.setOnClickListener { completeSale() }
     }
 
@@ -188,6 +237,13 @@ class NewSaleFragment : Fragment() {
             binding.tvSubtotal.text = subtotal.money()
             binding.tvTotal.text = grandTotal.money()
 
+            val isCredit = binding.chipGroupPayment.checkedChipId == R.id.chipCredit
+            if (isCredit) {
+                val paidNow = binding.etPaidNow.text.toString().toDoubleOrNull() ?: 0.0
+                val due = (grandTotal - paidNow).coerceAtLeast(0.0)
+                binding.tvRemainingDue.text = "Remaining Balance (Udhaar): ${due.money()}"
+            }
+
             var totalPurchasePrice = 0.0
             for (item in cartItems) {
                 val product = repository.getProduct(item.productId)
@@ -195,7 +251,7 @@ class NewSaleFragment : Fragment() {
             }
             val marginGuard = MarginGuard()
             val isAcceptable = marginGuard.isMarginAcceptable(grandTotal, totalPurchasePrice, 3.0)
-            binding.tvMarginWarning.visibility = if (!isAcceptable && totalPurchasePrice > 0) android.view.View.VISIBLE else android.view.View.GONE
+            binding.tvMarginWarning.visibility = if (!isAcceptable && totalPurchasePrice > 0) View.VISIBLE else View.GONE
         }
     }
 
@@ -285,30 +341,69 @@ class NewSaleFragment : Fragment() {
             else -> PaymentMethod.CASH
         }
 
-        val status = if (method == PaymentMethod.CREDIT) PaymentStatus.PENDING else PaymentStatus.PAID
+        val isCredit = method == PaymentMethod.CREDIT
+        val paidNow = if (isCredit) {
+            (binding.etPaidNow.text.toString().toDoubleOrNull() ?: 0.0).coerceIn(0.0, grandTotal)
+        } else {
+            grandTotal
+        }
+        val remainingDue = (grandTotal - paidNow).coerceAtLeast(0.0)
+
+        if (isCredit && remainingDue > 0.0 && (custName.isEmpty() || custName.equals("Walk-in Customer", ignoreCase = true))) {
+            Toast.makeText(requireContext(), "Customer name is required for Credit / Udhaar sales!", Toast.LENGTH_LONG).show()
+            binding.actvCustomer.requestFocus()
+            return
+        }
+
+        val status = when {
+            remainingDue <= 0.0 -> PaymentStatus.PAID
+            paidNow > 0.0 -> PaymentStatus.PARTIAL
+            else -> PaymentStatus.PENDING
+        }
 
         val sellerNameInput = binding.actvSeller.text?.toString()?.trim().orEmpty().ifEmpty { selectedSellerName }
 
-        val sale = Sale(
-            customerName = custName,
-            totalAmount = subtotal,
-            discount = discount,
-            taxAmount = tax,
-            finalAmount = grandTotal,
-            paymentMethod = method,
-            paymentStatus = status,
-            sellerId = selectedSellerId,
-            sellerName = sellerNameInput
-        )
-
         viewLifecycleOwner.lifecycleScope.launch {
+            var custId = selectedCustomerId
+            if (custId == null && custName != "Walk-in Customer") {
+                val existing = repository.searchCustomers(custName).first().find { it.name.equals(custName, true) }
+                custId = existing?.id ?: repository.insertCustomer(Customer(name = custName, phone = ""))
+            }
+
+            val sale = Sale(
+                customerId = custId,
+                customerName = custName,
+                totalAmount = subtotal,
+                discount = discount,
+                taxAmount = tax,
+                finalAmount = grandTotal,
+                paymentMethod = method,
+                paymentStatus = status,
+                sellerId = selectedSellerId,
+                sellerName = sellerNameInput
+            )
+
             val saleId = repository.insertSale(sale, cartItems)
             val createdSale = sale.copy(id = saleId)
             val finalItems = cartItems.toList()
-            
+
+            // If there was an upfront payment in a credit transaction, record the payment
+            if (isCredit && paidNow > 0.0) {
+                repository.recordPayment(
+                    Payment(
+                        saleId = saleId,
+                        customerId = custId,
+                        amount = paidNow,
+                        paymentMethod = PaymentMethod.CASH,
+                        paymentType = PaymentType.RECEIVED,
+                        notes = "Initial payment at POS"
+                    )
+                )
+            }
+
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Sale Recorded • Invoice #$saleId")
-                .setMessage("Total: ${grandTotal.money()} • $custName\n\nWould you like to print a thermal receipt or share invoice?")
+                .setTitle("Sale Recorded • ${createdSale.invoiceNumber}")
+                .setMessage("Total: ${grandTotal.money()} • Paid: ${paidNow.money()} • Due: ${remainingDue.money()}\nCustomer: $custName\n\nWould you like to print a thermal receipt or share invoice?")
                 .setPositiveButton("🖨️ Thermal Receipt") { _, _ ->
                     com.shopkeeper.mobileshop.utils.ThermalPrintHelper.showSaleReceiptDialog(requireContext(), createdSale, finalItems)
                     findNavController().popBackStack()

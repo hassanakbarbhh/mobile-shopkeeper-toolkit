@@ -94,7 +94,9 @@ class MainActivity : AppCompatActivity() {
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             if (menuItem.itemId == R.id.navigation_lock_app) {
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
-                val intent = Intent(this, LockScreenActivity::class.java)
+                val intent = Intent(this, LockScreenActivity::class.java).apply {
+                    putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
+                }
                 startActivity(intent)
                 finish()
                 true
@@ -231,7 +233,9 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_lock_app -> {
-                val intent = Intent(this, LockScreenActivity::class.java)
+                val intent = Intent(this, LockScreenActivity::class.java).apply {
+                    putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
+                }
                 startActivity(intent)
                 finish()
                 true

@@ -220,7 +220,9 @@ class SettingsFragment : Fragment() {
         // btnCheckFirebaseAuth removed
 
         binding.btnLockAppNow.setOnClickListener {
-            val intent = Intent(requireContext(), LockScreenActivity::class.java)
+            val intent = Intent(requireContext(), LockScreenActivity::class.java).apply {
+                putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
+            }
             startActivity(intent)
             requireActivity().finish()
         }

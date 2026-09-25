@@ -174,7 +174,7 @@ class PurchasesFragment : Fragment() {
                 .create()
 
             fun renderPurchaseState() {
-                dBinding.tvPurchaseTitle.text = "Purchase Order #${curPurchase.id}"
+                dBinding.tvPurchaseTitle.text = "Purchase Order ${curPurchase.orderNumber}"
                 val dateFmt = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
                 dBinding.tvPurchaseDate.text = dateFmt.format(Date(curPurchase.purchaseDate))
                 dBinding.tvPurchaseSupplier.text = curPurchase.supplierName.ifEmpty { "Cash Supplier" }
@@ -282,7 +282,7 @@ class PurchasesFragment : Fragment() {
 
             dBinding.btnSharePurchase.setOnClickListener {
                 val summary = buildString {
-                    appendLine("📦 PURCHASE ORDER SUMMARY #${curPurchase.id}")
+                    appendLine("📦 PURCHASE ORDER SUMMARY ${curPurchase.orderNumber}")
                     appendLine("Supplier: ${curPurchase.supplierName}")
                     appendLine("Total: ${curPurchase.totalCost.money()}")
                     appendLine("Paid: ${curPurchase.paidAmount.money()}")
@@ -409,7 +409,6 @@ class PurchasesFragment : Fragment() {
                 val qty = dBinding.etQty.text.toString().toIntOrNull() ?: 1
                 val cost = dBinding.etUnitCost.text.toString().toDoubleOrNull() ?: 0.0
                 val sell = dBinding.etSellPrice.text.toString().toDoubleOrNull() ?: cost
-                val paid = dBinding.etPaid.text.toString().toDoubleOrNull() ?: (cost * qty)
 
                 if (prodName.isEmpty() || cost <= 0.0) {
                     Toast.makeText(requireContext(), "Product name and cost are required", Toast.LENGTH_SHORT).show()
@@ -417,6 +416,14 @@ class PurchasesFragment : Fragment() {
                 }
 
                 val total = cost * qty
+                val rawPaid = dBinding.etPaid.text.toString().toDoubleOrNull() ?: total
+
+                if (rawPaid < 0.0 || rawPaid > total) {
+                    Toast.makeText(requireContext(), "Paid amount cannot exceed total bill (${total.money()})", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                val paid = rawPaid.coerceIn(0.0, total)
+
                 val supName = dBinding.spSupplier.selectedItem?.toString() ?: "Cash Supplier"
                 val matchedSup = suppliers.find { it.name == supName }
                 val supplierId = matchedSup?.id ?: 1L
@@ -426,7 +433,7 @@ class PurchasesFragment : Fragment() {
                     supplierName = supName,
                     totalCost = total,
                     paidAmount = paid,
-                    paymentStatus = if (paid >= total) PaymentStatus.PAID else PaymentStatus.PARTIAL
+                    paymentStatus = if (paid >= total) PaymentStatus.PAID else if (paid > 0.0) PaymentStatus.PARTIAL else PaymentStatus.PENDING
                 )
 
                 val item = PurchaseItem(
