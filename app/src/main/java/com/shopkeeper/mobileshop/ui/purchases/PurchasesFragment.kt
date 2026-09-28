@@ -426,37 +426,44 @@ class PurchasesFragment : Fragment() {
 
                 val supName = dBinding.spSupplier.selectedItem?.toString() ?: "Cash Supplier"
                 val matchedSup = suppliers.find { it.name == supName }
-                val supplierId = matchedSup?.id ?: 1L
-
-                val purchase = Purchase(
-                    supplierId = supplierId,
-                    supplierName = supName,
-                    totalCost = total,
-                    paidAmount = paid,
-                    paymentStatus = if (paid >= total) PaymentStatus.PAID else if (paid > 0.0) PaymentStatus.PARTIAL else PaymentStatus.PENDING
-                )
-
-                val item = PurchaseItem(
-                    purchaseId = 0,
-                    productName = prodName,
-                    supplierName = supName,
-                    imei = imei,
-                    quantity = qty,
-                    unitCost = cost
-                )
-
-                val newProd = Product(
-                    name = prodName,
-                    brand = brand,
-                    model = "",
-                    imei = imei,
-                    category = ProductCategory.SMARTPHONE,
-                    purchasePrice = cost,
-                    sellingPrice = sell,
-                    quantity = qty
-                )
 
                 viewLifecycleOwner.lifecycleScope.launch {
+                    val resolvedSupplierId = matchedSup?.id ?: repository.insertSupplier(
+                        Supplier(
+                            name = supName,
+                            phone = "",
+                            company = supName
+                        )
+                    )
+
+                    val purchase = Purchase(
+                        supplierId = resolvedSupplierId,
+                        supplierName = supName,
+                        totalCost = total,
+                        paidAmount = paid,
+                        paymentStatus = if (paid >= total) PaymentStatus.PAID else if (paid > 0.0) PaymentStatus.PARTIAL else PaymentStatus.PENDING
+                    )
+
+                    val item = PurchaseItem(
+                        purchaseId = 0,
+                        productName = prodName,
+                        supplierName = supName,
+                        imei = imei,
+                        quantity = qty,
+                        unitCost = cost
+                    )
+
+                    val newProd = Product(
+                        name = prodName,
+                        brand = brand,
+                        model = "",
+                        imei = imei,
+                        category = ProductCategory.SMARTPHONE,
+                        purchasePrice = cost,
+                        sellingPrice = sell,
+                        quantity = qty
+                    )
+
                     repository.insertPurchase(purchase, listOf(item))
                     repository.insertProduct(newProd)
                     dialog.dismiss()

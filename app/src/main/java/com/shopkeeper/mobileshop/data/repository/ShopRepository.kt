@@ -12,7 +12,7 @@ class ShopRepository(private val db: AppDatabase) {
     val totalProductCount: Flow<Int> = db.productDao().getTotalProductCount()
     fun searchProducts(q: String) = db.productDao().searchProducts("%$q%")
     suspend fun getProduct(id: Long) = db.productDao().getProductById(id)
-    suspend fun getProductByBarcode(barcode: String) = db.productDao().getByImei(barcode)
+    suspend fun getProductByBarcode(barcode: String) = db.productDao().getByBarcode(barcode) ?: db.productDao().getByImei(barcode)
     suspend fun insertProduct(p: Product) = db.productDao().insert(p)
     suspend fun updateProduct(p: Product) = db.productDao().update(p)
     suspend fun deleteProduct(p: Product) = db.productDao().delete(p)

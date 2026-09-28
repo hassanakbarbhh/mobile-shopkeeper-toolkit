@@ -60,4 +60,20 @@ class StockAndCatalogTest {
             assertEquals("Category must be SMARTPHONE", ProductCategory.SMARTPHONE, prod.category)
         }
     }
+
+    @Test
+    fun testProductWithBarcode() {
+        val prod = com.shopkeeper.mobileshop.data.db.entity.Product(
+            name = "Wireless Charger",
+            brand = "Anker",
+            model = "PowerWave",
+            category = ProductCategory.CHARGER,
+            purchasePrice = 1500.0,
+            sellingPrice = 2200.0,
+            quantity = 10,
+            barcode = "848061001234"
+        )
+        assertEquals("848061001234", prod.barcode)
+        assertTrue(prod.barcode.isNotEmpty())
+    }
 }

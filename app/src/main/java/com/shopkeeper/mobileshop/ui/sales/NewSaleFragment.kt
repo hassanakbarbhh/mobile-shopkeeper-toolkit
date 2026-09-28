@@ -10,7 +10,9 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -72,18 +74,30 @@ class NewSaleFragment : Fragment() {
     }
 
     private fun setupCustomerSelector() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repository.allCustomers.collect { list ->
-                availableCustomers = list
-                val names = list.map { "${it.name} (${it.phone})" }
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
-                binding.actvCustomer.setAdapter(adapter)
+        binding.actvCustomer.doAfterTextChanged { editable ->
+            val text = editable?.toString()?.trim().orEmpty()
+            val matched = availableCustomers.find { it.id == selectedCustomerId }
+            if (matched == null || (!text.equals(matched.name, ignoreCase = true) && !text.equals("${matched.name} (${matched.phone})", ignoreCase = true))) {
+                // User manually typed or edited name: clear stale customerId unless it directly matches an existing customer name
+                val directMatch = availableCustomers.find { it.name.equals(text, ignoreCase = true) }
+                selectedCustomerId = directMatch?.id
+            }
+        }
 
-                binding.actvCustomer.setOnItemClickListener { _, _, position, _ ->
-                    if (position in list.indices) {
-                        val c = list[position]
-                        selectedCustomerId = c.id
-                        binding.actvCustomer.setText(c.name, false)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repository.allCustomers.collect { list ->
+                    availableCustomers = list
+                    val names = list.map { "${it.name} (${it.phone})" }
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+                    binding.actvCustomer.setAdapter(adapter)
+
+                    binding.actvCustomer.setOnItemClickListener { _, _, position, _ ->
+                        if (position in list.indices) {
+                            val c = list[position]
+                            selectedCustomerId = c.id
+                            binding.actvCustomer.setText(c.name, false)
+                        }
                     }
                 }
             }
@@ -92,30 +106,32 @@ class NewSaleFragment : Fragment() {
 
     private fun setupSellerSelector() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.activeSellers.collect { sellers ->
-                availableSellers = sellers
-                val sellerNames = if (sellers.isEmpty()) {
-                    listOf("Owner")
-                } else {
-                    sellers.map { it.name }
-                }
-                val sellerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sellerNames)
-                binding.actvSeller.setAdapter(sellerAdapter)
-
-                if (binding.actvSeller.text.isNullOrBlank() && sellerNames.isNotEmpty()) {
-                    binding.actvSeller.setText(sellerNames[0], false)
-                    selectedSellerName = sellerNames[0]
-                    selectedSellerId = sellers.firstOrNull()?.id
-                }
-
-                binding.actvSeller.setOnItemClickListener { _, _, position, _ ->
-                    if (position in sellers.indices) {
-                        val sel = sellers[position]
-                        selectedSellerId = sel.id
-                        selectedSellerName = sel.name
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repository.activeSellers.collect { sellers ->
+                    availableSellers = sellers
+                    val sellerNames = if (sellers.isEmpty()) {
+                        listOf("Owner")
                     } else {
-                        selectedSellerId = null
-                        selectedSellerName = "Owner"
+                        sellers.map { it.name }
+                    }
+                    val sellerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sellerNames)
+                    binding.actvSeller.setAdapter(sellerAdapter)
+
+                    if (binding.actvSeller.text.isNullOrBlank() && sellerNames.isNotEmpty()) {
+                        binding.actvSeller.setText(sellerNames[0], false)
+                        selectedSellerName = sellerNames[0]
+                        selectedSellerId = sellers.firstOrNull()?.id
+                    }
+
+                    binding.actvSeller.setOnItemClickListener { _, _, position, _ ->
+                        if (position in sellers.indices) {
+                            val sel = sellers[position]
+                            selectedSellerId = sel.id
+                            selectedSellerName = sel.name
+                        } else {
+                            selectedSellerId = null
+                            selectedSellerName = "Owner"
+                        }
                     }
                 }
             }

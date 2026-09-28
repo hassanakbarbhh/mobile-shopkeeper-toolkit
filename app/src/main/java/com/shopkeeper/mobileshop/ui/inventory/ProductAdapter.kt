@@ -41,6 +41,7 @@ class ProductAdapter(
             if (product.warrantyMonths > 0) detailsList.add("${product.warrantyMonths}m warranty")
             if (product.notes.isNotBlank()) detailsList.add(product.notes)
             if (product.imei.isNotBlank()) detailsList.add("IMEI: ${product.imei}")
+            if (product.barcode.isNotBlank()) detailsList.add("Barcode: ${product.barcode}")
 
             if (detailsList.isNotEmpty()) {
                 binding.tvProductDetails.visibility = android.view.View.VISIBLE

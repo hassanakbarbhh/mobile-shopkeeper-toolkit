@@ -41,6 +41,14 @@
 
         <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent"
             android:layout_height="wrap_content" android:layout_marginTop="8dp"
+            style="@style/Widget.MobileShop.TextInput">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etBarcode"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Barcode / SKU (EAN, UPC, or retail code)"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="8dp"
             style="@style/Widget.MobileShop.TextInput" app:endIconMode="dropdown_menu">
             <AutoCompleteTextView android:id="@+id/actvCategory"
                 android:layout_width="match_parent" android:layout_height="wrap_content"

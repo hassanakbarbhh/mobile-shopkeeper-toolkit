@@ -9,6 +9,7 @@ import androidx.room.Index
     tableName = "products",
     indices = [
         Index(value = ["imei"], unique = true),
+        Index(value = ["barcode"]),
         Index(value = ["name"]),
         Index(value = ["cloudId"])
     ]
@@ -19,6 +20,7 @@ data class Product(
     val brand: String,
     val model: String,
     val imei: String = "",
+    val barcode: String = "",
     val category: ProductCategory,
     val purchasePrice: Double,
     val sellingPrice: Double,

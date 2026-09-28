@@ -174,7 +174,23 @@ class LockScreenActivity : AppCompatActivity() {
                     binding.btnSessionUnlockBiometric.visibility = View.GONE
                 }
 
+                val (isLocked, lockSec) = com.shopkeeper.mobileshop.security.AppUnlockRateLimiter.checkLockout(this)
+                if (isLocked) {
+                    binding.btnSessionUnlockPassword.isEnabled = false
+                    binding.tvSessionError.text = "App unlock temporarily locked for $lockSec seconds."
+                    binding.tvSessionError.visibility = View.VISIBLE
+                } else {
+                    binding.btnSessionUnlockPassword.isEnabled = true
+                }
+
                 binding.btnSessionUnlockPassword.setOnClickListener {
+                    val (lockedNow, secondsLeft) = com.shopkeeper.mobileshop.security.AppUnlockRateLimiter.checkLockout(this)
+                    if (lockedNow) {
+                        binding.tvSessionError.text = "App unlock temporarily locked for $secondsLeft seconds."
+                        binding.tvSessionError.visibility = View.VISIBLE
+                        return@setOnClickListener
+                    }
+
                     val enteredPass = binding.etSessionPassword.text?.toString()?.trim().orEmpty()
                     if (enteredPass.isEmpty()) {
                         binding.tvSessionError.text = "Please enter your password or PIN"
@@ -182,16 +198,19 @@ class LockScreenActivity : AppCompatActivity() {
                         return@setOnClickListener
                     }
                     val valid = com.shopkeeper.mobileshop.utils.PasswordManager.verifyForMode(this, session.role, enteredPass) ||
-                                (session.passwordHash.isNotEmpty() && com.shopkeeper.mobileshop.security.SecureStorage.verifyPassword(this, enteredPass, session.passwordHash)) ||
-                                enteredPass == "1234"
+                                (session.passwordHash.isNotEmpty() && com.shopkeeper.mobileshop.security.SecureStorage.verifyPassword(this, enteredPass, session.passwordHash))
                     if (valid) {
-                        com.shopkeeper.mobileshop.security.LoginRateLimiter.reset(this)
+                        com.shopkeeper.mobileshop.security.AppUnlockRateLimiter.reset(this)
                         onUnlocked(session.role)
                     } else {
-                        com.shopkeeper.mobileshop.security.LoginRateLimiter.recordFailure(this)
-                        binding.tvSessionError.text = "Incorrect password or PIN. Try again."
+                        com.shopkeeper.mobileshop.security.AppUnlockRateLimiter.recordFailure(this)
+                        val remaining = com.shopkeeper.mobileshop.security.AppUnlockRateLimiter.getRemainingAttempts(this)
+                        binding.tvSessionError.text = if (remaining > 0) {
+                            "Incorrect password or PIN. $remaining attempt(s) remaining."
+                        } else {
+                            "Too many failed attempts. Unlock temporarily locked for 5 minutes."
+                        }
                         binding.tvSessionError.visibility = View.VISIBLE
-                        checkRateLimitStatus()
                     }
                 }
             } else {

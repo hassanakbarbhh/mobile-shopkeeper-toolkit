@@ -25,10 +25,13 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE imei = :imei LIMIT 1")
     suspend fun getByImei(imei: String): Product?
 
+    @Query("SELECT * FROM products WHERE barcode = :barcode LIMIT 1")
+    suspend fun getByBarcode(barcode: String): Product?
+
     @Query("SELECT * FROM products WHERE cloudId = :cloudId LIMIT 1")
     suspend fun getByCloudId(cloudId: String): Product?
 
-    @Query("SELECT * FROM products WHERE name LIKE :query OR brand LIKE :query OR model LIKE :query OR imei LIKE :query")
+    @Query("SELECT * FROM products WHERE name LIKE :query OR brand LIKE :query OR model LIKE :query OR imei LIKE :query OR barcode LIKE :query")
     fun searchProducts(query: String): Flow<List<Product>>
 
     @Query("SELECT * FROM products WHERE quantity <= :threshold ORDER BY quantity ASC")

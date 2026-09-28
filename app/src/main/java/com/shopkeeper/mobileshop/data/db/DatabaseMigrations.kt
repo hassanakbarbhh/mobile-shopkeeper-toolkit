@@ -124,4 +124,11 @@ object DatabaseMigrations {
             db.execSQL("UPDATE payments SET updatedAt = paymentDate WHERE updatedAt = 0")
         }
     }
+
+    val MIGRATION_8_9 = object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE products ADD COLUMN barcode TEXT NOT NULL DEFAULT ''")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_products_barcode ON products(barcode)")
+        }
+    }
 }

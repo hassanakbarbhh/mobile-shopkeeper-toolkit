@@ -129,7 +129,9 @@ class InventoryFragment : Fragment() {
             fullList.filter {
                 it.name.contains(query, true) ||
                 it.brand.contains(query, true) ||
-                it.imei.contains(query, true)
+                it.model.contains(query, true) ||
+                it.imei.contains(query, true) ||
+                it.barcode.contains(query, true)
             }
         }
 
@@ -156,6 +158,7 @@ class InventoryFragment : Fragment() {
             dialogBinding.etBrand.setText(product.brand)
             dialogBinding.etModel.setText(product.model)
             dialogBinding.etImei.setText(product.imei)
+            dialogBinding.etBarcode.setText(product.barcode)
             dialogBinding.actvCategory.setText(product.category.name.replace('_', ' '), false)
             dialogBinding.etPurchasePrice.setText(product.purchasePrice.toString())
             dialogBinding.etSellingPrice.setText(product.sellingPrice.toString())
@@ -180,6 +183,7 @@ class InventoryFragment : Fragment() {
             val brand = dialogBinding.etBrand.text.toString().trim()
             val model = dialogBinding.etModel.text.toString().trim()
             val imei = dialogBinding.etImei.text.toString().trim()
+            val barcode = dialogBinding.etBarcode.text.toString().trim()
             val buyPrice = dialogBinding.etPurchasePrice.text.toString().toDoubleOrNull() ?: 0.0
             val sellPrice = dialogBinding.etSellingPrice.text.toString().toDoubleOrNull() ?: 0.0
             val qty = dialogBinding.etQuantity.text.toString().toIntOrNull() ?: 0
@@ -201,12 +205,14 @@ class InventoryFragment : Fragment() {
                 name = name, brand = brand, model = model,
                 category = category, purchasePrice = buyPrice,
                 sellingPrice = sellPrice, quantity = qty, imei = imei,
+                barcode = barcode,
                 ram = ram, storage = storage, color = color,
                 warrantyMonths = warranty, notes = notes
             )).copy(
                 name = name, brand = brand, model = model,
                 category = category, purchasePrice = buyPrice,
                 sellingPrice = sellPrice, quantity = qty, imei = imei,
+                barcode = barcode,
                 ram = ram, storage = storage, color = color,
                 warrantyMonths = warranty, notes = notes,
                 updatedAt = System.currentTimeMillis()
