@@ -156,6 +156,10 @@ class SyncWorker(
                                         if (!remoteStorage.isNullOrBlank() && (dataMap["storage"]?.toString().isNullOrBlank())) {
                                             dataMap["storage"] = remoteStorage
                                         }
+                                        val remoteBarcode = snapshot.getString("barcode")
+                                        if (!remoteBarcode.isNullOrBlank() && (dataMap["barcode"]?.toString().isNullOrBlank())) {
+                                            dataMap["barcode"] = remoteBarcode
+                                        }
                                     }
                                 }
                                 "Customer" -> {

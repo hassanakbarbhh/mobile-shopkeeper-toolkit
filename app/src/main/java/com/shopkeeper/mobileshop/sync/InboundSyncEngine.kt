@@ -130,6 +130,7 @@ object InboundSyncEngine {
                             brand = doc.getString("brand") ?: existing.brand,
                             model = doc.getString("model") ?: existing.model,
                             imei = imei,
+                            barcode = doc.getString("barcode") ?: existing.barcode,
                             category = category,
                             purchasePrice = doc.getDouble("purchasePrice") ?: existing.purchasePrice,
                             sellingPrice = doc.getDouble("sellingPrice") ?: existing.sellingPrice,
@@ -157,6 +158,7 @@ object InboundSyncEngine {
                         brand = doc.getString("brand") ?: "",
                         model = doc.getString("model") ?: "",
                         imei = imei,
+                        barcode = doc.getString("barcode") ?: "",
                         category = category,
                         purchasePrice = doc.getDouble("purchasePrice") ?: 0.0,
                         sellingPrice = doc.getDouble("sellingPrice") ?: 0.0,
@@ -178,6 +180,82 @@ object InboundSyncEngine {
             }
         }
         return applied
+    }
+
+    /**
+     * Maps and merges a remote product payload into a local Product model.
+     * Ensures consistent barcode, versioning, and attribute preservation across device synchronization.
+     */
+    fun parseInboundProduct(
+        cloudId: String,
+        data: Map<String, Any?>,
+        existing: Product? = null,
+        remoteVersion: Long = (data["version"] as? Number)?.toLong() ?: 1L,
+        remoteUpdatedAt: Long = (data["updatedAt"] as? Number)?.toLong() ?: System.currentTimeMillis()
+    ): Product? {
+        val isDeleted = data["isDeleted"] == true || ((data["deletedAt"] as? Number)?.toLong() ?: 0L) > 0L
+        val deletedAt = (data["deletedAt"] as? Number)?.toLong()
+        val imei = (data["imei"] as? String) ?: ""
+        val barcode = (data["barcode"] as? String) ?: existing?.barcode ?: ""
+
+        if (existing != null) {
+            if (isDeleted) {
+                return existing.copy(
+                    isDeleted = true,
+                    deletedAt = deletedAt ?: System.currentTimeMillis(),
+                    version = remoteVersion,
+                    updatedAt = remoteUpdatedAt
+                )
+            }
+            val catStr = (data["category"] as? String) ?: existing.category.name
+            val category = runCatching { ProductCategory.valueOf(catStr) }.getOrDefault(existing.category)
+            return existing.copy(
+                cloudId = cloudId,
+                name = (data["name"] as? String) ?: existing.name,
+                brand = (data["brand"] as? String) ?: existing.brand,
+                model = (data["model"] as? String) ?: existing.model,
+                imei = imei,
+                barcode = barcode,
+                category = category,
+                purchasePrice = (data["purchasePrice"] as? Number)?.toDouble() ?: existing.purchasePrice,
+                sellingPrice = (data["sellingPrice"] as? Number)?.toDouble() ?: existing.sellingPrice,
+                quantity = (data["quantity"] as? Number)?.toInt() ?: existing.quantity,
+                ram = (data["ram"] as? String) ?: existing.ram,
+                storage = (data["storage"] as? String) ?: existing.storage,
+                color = (data["color"] as? String) ?: existing.color,
+                version = remoteVersion,
+                updatedAt = remoteUpdatedAt,
+                isDeleted = false,
+                deletedAt = null,
+                lastModifiedBy = (data["lastModifiedBy"] as? String) ?: "",
+                lastModifiedDevice = (data["lastModifiedDevice"] as? String) ?: ""
+            )
+        } else if (!isDeleted) {
+            val name = (data["name"] as? String) ?: return null
+            val catStr = (data["category"] as? String) ?: ProductCategory.SMARTPHONE.name
+            val category = runCatching { ProductCategory.valueOf(catStr) }.getOrDefault(ProductCategory.SMARTPHONE)
+            return Product(
+                cloudId = cloudId,
+                name = name,
+                brand = (data["brand"] as? String) ?: "",
+                model = (data["model"] as? String) ?: "",
+                imei = imei,
+                barcode = barcode,
+                category = category,
+                purchasePrice = (data["purchasePrice"] as? Number)?.toDouble() ?: 0.0,
+                sellingPrice = (data["sellingPrice"] as? Number)?.toDouble() ?: 0.0,
+                quantity = (data["quantity"] as? Number)?.toInt() ?: 1,
+                ram = (data["ram"] as? String) ?: "",
+                storage = (data["storage"] as? String) ?: "",
+                color = (data["color"] as? String) ?: "",
+                createdAt = (data["createdAt"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                updatedAt = remoteUpdatedAt,
+                version = remoteVersion,
+                lastModifiedBy = (data["lastModifiedBy"] as? String) ?: "",
+                lastModifiedDevice = (data["lastModifiedDevice"] as? String) ?: ""
+            )
+        }
+        return null
     }
 
     private suspend fun syncCustomers(
