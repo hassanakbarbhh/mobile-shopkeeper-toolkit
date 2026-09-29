@@ -93,6 +93,9 @@ class BarcodeSyncIntegrationTest {
             model = "A3102",
             barcode = originalBarcode,
             category = ProductCategory.SMARTPHONE,
+            purchasePrice = 120000.0,
+            sellingPrice = 135000.0,
+            quantity = 3,
             version = 1L
         )
 
@@ -131,8 +134,12 @@ class BarcodeSyncIntegrationTest {
             cloudId = cloudProductId,
             name = "Xiaomi 14",
             brand = "Xiaomi",
+            model = "23127PN0CG",
             barcode = existingLocalBarcode,
-            category = ProductCategory.SMARTPHONE
+            category = ProductCategory.SMARTPHONE,
+            purchasePrice = 65000.0,
+            sellingPrice = 72000.0,
+            quantity = 2
         )
 
         // Remote payload has null or missing barcode field

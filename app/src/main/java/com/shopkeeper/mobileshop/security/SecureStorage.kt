@@ -71,10 +71,7 @@ object SecureStorage {
             keyGenerator.init(keyGenSpec)
             keyGenerator.generateKey()
         } catch (e: Throwable) {
-            // In unit tests or environments without AndroidKeyStore provider,
-            // fall back to a derived 256-bit AES key rather than failing initialization.
-            val salt = getOrCreateSalt(context).toByteArray(Charsets.UTF_8).copyOf(32)
-            SecretKeySpec(salt, "AES")
+            throw SecurityException("Failed to access or generate non-exportable hardware-backed key in AndroidKeyStore: ${e.message}", e)
         }
     }
 
