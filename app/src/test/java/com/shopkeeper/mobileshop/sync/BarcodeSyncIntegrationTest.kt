@@ -7,11 +7,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
  * End-to-end multi-device synchronization test proving:
  * Device A -> Product barcode -> Firestore payload -> Device B -> same barcode
  */
+@RunWith(RobolectricTestRunner::class)
 class BarcodeSyncIntegrationTest {
 
     @Test

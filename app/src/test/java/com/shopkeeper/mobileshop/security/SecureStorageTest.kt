@@ -33,14 +33,17 @@ class SecureStorageTest {
     }
 
     @Test
-    fun testEncryptionAndDecryption() {
+    fun testEncryptionFailsClosedWhenKeystoreUnavailable() {
         val original = "sensitive_session_token_xyz"
-        val encrypted = SecureStorage.encryptString(context, original)
-        assertTrue(encrypted != original)
-        assertTrue("Must use AES-GCM format", encrypted.startsWith("gcm:"))
-
-        val decrypted = SecureStorage.decryptString(context, encrypted)
-        assertEquals(original, decrypted)
+        // In JVM/Robolectric test environment where hardware AndroidKeyStore is unavailable,
+        // encryptString must fail closed by throwing SecurityException rather than falling back to software key.
+        val ex = assertThrows(SecurityException::class.java) {
+            SecureStorage.encryptString(context, original)
+        }
+        assertTrue(
+            "Must fail closed on Keystore unavailability",
+            ex.message?.contains("device encryption operation could not be completed securely") == true
+        )
     }
 
     @Test

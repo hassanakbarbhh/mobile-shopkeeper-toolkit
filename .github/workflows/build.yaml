@@ -130,19 +130,15 @@ jobs:
           echo "=========================================================="
           echo "==> [CHECK 3/3] Executing Bundle Release AAB..."
           echo "=========================================================="
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
-            export KEYSTORE_FILE="release.keystore"
-            export KEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}"
-            export KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
-            export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
-          else
-            echo "KEYSTORE_BASE64 not set; signing AAB with generated keystore..."
-            export KEYSTORE_FILE="debug.keystore"
-            export KEYSTORE_PASSWORD="android"
-            export KEY_ALIAS="androiddebugkey"
-            export KEY_PASSWORD="android"
+          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "ERROR: Production KEYSTORE_BASE64 secret is not configured! Aborting release AAB build to prevent insecure debug key signing."
+            exit 1
           fi
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
+          export KEYSTORE_FILE="release.keystore"
+          export KEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}"
+          export KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
+          export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
           gradle bundleRelease --no-daemon --stacktrace
           echo "==> [CHECK 3/3 PASSED] AAB assembly completed."
 
