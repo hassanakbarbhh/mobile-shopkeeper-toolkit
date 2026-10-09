@@ -113,11 +113,11 @@ class ShopRepository(private val db: AppDatabase) {
      * Records a purchase atomically:
      *  - inserts the purchase and its items,
      *  - increases stock for every matched product (matched by productId when provided,
-     *    otherwise by non-blank IMEI, else by name+brand+model),
+     *    otherwise by non-blank IMEI, else by exact name/brand/model with a name-only fallback),
      *  - records the purchase cost basis into matched products,
      *  - increases the supplier's payable balance by the unpaid remainder.
      *
-     * If any step fails (e.g. product missing, negative result), the whole
+     * If any step fails (e.g. product missing, supplier missing), the whole
      * transaction rolls back so no purchase record or payable is left behind
      * without its stock/cost effects.
      */
@@ -131,8 +131,7 @@ class ShopRepository(private val db: AppDatabase) {
             if (outstanding > 0.0) {
                 val supplier = db.supplierDao().getById(p.supplierId)
                     ?: throw IllegalStateException("Supplier not found for purchase: id=${p.supplierId}")
-                val updated = supplier.copy(balance = supplier.balance + outstanding)
-                db.supplierDao().update(updated)
+                db.supplierDao().adjustBalance(p.supplierId, outstanding)
             }
 
             for (item in linked) {
@@ -159,7 +158,7 @@ class ShopRepository(private val db: AppDatabase) {
             val byImei = db.productDao().getByImei(item.imei)
             if (byImei != null) return byImei
         }
-        return db.productDao().getByNameBrandModel(item.productName, item.supplierName, item.productName)
+        return db.productDao().getByName(item.productName)
     }
 
     suspend fun deletePurchase(p: Purchase) = db.purchaseDao().delete(p)
