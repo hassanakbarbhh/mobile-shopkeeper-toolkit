@@ -1,6 +1,7 @@
 package com.shopkeeper.mobileshop.data.db.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface SupplierDao {
     @Insert suspend fun insert(s: Supplier): Long
     @Update suspend fun update(s: Supplier)
+    @Delete suspend fun delete(s: Supplier)
     @Query("DELETE FROM suppliers WHERE id = :id") suspend fun deleteById(id: Long)
     @Query("DELETE FROM suppliers") suspend fun deleteAll()
 
