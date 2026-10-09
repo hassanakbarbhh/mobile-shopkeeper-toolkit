@@ -107,9 +107,7 @@ class P0DataIntegrityFixTest {
 
         repository.insertPurchase(purchase, listOf(item))
 
-        val updatedSupplier = repository.allSuppliers.let { flow ->
-            kotlinx.coroutines.flow.first(repository.allSuppliers).first { it.id == supplierId }
-        }
+        val updatedSupplier = kotlinx.coroutines.flow.first(repository.allSuppliers).first { it.id == supplierId }
         assertEquals("Unpaid remainder must land in supplier payable", 3000.0, updatedSupplier.balance, 0.001)
 
         val updatedProduct = repository.getProduct(product.id)!!
@@ -302,10 +300,7 @@ class P0DataIntegrityFixTest {
         val sellers = kotlinx.coroutines.flow.first(repository.allSellers)
         assertTrue("No demo sellers may be seeded", sellers.none { it.name.contains("Hassan") || it.name.contains("Ali Khan") })
 
-        val imeiAssets = db.imeiAssetDao().let { dao ->
-            // ImeiAssetDao has no list-all; verify via a known fake IMEI absence
-            dao.getAsset("356789123456789")
-        }
-        assertNull("Demo IMEI asset must not exist", imeiAssets)
+        val demoAsset = db.imeiAssetDao().getAssetSync("356789123456789")
+        assertNull("Demo IMEI asset must not exist", demoAsset)
     }
 }
