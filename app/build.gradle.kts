@@ -34,17 +34,21 @@ android {
     }
     create("release") {
       val keyFile = System.getenv("KEYSTORE_FILE") ?: project.findProperty("KEYSTORE_FILE")?.toString() ?: ""
-      if (keyFile.isNotEmpty() && file(keyFile).exists()) {
+      val storePass = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD")?.toString() ?: ""
+      val keyAliasVal = System.getenv("KEY_ALIAS") ?: project.findProperty("KEY_ALIAS")?.toString() ?: ""
+      val keyPass = System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD")?.toString() ?: ""
+      if (keyFile.isNotEmpty() && file(keyFile).exists() &&
+          storePass.isNotEmpty() && keyAliasVal.isNotEmpty() && keyPass.isNotEmpty()
+      ) {
         storeFile = file(keyFile)
-        storePassword = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD")?.toString()
-        keyAlias = System.getenv("KEY_ALIAS") ?: project.findProperty("KEY_ALIAS")?.toString()
-        keyPassword = System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD")?.toString()
-      } else {
-        storeFile = getByName("debug").storeFile
-        storePassword = getByName("debug").storePassword
-        keyAlias = getByName("debug").keyAlias
-        keyPassword = getByName("debug").keyPassword
+        storePassword = storePass
+        keyAlias = keyAliasVal
+        keyPassword = keyPass
       }
+      // SECURITY (BUG-006): no silent fallback to the debug keystore.
+      // If release credentials are absent, the release signing config stays
+      // unset and assembleRelease FAILS with a clear signing error instead of
+      // producing a production APK signed with the well-known debug key.
     }
   }
 
