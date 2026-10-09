@@ -109,12 +109,57 @@ class ShopRepository(private val db: AppDatabase) {
     suspend fun getPurchaseItems(purchaseId: Long) = db.purchaseDao().getItemsForPurchase(purchaseId)
     suspend fun updatePurchase(p: Purchase) = db.purchaseDao().update(p)
 
-    suspend fun insertPurchase(p: Purchase, items: List<PurchaseItem>): Long {
+    /**
+     * Records a purchase atomically:
+     *  - inserts the purchase and its items,
+     *  - increases stock for every matched product (matched by productId when provided,
+     *    otherwise by non-blank IMEI, else by name+brand+model),
+     *  - records the purchase cost basis into matched products,
+     *  - increases the supplier's payable balance by the unpaid remainder.
+     *
+     * If any step fails (e.g. product missing, negative result), the whole
+     * transaction rolls back so no purchase record or payable is left behind
+     * without its stock/cost effects.
+     */
+    suspend fun insertPurchase(p: Purchase, items: List<PurchaseItem>, productIds: Map<PurchaseItem, Long> = emptyMap()): Long {
         return db.withTransaction {
             val id = db.purchaseDao().insert(p)
-            db.purchaseDao().insertItems(items.map { it.copy(purchaseId = id) })
+            val linked = items.map { it.copy(purchaseId = id) }
+            db.purchaseDao().insertItems(linked)
+
+            val outstanding = p.totalCost - p.paidAmount
+            if (outstanding > 0.0) {
+                val supplier = db.supplierDao().getById(p.supplierId)
+                    ?: throw IllegalStateException("Supplier not found for purchase: id=${p.supplierId}")
+                val updated = supplier.copy(balance = supplier.balance + outstanding)
+                db.supplierDao().update(updated)
+            }
+
+            for (item in linked) {
+                val product = resolveProductForPurchase(item, productIds[item])
+                    ?: throw IllegalStateException(
+                        "Product not found for purchase item '${item.productName}'. Create the product before recording the purchase."
+                    )
+                val updated = product.copy(
+                    quantity = product.quantity + item.quantity,
+                    purchasePrice = if (item.unitCost > 0.0) item.unitCost else product.purchasePrice,
+                    updatedAt = System.currentTimeMillis()
+                )
+                db.productDao().update(updated)
+            }
             id
         }
+    }
+
+    private suspend fun resolveProductForPurchase(item: PurchaseItem, explicitId: Long?): Product? {
+        if (explicitId != null && explicitId > 0L) {
+            return db.productDao().getProductById(explicitId)
+        }
+        if (item.imei.isNotBlank()) {
+            val byImei = db.productDao().getByImei(item.imei)
+            if (byImei != null) return byImei
+        }
+        return db.productDao().getByNameBrandModel(item.productName, item.supplierName, item.productName)
     }
 
     suspend fun deletePurchase(p: Purchase) = db.purchaseDao().delete(p)
@@ -135,17 +180,25 @@ class ShopRepository(private val db: AppDatabase) {
     fun getTotalSalesBySeller(sellerId: Long) = db.saleDao().getTotalSalesBySeller(sellerId)
     fun getSalesCountBySeller(sellerId: Long) = db.saleDao().getSalesCountBySeller(sellerId)
 
+    /**
+     * Records a payment atomically. The payment row insert and the dependent
+     * sale payment-status recompute happen inside one Room transaction so a
+     * failure cannot leave a paid sale flagged pending (or vice versa), and a
+     * crash cannot record a payment whose status update was lost.
+     */
     suspend fun recordPayment(payment: Payment) {
-        db.paymentDao().insert(payment)
-        payment.saleId?.let { saleId ->
-            val sale = db.saleDao().getSaleById(saleId) ?: return@let
-            val totalReceived = db.paymentDao().receivedForSale(saleId) ?: 0.0
-            val newStatus = when {
-                totalReceived >= sale.finalAmount -> PaymentStatus.PAID
-                totalReceived > 0.0 -> PaymentStatus.PARTIAL
-                else -> PaymentStatus.PENDING
+        db.withTransaction {
+            db.paymentDao().insert(payment)
+            payment.saleId?.let { saleId ->
+                val sale = db.saleDao().getSaleById(saleId) ?: return@withTransaction
+                val totalReceived = db.paymentDao().receivedForSale(saleId) ?: 0.0
+                val newStatus = when {
+                    totalReceived >= sale.finalAmount -> PaymentStatus.PAID
+                    totalReceived > 0.0 -> PaymentStatus.PARTIAL
+                    else -> PaymentStatus.PENDING
+                }
+                db.saleDao().update(sale.copy(paymentStatus = newStatus))
             }
-            db.saleDao().update(sale.copy(paymentStatus = newStatus))
         }
     }
 
