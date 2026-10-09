@@ -139,11 +139,9 @@ class P0DataIntegrityFixTest {
             assertTrue(e.message?.contains("Product not found") == true)
         }
 
-        // Purchase must not exist
         val allPurchases = kotlinx.coroutines.flow.first(repository.allPurchases)
         assertTrue("Failed purchase must not persist", allPurchases.isEmpty())
 
-        // Supplier payable must be untouched
         val supplierAfter = kotlinx.coroutines.flow.first(repository.allSuppliers).first { it.id == supplierId }
         assertEquals("Payable must not change on rollback", 0.0, supplierAfter.balance, 0.001)
     }
@@ -162,7 +160,7 @@ class P0DataIntegrityFixTest {
         repository.insertProduct(product)
 
         val purchase = Purchase(
-            supplierId = 9999L, // nonexistent supplier, credit purchase
+            supplierId = 9999L,
             supplierName = "Ghost Supplier",
             totalCost = 400.0,
             paidAmount = 0.0
@@ -284,7 +282,6 @@ class P0DataIntegrityFixTest {
 
     @Test
     fun testPaymentWithoutSaleDoesNotCrash() = runBlocking {
-        // Expense-type or customer payments not tied to a sale must be accepted
         repository.recordPayment(
             Payment(customerId = 1L, amount = 500.0, paymentMethod = PaymentMethod.CASH, paymentType = PaymentType.RECEIVED)
         )
@@ -294,7 +291,6 @@ class P0DataIntegrityFixTest {
 
     @Test
     fun testFreshDatabaseIsNotPollutedWithDemoRecords() = runBlocking {
-        // Seed check must not inject fake sellers, IMEIs, or invoices
         AppDatabase.ensureCleanDataAndDefaultStock(db)
 
         val sellers = kotlinx.coroutines.flow.first(repository.allSellers)
@@ -302,5 +298,166 @@ class P0DataIntegrityFixTest {
 
         val demoAsset = db.imeiAssetDao().getAssetSync("356789123456789")
         assertNull("Demo IMEI asset must not exist", demoAsset)
+    }
+
+    // --- P1: IMEI lifecycle integration ---
+
+    @Test
+    fun testPurchaseRegistersImeiAssetInStockWithLifecycleEvent() = runBlocking {
+        val supplierId = repository.insertSupplier(Supplier(name = "IMEI Source", phone = "03001110000"))
+        val product = Product(
+            name = "Samsung Galaxy A14",
+            brand = "Samsung",
+            model = "A14",
+            imei = "",
+            category = ProductCategory.SMARTPHONE,
+            purchasePrice = 0.0,
+            sellingPrice = 60000.0,
+            quantity = 0
+        )
+        repository.insertProduct(product)
+
+        val purchase = Purchase(supplierId = supplierId, supplierName = "IMEI Source", totalCost = 45000.0, paidAmount = 45000.0)
+        val item = PurchaseItem(purchaseId = 0, productName = "Samsung Galaxy A14", imei = "351234567890123", quantity = 1, unitCost = 45000.0)
+        val purchaseId = repository.insertPurchase(purchase, listOf(item))
+
+        val asset = db.imeiAssetDao().getAssetSync("351234567890123")
+        assertNotNull("Purchase with IMEI must register a tracked asset", asset)
+        assertEquals(ImeiAsset.STATUS_IN_STOCK, asset!!.currentStatus)
+        assertEquals(purchaseId, asset.purchaseId)
+        assertEquals(45000.0, asset.purchasePrice, 0.001)
+
+        val events = db.imeiAssetDao().getEventsForImeiSync("351234567890123")
+        assertTrue("Purchase must leave a lifecycle event", events.isNotEmpty())
+        assertEquals(ImeiLifecycleEvent.EVENT_IN_STOCK, events.first().eventType)
+    }
+
+    @Test
+    fun testBlankImeiPurchaseNeverCreatesAsset() = runBlocking {
+        val supplierId = repository.insertSupplier(Supplier(name = "Accessory Source", phone = "03002220000"))
+        val product = Product(
+            name = "Charger 33W",
+            brand = "Generic",
+            model = "C33",
+            imei = "",
+            category = ProductCategory.CHARGER,
+            purchasePrice = 0.0,
+            sellingPrice = 2500.0,
+            quantity = 0
+        )
+        repository.insertProduct(product)
+
+        val purchase = Purchase(supplierId = supplierId, supplierName = "Accessory Source", totalCost = 10000.0, paidAmount = 10000.0)
+        val item = PurchaseItem(purchaseId = 0, productName = "Charger 33W", imei = "", quantity = 5, unitCost = 2000.0)
+        repository.insertPurchase(purchase, listOf(item))
+
+        // No asset exists for any blank-derived key: imei_assets stays empty
+        val assets = kotlinx.coroutines.flow.first(db.imeiAssetDao().getAllAssets())
+        assertTrue("Blank IMEI must never create a tracked asset", assets.isEmpty())
+    }
+
+    @Test
+    fun testSaleWithImeiMarksAssetSoldAndRecordsEvent() = runBlocking {
+        val supplierId = repository.insertSupplier(Supplier(name = "Flow Supplier", phone = "03003330000"))
+        val product = Product(
+            name = "Xiaomi Redmi 13C",
+            brand = "Xiaomi",
+            model = "23124RN87I",
+            imei = "",
+            category = ProductCategory.SMARTPHONE,
+            purchasePrice = 0.0,
+            sellingPrice = 48000.0,
+            quantity = 0
+        )
+        val pid = repository.insertProduct(product)
+
+        val purchase = Purchase(supplierId = supplierId, supplierName = "Flow Supplier", totalCost = 38000.0, paidAmount = 38000.0)
+        val pItem = PurchaseItem(purchaseId = 0, productName = "Xiaomi Redmi 13C", imei = "861234567890124", quantity = 1, unitCost = 38000.0)
+        repository.insertPurchase(purchase, listOf(pItem))
+
+        val sale = Sale(customerName = "Kamran Ali", totalAmount = 48000.0, finalAmount = 48000.0, paymentMethod = PaymentMethod.CASH)
+        val sItem = SaleItem(
+            saleId = 0,
+            productId = pid,
+            productName = "Xiaomi Redmi 13C",
+            quantity = 1,
+            unitPrice = 48000.0,
+            totalPrice = 48000.0,
+            imei = "861234567890124"
+        )
+        val saleId = repository.insertSale(sale, listOf(sItem))
+
+        val asset = db.imeiAssetDao().getAssetSync("861234567890124")!!
+        assertEquals("Sold device must be marked SOLD", ImeiAsset.STATUS_SOLD, asset.currentStatus)
+        assertEquals(saleId, asset.saleInvoiceId)
+        assertEquals("Kamran Ali", asset.customerName)
+
+        val events = db.imeiAssetDao().getEventsForImeiSync("861234567890124")
+        assertEquals(ImeiLifecycleEvent.EVENT_SOLD, events.last().eventType)
+    }
+
+    @Test
+    fun testSaleRollbackLeavesNoSoldAsset() = runBlocking {
+        val product = Product(
+            name = "Oppo A18",
+            brand = "Oppo",
+            model = "CPH2591",
+            imei = "",
+            category = ProductCategory.SMARTPHONE,
+            purchasePrice = 24000.0,
+            sellingPrice = 29000.0,
+            quantity = 1
+        )
+        val pid = repository.insertProduct(product)
+
+        // Sale requests more than available: rollback must leave nothing behind
+        val sale = Sale(customerName = "Test", totalAmount = 999999.0, finalAmount = 999999.0, paymentMethod = PaymentMethod.CASH)
+        val sItem = SaleItem(
+            saleId = 0, productId = pid, productName = "Oppo A18", quantity = 5,
+            unitPrice = 29000.0, totalPrice = 145000.0, imei = "869999999999991"
+        )
+        try {
+            repository.insertSale(sale, listOf(sItem))
+            fail("Sale must fail on insufficient stock")
+        } catch (e: IllegalStateException) {
+            // expected
+        }
+        val asset = db.imeiAssetDao().getAssetSync("869999999999991")
+        assertNull("Rolled-back sale must not create an IMEI asset", asset)
+    }
+
+    // --- P2: delete reversal ---
+
+    @Test
+    fun testDeletePurchaseWithReversalReducesStockAndPayable() = runBlocking {
+        val supplierId = repository.insertSupplier(Supplier(name = "Reversal Supplier", phone = "03004440000"))
+        val product = Product(
+            name = "Reversal Test Phone",
+            brand = "Test",
+            model = "RT1",
+            imei = "",
+            category = ProductCategory.SMARTPHONE,
+            purchasePrice = 10000.0,
+            sellingPrice = 15000.0,
+            quantity = 0
+        )
+        repository.insertProduct(product)
+
+        val purchase = Purchase(supplierId = supplierId, supplierName = "Reversal Supplier", totalCost = 10000.0, paidAmount = 4000.0)
+        val item = PurchaseItem(purchaseId = 0, productName = "Reversal Test Phone", quantity = 3, unitCost = 10000.0 / 3.0 * 3.0)
+        // Use simple values: 3 units at 3333.33
+        val itemAdjusted = item.copy(unitCost = 3333.333333)
+        val purchaseId = repository.insertPurchase(purchase, listOf(itemAdjusted))
+
+        val supplierMid = kotlinx.coroutines.flow.first(repository.allSuppliers).first { it.id == supplierId }
+        assertEquals(6000.0, supplierMid.balance, 0.01)
+
+        val purchase = repository.allPurchases.let { kotlinx.coroutines.flow.first(it).first { p -> p.id == purchaseId } }
+        repository.deletePurchaseWithReversal(purchase)
+
+        val productAfter = repository.getProduct(product.id)!!
+        assertEquals("Stock must be reduced back", 0, productAfter.quantity)
+        val supplierAfter = kotlinx.coroutines.flow.first(repository.allSuppliers).first { it.id == supplierId }
+        assertEquals("Payable must be reduced on purchase deletion", 0.0, supplierAfter.balance, 0.01)
     }
 }
