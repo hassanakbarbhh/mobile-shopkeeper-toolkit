@@ -72,9 +72,8 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
-                            CoroutineScope(Dispatchers.IO).launch {
-                                INSTANCE?.let { seedInitialData(it) }
-                            }
+                            // No demo seed data: a fresh install must start empty so
+                            // real shop ledgers are never polluted with fake records.
                         }
 
                         override fun onOpen(db: SupportSQLiteDatabase) {
@@ -86,134 +85,27 @@ abstract class AppDatabase : RoomDatabase() {
                     })
                     .build()
                 INSTANCE = instance
-                // Also trigger cleanup/seed check right away
-                CoroutineScope(Dispatchers.IO).launch {
-                    ensureCleanDataAndDefaultStock(instance)
-                }
                 instance
             }
         }
 
+        /**
+         * Seeds the default phone catalog only when the products table is completely
+         * empty (fresh install). Never deletes or overwrites existing business data.
+         * Kept public because the regression suite exercises it directly (BUG-002).
+         */
         suspend fun ensureCleanDataAndDefaultStock(db: AppDatabase) {
             try {
-                // Safe non-destructive initial seeding: check products in stock
                 val currentProducts = db.productDao().getAllProductsList()
-                val hasOnlineModels = currentProducts.any { it.notes.contains("Specs:") || it.notes.contains("Online Model") || it.sellingPrice == 0.0 }
-                
-                if (currentProducts.isEmpty() || !hasOnlineModels) {
-                    val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map { 
-                        it.toProductNoPrice() 
+                if (currentProducts.isEmpty()) {
+                    val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map {
+                        it.toProductNoPrice()
                     }
                     db.productDao().insertAll(defaultPhoneProducts)
                 }
             } catch (e: Exception) {
                 // Ignore background initialization errors
             }
-        }
-
-        private suspend fun seedInitialData(db: AppDatabase) {
-            // Seed all phone brand names & models with no price and 0 quantity
-            val defaultPhoneProducts = com.shopkeeper.mobileshop.data.catalog.OnlineCatalogRepository.allOnlineModels.map {
-                it.toProductNoPrice()
-            }
-            db.productDao().insertAll(defaultPhoneProducts)
-
-            // Shop Owner Seller
-            val s1 = Seller(
-                name = "Hassan (Owner)",
-                phone = "+92 300 1234567",
-                role = "Shop Owner",
-                commissionPercent = 0.0,
-                isActive = true
-            )
-            val s2 = Seller(
-                name = "Ali Khan",
-                phone = "+92 321 7654321",
-                role = "Sales Executive",
-                commissionPercent = 2.0,
-                isActive = true
-            )
-            listOf(s1, s2).forEach { db.sellerDao().insert(it) }
-
-            // Seed flagship IMEI 356789123456789 lifecycle as seen in product design poster
-            val sampleImei = "356789123456789"
-            val handset = ImeiAsset(
-                imei = sampleImei,
-                serialNumber = "R58M30XYZ89",
-                productId = 1L,
-                productName = "Samsung Galaxy S24",
-                brand = "Samsung",
-                model = "Galaxy S24",
-                storage = "256GB",
-                color = "Phantom Black",
-                supplierName = "ABC Mobile",
-                purchasePrice = 160000.0,
-                sellingPrice = 185000.0,
-                currentStatus = ImeiAsset.STATUS_SOLD,
-                currentBranch = "Main Branch",
-                ptaStatus = "Approved",
-                warrantyExpiryDate = System.currentTimeMillis() + (365L * 24 * 3600 * 1000),
-                customerId = 1L,
-                customerName = "Muhammad Ali",
-                customerPhone = "0300-1234567",
-                saleInvoiceId = 2891L,
-                repairHistoryCount = 1
-            )
-            db.imeiAssetDao().insertAsset(handset)
-
-            val now = System.currentTimeMillis()
-            val dayMs = 24L * 3600 * 1000
-            val events = listOf(
-                ImeiLifecycleEvent(
-                    imei = sampleImei,
-                    eventType = ImeiLifecycleEvent.EVENT_PURCHASED,
-                    timestamp = now - (40 * dayMs),
-                    title = "Purchased from Supplier",
-                    details = "Purchased from ABC Mobile Wholesale at Rs 160,000",
-                    referenceId = "PO-4481"
-                ),
-                ImeiLifecycleEvent(
-                    imei = sampleImei,
-                    eventType = ImeiLifecycleEvent.EVENT_IN_STOCK,
-                    timestamp = now - (38 * dayMs),
-                    title = "Received In Stock",
-                    details = "Verified PTA Status: Approved, Battery Health: 100%",
-                    referenceId = "STK-902"
-                ),
-                ImeiLifecycleEvent(
-                    imei = sampleImei,
-                    eventType = ImeiLifecycleEvent.EVENT_TRANSFERRED,
-                    timestamp = now - (34 * dayMs),
-                    title = "Transferred to Display",
-                    details = "Transferred to Counter 1 - Main Branch",
-                    referenceId = "TR-102"
-                ),
-                ImeiLifecycleEvent(
-                    imei = sampleImei,
-                    eventType = ImeiLifecycleEvent.EVENT_SOLD,
-                    timestamp = now - (30 * dayMs),
-                    title = "Sold to Customer",
-                    details = "Sold to Muhammad Ali for Rs 185,000. Invoice #INV-002891",
-                    referenceId = "INV-002891"
-                ),
-                ImeiLifecycleEvent(
-                    imei = sampleImei,
-                    eventType = ImeiLifecycleEvent.EVENT_WARRANTY,
-                    timestamp = now - (30 * dayMs),
-                    title = "Official Warranty Activated",
-                    details = "1 Year Brand Warranty active till August 2025",
-                    referenceId = "WAR-S24"
-                ),
-                ImeiLifecycleEvent(
-                    imei = sampleImei,
-                    eventType = ImeiLifecycleEvent.EVENT_REPAIR,
-                    timestamp = now - (10 * dayMs),
-                    title = "Repair Inspection: Screen Glass",
-                    details = "Replaced outer protective glass. Ticket #R-1042 completed",
-                    referenceId = "R-1042"
-                )
-            )
-            events.forEach { db.imeiAssetDao().insertLifecycleEvent(it) }
         }
     }
 }
