@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             if (menuItem.itemId == R.id.navigation_lock_app) {
+                com.shopkeeper.mobileshop.security.AppLockManager.lockNow()
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
                 val intent = Intent(this, LockScreenActivity::class.java).apply {
                     putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
@@ -233,6 +234,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_lock_app -> {
+                com.shopkeeper.mobileshop.security.AppLockManager.lockNow()
                 val intent = Intent(this, LockScreenActivity::class.java).apply {
                     putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
                 }
@@ -241,6 +243,18 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (AppPreferences.isLockEnabled(this) && !com.shopkeeper.mobileshop.security.AppLockManager.isAppUnlocked()) {
+            val intent = Intent(this, LockScreenActivity::class.java).apply {
+                putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            startActivity(intent)
+            finish()
         }
     }
 

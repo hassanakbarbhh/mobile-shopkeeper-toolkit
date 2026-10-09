@@ -139,10 +139,12 @@ class LockScreenActivity : AppCompatActivity() {
 
     private fun checkExistingSession() {
         val session = UserAuthManager.getCurrentUser(this)
-        val isLockedMode = intent.getBooleanExtra(EXTRA_LOCKED_MODE, false)
+        val isExplicitLocked = intent.getBooleanExtra(EXTRA_LOCKED_MODE, false)
+        val isLockedMode = isExplicitLocked || AppPreferences.isLockEnabled(this)
 
         if (session != null) {
             binding.cardActiveSession.visibility = View.VISIBLE
+            binding.layoutAuthForms.visibility = View.GONE
             binding.tvSessionName.text = session.displayName
             binding.tvSessionEmail.text = session.email
             binding.tvSessionAvatar.text = session.displayName.firstOrNull()?.uppercase() ?: "U"
@@ -154,7 +156,7 @@ class LockScreenActivity : AppCompatActivity() {
             }
 
             if (isLockedMode) {
-                // EXPLICIT LOCK: No bypass, require re-authentication!
+                // SECURITY ENFORCED: No bypass, require re-authentication!
                 binding.tvSessionLockNotice.visibility = View.VISIBLE
                 binding.btnSessionEnter.visibility = View.GONE
                 binding.layoutSessionPassword.visibility = View.VISIBLE
@@ -704,6 +706,7 @@ class LockScreenActivity : AppCompatActivity() {
     }
 
     private fun onUnlocked(mode: AppMode) {
+        com.shopkeeper.mobileshop.security.AppLockManager.setUnlocked(true)
         if (mode == AppMode.BASIC_USER) {
             val intent = Intent(this, PendingApprovalActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

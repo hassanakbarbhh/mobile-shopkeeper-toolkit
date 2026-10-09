@@ -131,4 +131,11 @@ object DatabaseMigrations {
             db.execSQL("CREATE INDEX IF NOT EXISTS index_products_barcode ON products(barcode)")
         }
     }
+
+    val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP INDEX IF EXISTS `index_products_imei`")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_products_imei` ON `products` (`imei`)")
+        }
+    }
 }

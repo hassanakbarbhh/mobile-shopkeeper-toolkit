@@ -10,7 +10,7 @@ interface RepairDao {
     @Update suspend fun update(repair: Repair)
     @Delete suspend fun delete(repair: Repair)
     @Query("DELETE FROM repairs") suspend fun deleteAllRepairs()
-    @Query("DELETE FROM repairs WHERE customerName IN ('Pooja Sharma', 'Vikas Patel')") suspend fun deleteDummyRepairs()
+    @Query("SELECT COUNT(*) FROM repairs WHERE isDeleted = 1") suspend fun deleteDummyRepairs(): Int
 
     @Query("SELECT * FROM repairs ORDER BY receivedDate DESC")
     fun getAllRepairs(): Flow<List<Repair>>

@@ -453,19 +453,41 @@ class PurchasesFragment : Fragment() {
                         unitCost = cost
                     )
 
-                    val newProd = Product(
-                        name = prodName,
-                        brand = brand,
-                        model = "",
-                        imei = imei,
-                        category = ProductCategory.SMARTPHONE,
-                        purchasePrice = cost,
-                        sellingPrice = sell,
-                        quantity = qty
-                    )
+                    // Check if matching product already exists in stock
+                    val allProducts = repository.getAllProductsList()
+                    val existing = if (imei.isNotBlank()) {
+                        allProducts.find { it.imei.equals(imei, ignoreCase = true) && !it.isDeleted }
+                    } else {
+                        allProducts.find {
+                            it.name.equals(prodName, ignoreCase = true) &&
+                            (brand.isBlank() || brand.equals("Generic", ignoreCase = true) || it.brand.equals(brand, ignoreCase = true)) &&
+                            !it.isDeleted
+                        }
+                    }
+
+                    if (existing != null) {
+                        val updated = existing.copy(
+                            quantity = existing.quantity + qty,
+                            purchasePrice = cost,
+                            sellingPrice = if (sell > 0.0) sell else existing.sellingPrice,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        repository.updateProduct(updated)
+                    } else {
+                        val newProd = Product(
+                            name = prodName,
+                            brand = brand,
+                            model = "",
+                            imei = imei,
+                            category = ProductCategory.SMARTPHONE,
+                            purchasePrice = cost,
+                            sellingPrice = sell,
+                            quantity = qty
+                        )
+                        repository.insertProduct(newProd)
+                    }
 
                     repository.insertPurchase(purchase, listOf(item))
-                    repository.insertProduct(newProd)
                     dialog.dismiss()
                     Toast.makeText(requireContext(), "Purchase recorded and stock added!", Toast.LENGTH_SHORT).show()
                 }

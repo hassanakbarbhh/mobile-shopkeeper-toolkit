@@ -23,6 +23,15 @@ android {
   }
 
   signingConfigs {
+    getByName("debug") {
+      val rootDebugKeystore = rootProject.file("debug.keystore")
+      if (rootDebugKeystore.exists()) {
+        storeFile = rootDebugKeystore
+        storePassword = "android"
+        keyAlias = "androiddebugkey"
+        keyPassword = "android"
+      }
+    }
     create("release") {
       val keyFile = System.getenv("KEYSTORE_FILE") ?: project.findProperty("KEYSTORE_FILE")?.toString() ?: ""
       if (keyFile.isNotEmpty() && file(keyFile).exists()) {
@@ -46,6 +55,9 @@ android {
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    }
+    debug {
+      signingConfig = signingConfigs.getByName("debug")
     }
   }
 

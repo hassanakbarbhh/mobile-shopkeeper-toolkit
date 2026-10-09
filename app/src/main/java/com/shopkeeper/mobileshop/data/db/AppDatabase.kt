@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
         PurchaseItem::class, Expense::class, Seller::class, CashClosing::class,
         OutboxOperation::class, ImeiAsset::class, ImeiLifecycleEvent::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -63,7 +63,11 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(DatabaseMigrations.MIGRATION_7_8, DatabaseMigrations.MIGRATION_8_9)
+                    .addMigrations(
+                        DatabaseMigrations.MIGRATION_7_8,
+                        DatabaseMigrations.MIGRATION_8_9,
+                        DatabaseMigrations.MIGRATION_9_10
+                    )
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
@@ -92,28 +96,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         suspend fun ensureCleanDataAndDefaultStock(db: AppDatabase) {
             try {
-                // Delete old dummy customers so customer data starts clean
-                db.customerDao().deleteDummyCustomers()
-
-                // Delete dummy repairs and dummy expenses
-                db.repairDao().deleteDummyRepairs()
-                db.expenseDao().deleteDummyExpenses()
-
-                // Check products in stock
-                val existing = db.productDao().getAllProductsList()
-                
-                // Delete the old dummy accessory products
-                val dummyNames = setOf(
-                    "Apple 20W USB-C Power Adapter",
-                    "boAt Airdopes 141 ANC",
-                    "Tempered Glass (Universal 6.7\")",
-                    "Mi 10000mAh Power Bank 3i"
-                )
-                existing.filter { it.name in dummyNames }.forEach {
-                    db.productDao().delete(it)
-                }
-
-                // If stock is empty or missing phone models, seed all brands & models with no price
+                // Safe non-destructive initial seeding: check products in stock
                 val currentProducts = db.productDao().getAllProductsList()
                 val hasOnlineModels = currentProducts.any { it.notes.contains("Specs:") || it.notes.contains("Online Model") || it.sellingPrice == 0.0 }
                 
@@ -124,7 +107,7 @@ abstract class AppDatabase : RoomDatabase() {
                     db.productDao().insertAll(defaultPhoneProducts)
                 }
             } catch (e: Exception) {
-                // Ignore background sync errors
+                // Ignore background initialization errors
             }
         }
 

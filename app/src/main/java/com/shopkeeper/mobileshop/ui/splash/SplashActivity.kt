@@ -36,7 +36,12 @@ class SplashActivity : AppCompatActivity() {
         if (isFinishing || isDestroyed) return
         try {
             // Security login interface
-            startActivity(Intent(this, LockScreenActivity::class.java))
+            val intent = Intent(this, LockScreenActivity::class.java).apply {
+                if (AppPreferences.isLockEnabled(this@SplashActivity)) {
+                    putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)
+                }
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             startActivity(Intent(this, MainActivity::class.java))
         }

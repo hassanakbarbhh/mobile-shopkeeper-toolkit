@@ -219,6 +219,13 @@ class SettingsFragment : Fragment() {
 
         // btnCheckFirebaseAuth removed
 
+        binding.switchAppLock.isChecked = AppPreferences.isLockEnabled(requireContext())
+        binding.switchAppLock.setOnCheckedChangeListener { _, isChecked ->
+            AppPreferences.setLockEnabled(requireContext(), isChecked)
+            val msg = if (isChecked) "App Lock enabled! PIN/Biometric required on launch." else "App Lock disabled."
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+        }
+
         binding.btnLockAppNow.setOnClickListener {
             val intent = Intent(requireContext(), LockScreenActivity::class.java).apply {
                 putExtra(LockScreenActivity.EXTRA_LOCKED_MODE, true)

@@ -37,6 +37,29 @@ class ShopApplication : Application() {
         } catch (e: Throwable) {
             Log.e(TAG, "Component initialization error: ${e.message}")
         }
+
+        // 4. App Lock Security Lifecycle: Lock session when app enters background
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            private var startedActivityCount = 0
+
+            override fun onActivityStarted(activity: android.app.Activity) {
+                startedActivityCount++
+            }
+
+            override fun onActivityStopped(activity: android.app.Activity) {
+                startedActivityCount--
+                if (startedActivityCount <= 0) {
+                    startedActivityCount = 0
+                    com.shopkeeper.mobileshop.security.AppLockManager.onAppBackgrounded()
+                }
+            }
+
+            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}
+            override fun onActivityResumed(activity: android.app.Activity) {}
+            override fun onActivityPaused(activity: android.app.Activity) {}
+            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
+            override fun onActivityDestroyed(activity: android.app.Activity) {}
+        })
     }
 
     private fun setupCrashShield() {

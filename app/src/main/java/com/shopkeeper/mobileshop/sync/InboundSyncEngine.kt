@@ -64,9 +64,9 @@ object InboundSyncEngine {
 
     /**
      * Determines whether an incoming remote document should overwrite the local state.
-     * Prevents clobbering unsynchronized offline local mutations unless remote is strictly newer.
+     * Prevents clobbering unsynchronized offline local mutations or newer local state with stale remote data.
      */
-    private fun shouldApplyRemote(
+    fun shouldApplyRemote(
         hasPendingLocal: Boolean,
         localVersion: Long,
         remoteVersion: Long,
@@ -78,8 +78,8 @@ object InboundSyncEngine {
             // Only overwrite if remote is strictly newer (both version and timestamp).
             remoteVersion > localVersion && remoteUpdatedAt > localUpdatedAt
         } else {
-            // No local pending edits: standard optimistic versioning & timestamp comparison
-            remoteVersion >= localVersion || remoteUpdatedAt >= localUpdatedAt
+            // No local pending edits: strictly newer version, or tie-break on strictly newer timestamp
+            remoteVersion > localVersion || (remoteVersion == localVersion && remoteUpdatedAt > localUpdatedAt)
         }
     }
 

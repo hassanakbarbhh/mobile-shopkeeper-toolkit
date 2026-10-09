@@ -8,7 +8,7 @@ import androidx.room.Index
 @Entity(
     tableName = "products",
     indices = [
-        Index(value = ["imei"], unique = true),
+        Index(value = ["imei"]),
         Index(value = ["barcode"]),
         Index(value = ["name"]),
         Index(value = ["cloudId"])

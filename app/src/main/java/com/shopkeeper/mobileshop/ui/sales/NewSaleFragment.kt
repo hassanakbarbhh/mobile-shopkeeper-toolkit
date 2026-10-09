@@ -399,7 +399,13 @@ class NewSaleFragment : Fragment() {
                 sellerName = sellerNameInput
             )
 
-            val saleId = repository.insertSale(sale, cartItems)
+            val saleId: Long
+            try {
+                saleId = repository.insertSale(sale, cartItems)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Sale failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                return@launch
+            }
             val createdSale = sale.copy(id = saleId)
             val finalItems = cartItems.toList()
 

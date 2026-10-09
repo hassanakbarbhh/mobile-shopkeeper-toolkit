@@ -10,7 +10,7 @@ interface CustomerDao {
     @Update suspend fun update(customer: Customer)
     @Delete suspend fun delete(customer: Customer)
     @Query("DELETE FROM customers") suspend fun deleteAllCustomers()
-    @Query("DELETE FROM customers WHERE name IN ('Amit Kumar', 'Pooja Sharma', 'Rahul Verma')") suspend fun deleteDummyCustomers()
+    @Query("SELECT COUNT(*) FROM customers WHERE isDeleted = 1") suspend fun deleteDummyCustomers(): Int
 
     @Query("SELECT * FROM customers ORDER BY name ASC")
     fun getAllCustomers(): Flow<List<Customer>>
