@@ -31,6 +31,17 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE cloudId = :cloudId LIMIT 1")
     suspend fun getByCloudId(cloudId: String): Product?
 
+    /**
+     * Exact-match lookup used by the purchase flow to find an existing catalog
+     * product for a non-IMEI (accessory) purchase line. Falls back to a
+     * name-only match so shops that do not track brand/model still reconcile.
+     */
+    @Query("SELECT * FROM products WHERE name = :name AND brand = :brand AND model = :model LIMIT 1")
+    suspend fun getByNameBrandModel(name: String, brand: String, model: String): Product?
+
+    @Query("SELECT * FROM products WHERE name = :name LIMIT 1")
+    suspend fun getByName(name: String): Product?
+
     @Query("SELECT * FROM products WHERE name LIKE :query OR brand LIKE :query OR model LIKE :query OR imei LIKE :query OR barcode LIKE :query")
     fun searchProducts(query: String): Flow<List<Product>>
 
