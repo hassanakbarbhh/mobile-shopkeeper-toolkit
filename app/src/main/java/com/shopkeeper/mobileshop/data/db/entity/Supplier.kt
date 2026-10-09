@@ -16,6 +16,8 @@ data class Supplier(
     val company: String = "",
     val address: String = "",
     val notes: String = "",
+    /** Outstanding amount this shop still owes the supplier. Positive = we owe. */
+    val balance: Double = 0.0,
     val createdAt: Long = System.currentTimeMillis(),
     val cloudId: String = java.util.UUID.randomUUID().toString(),
     val shopId: String = "",
