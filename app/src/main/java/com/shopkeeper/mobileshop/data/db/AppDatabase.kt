@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
         PurchaseItem::class, Expense::class, Seller::class, CashClosing::class,
         OutboxOperation::class, ImeiAsset::class, ImeiLifecycleEvent::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -66,7 +66,8 @@ abstract class AppDatabase : RoomDatabase() {
                     .addMigrations(
                         DatabaseMigrations.MIGRATION_7_8,
                         DatabaseMigrations.MIGRATION_8_9,
-                        DatabaseMigrations.MIGRATION_9_10
+                        DatabaseMigrations.MIGRATION_9_10,
+                        DatabaseMigrations.MIGRATION_10_11
                     )
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .addCallback(object : RoomDatabase.Callback() {
