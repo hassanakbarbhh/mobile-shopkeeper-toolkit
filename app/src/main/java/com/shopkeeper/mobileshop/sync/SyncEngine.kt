@@ -99,15 +99,22 @@ object SyncEngine {
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+        // A user-triggered "Sync Now" must not be queued behind WorkManager's
+        // expedited throttling: OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST
+        // would silently degrade a manual sync to a background request.
+        val builder = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(constraints)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
-            .build()
+
+        if (forceExpedited) {
+            builder.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+        }
 
         WorkManager.getInstance(context).enqueueUniqueWork(
             SyncWorker.WORK_NAME,
-            ExistingWorkPolicy.REPLACE,
-            syncRequest
+            // Expedited runs replace any queued background sync attempt
+            if (forceExpedited) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP,
+            builder.build()
         )
     }
 

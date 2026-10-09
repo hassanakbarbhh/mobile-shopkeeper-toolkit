@@ -11,9 +11,14 @@ interface PurchaseDao {
     @Update suspend fun update(p: Purchase)
     @Delete suspend fun delete(p: Purchase)
     @Insert suspend fun insertItems(items: List<PurchaseItem>)
+    @Query("DELETE FROM purchase_items WHERE purchaseId = :purchaseId")
+    suspend fun deleteItemsForPurchase(purchaseId: Long)
 
     @Query("SELECT * FROM purchases ORDER BY purchaseDate DESC")
     fun getAll(): Flow<List<Purchase>>
+
+    @Query("SELECT * FROM purchases WHERE id = :purchaseId LIMIT 1")
+    suspend fun getById(purchaseId: Long): Purchase?
 
     @Query("SELECT * FROM purchase_items WHERE purchaseId = :purchaseId")
     suspend fun getItemsForPurchase(purchaseId: Long): List<PurchaseItem>

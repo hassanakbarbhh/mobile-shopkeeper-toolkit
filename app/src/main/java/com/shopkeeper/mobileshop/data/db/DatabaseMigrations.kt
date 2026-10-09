@@ -138,4 +138,16 @@ object DatabaseMigrations {
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_products_imei` ON `products` (`imei`)")
         }
     }
+
+    /**
+     * Adds the supplier payable balance. Existing suppliers start at 0.00 —
+     * legacy purchase records are not retroactively summed (their payables were
+     * never tracked), so historical balances must be corrected by the shop owner
+     * manually rather than guessed by the migration.
+     */
+    val MIGRATION_10_11 = object : Migration(10, 11) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE suppliers ADD COLUMN balance REAL NOT NULL DEFAULT 0.0")
+        }
+    }
 }
